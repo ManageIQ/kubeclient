@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["abonas@redhat.com"]
   spec.summary       = %q{A client for Kubernetes REST api}
   spec.description   = "A client for Kubernetes REST api"
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/abonas/kubeclient"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files -z`.split("\x0")
