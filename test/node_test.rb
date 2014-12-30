@@ -1,0 +1,44 @@
+require 'minitest/autorun'
+require 'webmock/minitest'
+require 'kubeclient/node'
+require 'json'
+require './lib/kubeclient'
+
+class NodeTest < MiniTest::Test
+  def test_get_from_json
+    json_response = "{\n  \"kind\": \"Node\",\n  \"id\": \"127.0.0.1\",\n  \"uid\": \"b0ddfa00-8b5b-11e4-a8c4-3c970e4a436a\",\n  \"creationTimestamp\": \"2014-12-24T12:57:45+02:00\",\n  \"selfLink\": \"/api/v1beta1/nodes/127.0.0.1\",\n  \"resourceVersion\": 7,\n  \"apiVersion\": \"v1beta1\",\n  \"resources\": {\n    \"capacity\": {\n      \"cpu\": 1000,\n      \"memory\": 3221225472\n    }\n  }\n}"
+
+    stub_request(:get, /.*nodes*/).
+        to_return(:body => json_response, :status => 200)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta1"
+    node = client.get_node "127.0.0.1"
+
+    assert_instance_of(Node,node)
+    #checking that creationTimestamp was renamed properly
+    assert_respond_to(node, "creation_timestamp")
+    assert_respond_to(node, "uid")
+    assert_respond_to(node, "id")
+    assert_respond_to(node, "resources")
+    assert_respond_to(node, "resource_version")
+    assert_respond_to(node, "api_version")
+    assert_respond_to(node, "resources")
+
+    assert_equal 7, node.resource_version
+    assert_equal 1000, node.resources.capacity.cpu
+
+  end
+
+  def test_create_node_fail
+    our_node = Node.new
+    our_node.id = 'newnode'
+
+    stub_request(:delete, /.*nodes*/).
+        to_return(:status => 405)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta1"
+    assert_raises(NoMethodError) { client.create_node our_node }
+
+
+  end
+end

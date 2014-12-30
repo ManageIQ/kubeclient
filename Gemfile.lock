@@ -1,0 +1,48 @@
+PATH
+  remote: .
+  specs:
+    kubeclient (0.0.1)
+      activesupport
+      json
+      recursive-open-struct
+      rest-client
+
+GEM
+  remote: https://rubygems.org/
+  specs:
+    activesupport (4.2.0)
+      i18n (~> 0.7)
+      json (~> 1.7, >= 1.7.7)
+      minitest (~> 5.1)
+      thread_safe (~> 0.3, >= 0.3.4)
+      tzinfo (~> 1.1)
+    addressable (2.3.6)
+    crack (0.4.2)
+      safe_yaml (~> 1.0.0)
+    i18n (0.7.0)
+    json (1.8.1)
+    mime-types (2.4.3)
+    minitest (5.5.0)
+    netrc (0.10.2)
+    rake (10.4.2)
+    recursive-open-struct (0.5.0)
+    rest-client (1.7.2)
+      mime-types (>= 1.16, < 3.0)
+      netrc (~> 0.7)
+    safe_yaml (1.0.4)
+    thread_safe (0.3.4)
+    tzinfo (1.2.2)
+      thread_safe (~> 0.1)
+    webmock (1.20.4)
+      addressable (>= 2.3.6)
+      crack (>= 0.3.2)
+
+PLATFORMS
+  ruby
+
+DEPENDENCIES
+  bundler (~> 1.6)
+  kubeclient!
+  minitest
+  rake (~> 10.0)
+  webmock
