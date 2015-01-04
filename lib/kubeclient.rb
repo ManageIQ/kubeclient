@@ -13,7 +13,7 @@ require 'kubeclient/kube_exception'
 module Kubeclient
   class Client
    attr_reader :api_endpoint
-   entities = %w(Pod Service ReplicationController Node)
+   ENTITIES = %w(Pod Service ReplicationController Node)
 
     def initialize(api_endpoint,version)
       if !api_endpoint.end_with? "/"
@@ -27,7 +27,7 @@ module Kubeclient
       RestClient::Resource.new(@api_endpoint)
     end
 
-   entities.each do |entity|
+   ENTITIES.each do |entity|
 
      #get all entities of a type e.g. get_nodes, get_pods, etc.
      define_method("get_#{entity.underscore.pluralize}") do |labels=nil|
@@ -127,5 +127,18 @@ module Kubeclient
      end
 
    end
+
+   public
+   def get_all_entities
+      result_hash = {}
+      ENTITIES.each do |entity|
+        #todo method call for get each entities
+        # build hash of entity name to array of the entities
+        method_name = "get_#{entity.underscore.pluralize}"
+        key_name = entity.underscore
+        result_hash[key_name] = self.method(method_name).call
+      end
+     result_hash
+    end
   end
 end
