@@ -63,11 +63,16 @@ Input parameter - object of type Service, Pod, ReplicationController
 `service.selector.name = "redis"`<br>
 `service.selector.role = "master"`<br>
 `client.create_service service`<br>
-`<br>
+<br>
 
 5. Update entity (update pod, service, replication controller) <br>
 Input parameter - object of type Service, Pod, ReplicationController <br>
 `client.update_service rc1`
+<br>
+
+6. Get all entities - Returns a hash with 4 keys (node, service,pod, replication_controller). Each key points to an EntityList of same type. This method
+ is a convenience method instead of calling each entity's get method separately. <br>
+`client.get_all_entities`
 
 ## Contributing
 
