@@ -67,7 +67,7 @@ Input parameter - object of type Service, Pod, ReplicationController
 
 5. Update entity (update pod, service, replication controller) <br>
 Input parameter - object of type Service, Pod, ReplicationController <br>
-`client.update_service rc1`
+`client.update_service service1`
 <br>
 
 6. Get all entities - Returns a hash with 4 keys (node, service,pod, replication_controller). Each key points to an EntityList of same type. This method
