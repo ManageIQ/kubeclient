@@ -22,8 +22,9 @@ module Kubeclient
       @api_endpoint = api_endpoint+version
     end
 
-   #todo should a new one be created for every request?
+    private
     def rest_client
+      #todo should a new one be created for every request?
       RestClient::Resource.new(@api_endpoint)
     end
 
@@ -132,7 +133,7 @@ module Kubeclient
    def get_all_entities
       result_hash = {}
       ENTITIES.each do |entity|
-        #todo method call for get each entities
+        # method call for get each entities
         # build hash of entity name to array of the entities
         method_name = "get_#{entity.underscore.pluralize}"
         key_name = entity.underscore
