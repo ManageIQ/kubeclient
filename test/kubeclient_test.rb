@@ -122,7 +122,9 @@ class KubeClientTest < MiniTest::Test
     assert_instance_of(Node, result["node"][0])
   end
 
-  #dup method creates a shallow copy which is not good in this case since rename_keys changes the input hash
+  # dup method creates a shallow copy which is not good in this case
+  # since rename_keys changes the input hash
+  # hence need to create a deep_copy
   private
   def deep_copy(hash)
     Marshal.load(Marshal.dump(hash))
