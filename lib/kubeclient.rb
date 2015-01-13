@@ -95,36 +95,33 @@ module Kubeclient
 
      end
 
-     unless entity == 'Node' #nodes don't support create/update right now via REST api
-       define_method("create_#{entity.underscore}") do |entity_config|
-         #to_hash should be called because of issue #9 in recursive open struct
-         hash = entity_config.to_hash
-         #keys should be renamed from underscore to k8s json naming style (camelized w first word lowercase)
-         hash = rename_keys(hash, "camelize", :lower)
-         begin
-           rest_client[entity.pluralize.camelize(:lower)].post(hash.to_json)
-         rescue  RestClient::Exception => e
-           exception = KubeException.new(e.http_code, JSON.parse(e.response)['message'] )
-           raise exception
-         end
+     define_method("create_#{entity.underscore}") do |entity_config|
+       #to_hash should be called because of issue #9 in recursive open struct
+       hash = entity_config.to_hash
+       #keys should be renamed from underscore to k8s json naming style (camelized w first word lowercase)
+       hash = rename_keys(hash, "camelize", :lower)
+       begin
+         rest_client[entity.pluralize.camelize(:lower)].post(hash.to_json)
+       rescue  RestClient::Exception => e
+         exception = KubeException.new(e.http_code, JSON.parse(e.response)['message'] )
+         raise exception
        end
+     end
 
-       define_method("update_#{entity.underscore}") do |entity_config|
-         id = entity_config.id
-         #to_hash should be called because of issue #9 in recursive open struct
-         hash = entity_config.to_hash
-         #temporary solution to delete id till this issue is solved: https://github.com/GoogleCloudPlatform/kubernetes/issues/3085
-         hash.delete(:id)
-         #keys should be renamed from underscore to k8s json naming style (camelized w first word lowercase)
-         hash = rename_keys(hash, "camelize", :lower)
-         begin
-           rest_client[entity.underscore.pluralize+"/#{id}"].put(hash.to_json)
-         rescue  RestClient::Exception => e
-           exception = KubeException.new(e.http_code, JSON.parse(e.response)['message'] )
-           raise exception
-         end
+     define_method("update_#{entity.underscore}") do |entity_config|
+       id = entity_config.id
+       #to_hash should be called because of issue #9 in recursive open struct
+       hash = entity_config.to_hash
+       #temporary solution to delete id till this issue is solved: https://github.com/GoogleCloudPlatform/kubernetes/issues/3085
+       hash.delete(:id)
+       #keys should be renamed from underscore to k8s json naming style (camelized w first word lowercase)
+       hash = rename_keys(hash, "camelize", :lower)
+       begin
+         rest_client[entity.underscore.pluralize+"/#{id}"].put(hash.to_json)
+       rescue  RestClient::Exception => e
+         exception = KubeException.new(e.http_code, JSON.parse(e.response)['message'] )
+         raise exception
        end
-
      end
 
    end

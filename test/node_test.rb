@@ -27,15 +27,4 @@ class NodeTest < MiniTest::Test
     assert_equal 1000, node.resources.capacity.cpu
   end
 
-  def test_create_node_fail
-    our_node = Node.new
-    our_node.id = 'newnode'
-
-    stub_request(:delete, /.*nodes*/).
-        to_return(:status => 405)
-
-    client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta1"
-    assert_raises(NoMethodError) { client.create_node our_node }
-
-  end
 end
