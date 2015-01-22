@@ -119,15 +119,13 @@ module Kubeclient
 
    public
    def get_all_entities
-      result_hash = {}
-      ENTITIES.each do |entity|
+      ENTITIES.each_with_object({}) do |entity, result_hash|
         # method call for get each entities
         # build hash of entity name to array of the entities
         method_name = "get_#{entity.underscore.pluralize}"
         key_name = entity.underscore
         result_hash[key_name] = send(method_name)
       end
-     result_hash
     end
   end
 end
