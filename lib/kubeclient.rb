@@ -35,6 +35,15 @@ module Kubeclient
       entity.classify.constantize.new(hash)
     end
 
+    def get_resource_name(entity)
+      if @api_version == "v1beta1"
+        entity_name = entity.pluralize.camelize(:lower)
+      else
+        entity_name = entity.pluralize.downcase
+      end
+      entity_name
+    end
+
 
     public
 
@@ -45,7 +54,7 @@ module Kubeclient
        #todo labels support
        #todo namespace support?
        begin
-         response = rest_client[entity.pluralize.camelize(:lower)].get # nil, labels
+         response = rest_client[get_resource_name(entity)].get # nil, labels
        rescue  RestClient::Exception => e
          exception = KubeException.new(e.http_code, JSON.parse(e.response)['message'] )
          raise exception
@@ -59,7 +68,7 @@ module Kubeclient
      #get a single entity of a specific type by id
      define_method("get_#{entity.underscore}") do |id|
        begin
-         response = rest_client[entity.pluralize.camelize(:lower)+"/#{id}"].get
+         response = rest_client[get_resource_name(entity)+"/#{id}"].get
        rescue  RestClient::Exception => e
          exception = KubeException.new(e.http_code, JSON.parse(e.response)['message'] )
          raise exception
@@ -70,7 +79,7 @@ module Kubeclient
 
      define_method("delete_#{entity.underscore}") do |id|
        begin
-         rest_client[entity.underscore.pluralize+"/" +id].delete
+         rest_client[get_resource_name(entity)+"/" +id].delete
        rescue  RestClient::Exception => e
          exception = KubeException.new(e.http_code, JSON.parse(e.response)['message'] )
          raise exception
@@ -82,7 +91,7 @@ module Kubeclient
        #to_hash should be called because of issue #9 in recursive open struct
        hash = entity_config.to_hash
        begin
-         rest_client[entity.pluralize.camelize(:lower)].post(hash.to_json)
+         rest_client[get_resource_name(entity)].post(hash.to_json)
        rescue  RestClient::Exception => e
          exception = KubeException.new(e.http_code, JSON.parse(e.response)['message'] )
          raise exception
@@ -96,7 +105,7 @@ module Kubeclient
        #temporary solution to delete id till this issue is solved: https://github.com/GoogleCloudPlatform/kubernetes/issues/3085
        hash.delete(:id)
        begin
-         rest_client[entity.underscore.pluralize+"/#{id}"].put(hash.to_json)
+         rest_client[get_resource_name(entity)+"/#{id}"].put(hash.to_json)
        rescue  RestClient::Exception => e
          exception = KubeException.new(e.http_code, JSON.parse(e.response)['message'] )
          raise exception

@@ -3,7 +3,7 @@
 A Ruby client for Kubernetes REST api.
 The client supports GET, POST, PUT, DELETE on pods, services and replication controllers.
 Also, GET and DELETE is supported for nodes.
-The client currently supports Kubernetes REST api version v1beta1.
+The client currently supports Kubernetes REST api version v1beta1 and v1beta3.
 
 ## Installation
 
@@ -23,14 +23,12 @@ Or install it yourself as:
 
 ## Usage
 
-Please note that all the properties in json objects
-are converted to ruby style in the client (and converted back to k8s side
-before sent to k8s).
-So, containerPort on k8s side is container_port in the client.
-resourceVersion --> resource_version
-
 Initialize the client: <br>
 `client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta1"`
+
+or for the v3:
+
+`client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta3"`
 
 Examples:
 
@@ -53,12 +51,13 @@ Input parameter - id (string) specifying service id, pod id, replication control
 <br>
 
 4. Create a service (and respectively: create_pod pod_object, create_replication_controller rc_obj) <br>
-Input parameter - object of type Service, Pod, ReplicationController
+Input parameter - object of type Service, Pod, ReplicationController. <br>
+The below example is for v1beta1
 <br>
 `service = Service.new` <br>
 `service.id = "redis-master"`<br>
 `service.port = 6379`<br>
-`service.container_port  = "redis-server"`<br>
+`service.containerPort  = "redis-server"`<br>
 `service.selector = {}`<br>
 `service.selector.name = "redis"`<br>
 `service.selector.role = "master"`<br>
@@ -67,6 +66,7 @@ Input parameter - object of type Service, Pod, ReplicationController
 
 5. Update entity (update pod, service, replication controller) <br>
 Input parameter - object of type Service, Pod, ReplicationController <br>
+The below example is for v1beta1 <br>
 `client.update_service service1`
 <br>
 
