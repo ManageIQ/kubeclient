@@ -136,7 +136,7 @@ module Kubeclient
         # build hash of entity name to array of the entities
         method_name = "get_#{entity.underscore.pluralize}"
         key_name = entity.underscore
-        result_hash[key_name] = self.method(method_name).call
+        result_hash[key_name] = send(method_name)
       end
      result_hash
     end
