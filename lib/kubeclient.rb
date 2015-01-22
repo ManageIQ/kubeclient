@@ -28,6 +28,35 @@ module Kubeclient
       RestClient::Resource.new(@api_endpoint)
     end
 
+    protected
+    def create_entity(hash, entity, method_name)
+      rename_keys(hash,method_name, nil)
+      entity.classify.constantize.new(hash)
+    end
+
+    #recursively rename the keys in hash including
+    #nested hashes to/from ruby style
+    protected
+    def rename_keys(hash, method_name, method_param)
+      hash.keys.each { |key|
+        method_object = key.to_s.method(method_name)
+        if method_param != nil
+          new_key = method_object.call(method_param)
+        else
+          new_key = method_object.call
+        end
+        hash[new_key] = hash[key]
+        hash.delete(key) unless new_key == key
+
+        #recursive call to take care of values that are hashes themselves
+        if hash[new_key].is_a?(Hash) then rename_keys(hash[new_key],method_name, method_param) end
+
+      }
+      hash
+    end
+
+    public
+
    ENTITIES.each do |entity|
 
      #get all entities of a type e.g. get_nodes, get_pods, etc.
@@ -56,33 +85,6 @@ module Kubeclient
        end
          result = JSON.parse(response)
          create_entity(result, entity, "underscore")
-     end
-
-     protected
-     def create_entity(hash, entity, method_name)
-       rename_keys(hash,method_name, nil)
-       entity.classify.constantize.new(hash)
-     end
-
-     #recursively rename the keys in hash including
-     #nested hashes to/from ruby style
-     protected
-     def rename_keys(hash, method_name, method_param)
-       hash.keys.each { |key|
-         method_object = key.to_s.method(method_name)
-         if method_param != nil
-           new_key = method_object.call(method_param)
-         else
-           new_key = method_object.call
-         end
-         hash[new_key] = hash[key]
-         hash.delete(key) unless new_key == key
-
-         #recursive call to take care of values that are hashes themselves
-         if hash[new_key].is_a?(Hash) then rename_keys(hash[new_key],method_name, method_param) end
-
-       }
-       hash
      end
 
      define_method("delete_#{entity.underscore}") do |id|
