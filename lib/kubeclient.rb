@@ -30,30 +30,9 @@ module Kubeclient
 
     protected
     def create_entity(hash, entity, method_name)
-      rename_keys(hash,method_name, nil)
       entity.classify.constantize.new(hash)
     end
 
-    #recursively rename the keys in hash including
-    #nested hashes to/from ruby style
-    protected
-    def rename_keys(hash, method_name, method_param)
-      hash.keys.each { |key|
-        method_object = key.to_s.method(method_name)
-        if method_param != nil
-          new_key = method_object.call(method_param)
-        else
-          new_key = method_object.call
-        end
-        hash[new_key] = hash[key]
-        hash.delete(key) unless new_key == key
-
-        #recursive call to take care of values that are hashes themselves
-        if hash[new_key].is_a?(Hash) then rename_keys(hash[new_key],method_name, method_param) end
-
-      }
-      hash
-    end
 
     public
 
@@ -100,8 +79,6 @@ module Kubeclient
      define_method("create_#{entity.underscore}") do |entity_config|
        #to_hash should be called because of issue #9 in recursive open struct
        hash = entity_config.to_hash
-       #keys should be renamed from underscore to k8s json naming style (camelized w first word lowercase)
-       hash = rename_keys(hash, "camelize", :lower)
        begin
          rest_client[entity.pluralize.camelize(:lower)].post(hash.to_json)
        rescue  RestClient::Exception => e
@@ -116,8 +93,6 @@ module Kubeclient
        hash = entity_config.to_hash
        #temporary solution to delete id till this issue is solved: https://github.com/GoogleCloudPlatform/kubernetes/issues/3085
        hash.delete(:id)
-       #keys should be renamed from underscore to k8s json naming style (camelized w first word lowercase)
-       hash = rename_keys(hash, "camelize", :lower)
        begin
          rest_client[entity.underscore.pluralize+"/#{id}"].put(hash.to_json)
        rescue  RestClient::Exception => e

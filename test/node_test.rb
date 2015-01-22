@@ -16,14 +16,14 @@ class NodeTest < MiniTest::Test
 
     assert_instance_of(Node,node)
     #checking that creationTimestamp was renamed properly
-    assert_respond_to(node, "creation_timestamp")
+    assert_respond_to(node, "creationTimestamp")
     assert_respond_to(node, "uid")
     assert_respond_to(node, "id")
     assert_respond_to(node, "resources")
-    assert_respond_to(node, "resource_version")
-    assert_respond_to(node, "api_version")
+    assert_respond_to(node, "resourceVersion")
+    assert_respond_to(node, "apiVersion")
 
-    assert_equal 7, node.resource_version
+    assert_equal 7, node.resourceVersion
     assert_equal 1000, node.resources.capacity.cpu
   end
 

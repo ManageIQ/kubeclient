@@ -42,13 +42,13 @@ class ServiceTest < MiniTest::Test
 
     assert_instance_of(Service,service)
     #checking that creationTimestamp was renamed properly
-    assert_equal("2014-12-28T17:37:21+02:00",service.creation_timestamp)
+    assert_equal("2014-12-28T17:37:21+02:00",service.creationTimestamp)
     assert_equal("6a022e83-8ea7-11e4-a6e7-3c970e4a436a",service.uid)
     assert_equal("redisslave",service.id)
-    assert_equal(8,service.resource_version)
-    assert_equal("v1beta1",service.api_version)
-    assert_equal("10.0.0.248",service.portal_ip)
-    assert_equal(6379,service.container_port)
+    assert_equal(8,service.resourceVersion)
+    assert_equal("v1beta1",service.apiVersion)
+    assert_equal("10.0.0.248",service.portalIP)
+    assert_equal(6379,service.containerPort)
     assert_equal("TCP",service.protocol)
     assert_equal(10001,service.port)
     assert_equal("default",service.namespace)

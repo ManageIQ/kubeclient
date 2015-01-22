@@ -2,50 +2,9 @@ require 'minitest/autorun'
 require 'json'
 require 'webmock/minitest'
 require './lib/kubeclient'
-require './test/kubeclient'
 
 
 class KubeClientTest < MiniTest::Test
-
-  def test_renaming_keys
-    json_response = "{\n  \"kind\": \"Node\",\n  \"id\": \"127.0.0.1\",\n  \"uid\": \"b0ddfa00-8b5b-11e4-a8c4-3c970e4a436a\",\n  \"creationTimestamp\": \"2014-12-24T12:57:45+02:00\",\n  \"selfLink\": \"/api/v1beta1/nodes/127.0.0.1\",\n  \"resourceVersion\": 7,\n  \"apiVersion\": \"v1beta1\",\n  \"resources\": {\n    \"capacity\": {\n      \"cpu\": 1000,\n      \"memory\": 3221225472\n    }\n  }\n}"
-    stub_request(:get, /.*nodes*/).
-        to_return(:body => json_response, :status => 200)
-
-    client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta1"
-    original_hash = JSON.parse(json_response)
-    #convert to ruby style
-    hash_after_rename_underscore = client.rename_keys(deep_copy(original_hash),"underscore", nil)
-    #convert back to camelized style with first word downcase
-    hash_after_rename_camelize = client.rename_keys(deep_copy(hash_after_rename_underscore), "camelize", :lower)
-
-    assert_equal(original_hash, hash_after_rename_camelize)
-    assert_equal(7,hash_after_rename_camelize["resourceVersion"])
-    assert_equal(7,hash_after_rename_underscore["resource_version"])
-    assert_equal(nil, hash_after_rename_underscore["resourceVersion"])
-
-
-  end
-
-  #testing that keys renaming works on deeper level
-  #the json doesn't necessarily represent a valid k8s entity , it's for testing renaming purposes
-  def test_renaming_keys_deep
-    json_response = "{\n  \"kind\": \"Node\",\n  \"id\": \"127.0.0.1\",\n  \"uid\": \"b0ddfa00-8b5b-11e4-a8c4-3c970e4a436a\",\n  \"creationTimestamp\": \"2014-12-24T12:57:45+02:00\",\n  \"selfLink\": \"/api/v1beta1/nodes/127.0.0.1\",\n  \"resourceVersion\": 7,\n  \"apiVersion\": \"v1beta1\",\n  \"hostResources\": {\n    \"capacity\": {\n      \"cpu\": 1000,\n      \"memorySize\": 3221225472\n    }\n  }\n}"
-    stub_request(:get, /.*nodes*/).
-        to_return(:body => json_response, :status => 200)
-
-    client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta1"
-    original_hash = JSON.parse(json_response)
-    #convert to ruby style
-    hash_after_rename_underscore = client.rename_keys(deep_copy(original_hash),"underscore", nil)
-    #convert back to camelized style with first word downcase
-    hash_after_rename_camelize = client.rename_keys(deep_copy(hash_after_rename_underscore), "camelize", :lower)
-
-    assert_equal(original_hash, hash_after_rename_camelize)
-    assert_equal(3221225472,hash_after_rename_camelize["hostResources"]["capacity"]["memorySize"])
-    assert_equal(nil,hash_after_rename_underscore["host_resources"]["capacity"]["memorySize"])
-    assert_equal(3221225472,hash_after_rename_underscore["host_resources"]["capacity"]["memory_size"])
-  end
 
   def test_json
     our_object = Service.new
