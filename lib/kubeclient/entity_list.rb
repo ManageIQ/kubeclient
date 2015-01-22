@@ -1,9 +1,9 @@
 class EntityList < Array
-  attr_reader :kind, :resource_version
+  attr_reader :kind, :resourceVersion
 
   def initialize(kind,resource_version)
     @kind = kind
-    @resource_version = resource_version
+    @resourceVersion = resource_version
     super()
   end
 

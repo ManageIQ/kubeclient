@@ -60,7 +60,11 @@ module Kubeclient
          raise exception
        end
         result = JSON.parse(response)
-        collection = EntityList.new(entity,result["resourceVersion"])
+        if @api_version == "v1beta1"
+          collection = EntityList.new(entity,result["resourceVersion"])
+        else
+          collection = EntityList.new(entity,result["metadata"]["resourceVersion"])
+        end
         result["items"].each { |item | collection.push(create_entity(item, entity))  }
         collection
      end
