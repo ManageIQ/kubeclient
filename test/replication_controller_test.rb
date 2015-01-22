@@ -18,10 +18,10 @@ class ReplicationControllerTest < MiniTest::Test
     assert_equal("frontendController",rc.id)
     assert_equal("f4e5966c-8eb2-11e4-a6e7-3c970e4a436a",rc.uid)
     assert_equal("default",rc.namespace)
-    assert_equal(3,rc.desired_state.replicas)
-    assert_equal("frontend",rc.desired_state.replica_selector.name)
+    assert_equal(3,rc.desiredState.replicas)
+    assert_equal("frontend",rc.desiredState.replicaSelector.name)
     #the access to containers is not as nice as rest of the properties, but it's about to change in beta v3,
     #hence it can significantly impact the design of the client. to be revisited after beta v3 api is released.
-    assert_equal("php-redis",rc.desired_state.pod_template.desired_state.manifest.containers[0]['name'])
+    assert_equal("php-redis",rc.desiredState.podTemplate.desiredState.manifest.containers[0]['name'])
   end
 end

@@ -18,7 +18,7 @@ class PodTest < MiniTest::Test
 
     assert_instance_of(Pod,pod)
     assert_equal("redis-master-pod",pod.id)
-    assert_equal("redis-master",pod.desired_state.manifest.containers[0]['name'])
+    assert_equal("redis-master",pod.desiredState.manifest.containers[0]['name'])
   end
 
 end
