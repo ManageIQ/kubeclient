@@ -20,6 +20,8 @@ module Kubeclient
          api_endpoint = api_endpoint + "/"
       end
       @api_endpoint = api_endpoint+version
+      #version flag is needed to take care of the differences between versions
+      @api_version = version
     end
 
     private
@@ -29,7 +31,7 @@ module Kubeclient
     end
 
     protected
-    def create_entity(hash, entity, method_name)
+    def create_entity(hash, entity)
       entity.classify.constantize.new(hash)
     end
 
@@ -50,7 +52,7 @@ module Kubeclient
        end
         result = JSON.parse(response)
         collection = EntityList.new(entity,result["resourceVersion"])
-        result["items"].each { |item | collection.push(create_entity(item, entity, "underscore"))  }
+        result["items"].each { |item | collection.push(create_entity(item, entity))  }
         collection
      end
 
@@ -63,7 +65,7 @@ module Kubeclient
          raise exception
        end
          result = JSON.parse(response)
-         create_entity(result, entity, "underscore")
+         create_entity(result, entity)
      end
 
      define_method("delete_#{entity.underscore}") do |id|
