@@ -1,0 +1,6 @@
+MethodLength:
+  Enabled: false
+ClassLength:
+  Enabled: false
+Metrics/AbcSize:
+  Enabled: false
