@@ -3,6 +3,9 @@ require 'json'
 require 'webmock/minitest'
 require './lib/kubeclient'
 
+def open_test_json_file(name)
+  File.new(File.join(File.dirname(__FILE__), 'json', name))
+end
 
 class KubeClientTest < MiniTest::Test
 

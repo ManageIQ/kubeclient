@@ -74,6 +74,13 @@ The below example is for v1beta1 <br>
  is a convenience method instead of calling each entity's get method separately. <br>
 `client.get_all_entities`
 
+7. Receive entity updates <br>
+It is possible to receive live update notices watching the relevant entities:
+<br>
+`client.watch_pods.each do |notice|` <br>
+`  # process notice data` <br>
+`end` <br>
+
 ## Contributing
 
 1. Fork it ( https://github.com/[my-github-username]/kubeclient/fork )
