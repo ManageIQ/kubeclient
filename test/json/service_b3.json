@@ -1,0 +1,27 @@
+{
+    "kind": "Service",
+    "apiVersion": "v1beta3",
+    "metadata": {
+        "name": "kubernetes-ro",
+        "namespace": "default",
+        "selfLink": "/api/v1beta3/services/kubernetes-ro?namespace=default",
+        "uid": "ffb153db-a230-11e4-a36b-3c970e4a436a",
+        "resourceVersion": "4",
+        "creationTimestamp": "2015-01-22T14:20:05+02:00",
+        "labels": {
+            "component": "apiserver",
+            "provider": "kubernetes"
+        }
+    },
+    "spec": {
+        "port": 80,
+        "protocol": "TCP",
+        "selector": null,
+        "portalIP": "10.0.0.154",
+        "containerPort": 0,
+        "sessionAffinity": "None"
+    },
+    "status": {
+
+    }
+}

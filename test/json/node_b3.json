@@ -1,0 +1,27 @@
+{
+    "kind": "Node",
+    "apiVersion": "v1beta3",
+    "metadata": {
+        "name": "127.0.0.1",
+        "selfLink": "/api/v1beta3/nodes/127.0.0.1",
+        "uid": "01018013-a231-11e4-a36b-3c970e4a436a",
+        "resourceVersion": "7",
+        "creationTimestamp": "2015-01-22T14:20:08+02:00"
+    },
+    "spec": {
+        "capacity": {
+            "cpu": "1",
+            "memory": "3Gi"
+        }
+    },
+    "status": {
+        "hostIP": "127.0.0.1",
+        "conditions": [
+            {
+                "kind": "Ready",
+                "status": "Full",
+                "lastTransitionTime": null
+            }
+        ]
+    }
+}

@@ -1,0 +1,36 @@
+{
+    "kind": "NodeList",
+    "creationTimestamp": null,
+    "selfLink": "/api/v1beta1/nodes",
+    "apiVersion": "v1beta1",
+    "minions": [
+        {
+            "id": "127.0.0.1",
+            "uid": "a7b13504-9402-11e4-9a08-3c970e4a436a",
+            "creationTimestamp": "2015-01-04T13:13:05+02:00",
+            "selfLink": "/api/v1beta1/nodes/127.0.0.1",
+            "resourceVersion": 7,
+            "resources": {
+                "capacity": {
+                    "cpu": 1000,
+                    "memory": 3221225472
+                }
+            }
+        }
+    ],
+    "items": [
+        {
+            "id": "127.0.0.1",
+            "uid": "a7b13504-9402-11e4-9a08-3c970e4a436a",
+            "creationTimestamp": "2015-01-04T13:13:05+02:00",
+            "selfLink": "/api/v1beta1/nodes/127.0.0.1",
+            "resourceVersion": 7,
+            "resources": {
+                "capacity": {
+                    "cpu": 1000,
+                    "memory": 3221225472
+                }
+            }
+        }
+    ]
+}

@@ -1,0 +1,20 @@
+{
+    "kind": "Service",
+    "id": "redisslave",
+    "uid": "6a022e83-8ea7-11e4-a6e7-3c970e4a436a",
+    "creationTimestamp": "2014-12-28T17:37:21+02:00",
+    "selfLink": "/api/v1beta1/services/redisslave?namespace=default",
+    "resourceVersion": 8,
+    "apiVersion": "v1beta1",
+    "namespace": "default",
+    "port": 10001,
+    "protocol": "TCP",
+    "labels": {
+        "name": "redisslave"
+    },
+    "selector": {
+        "name": "redisslave"
+    },
+    "containerPort": 6379,
+    "portalIP": "10.0.0.248"
+}

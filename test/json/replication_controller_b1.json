@@ -1,0 +1,66 @@
+{
+    "kind": "ReplicationController",
+    "id": "frontendController",
+    "uid": "f4e5966c-8eb2-11e4-a6e7-3c970e4a436a",
+    "creationTimestamp": "2014-12-28T18:59:59+02:00",
+    "selfLink": "/api/v1beta1/replicationControllers/frontendController?namespace=default",
+    "resourceVersion": 11,
+    "apiVersion": "v1beta1",
+    "namespace": "default",
+    "desiredState": {
+        "replicas": 3,
+        "replicaSelector": {
+            "name": "frontend"
+        },
+        "podTemplate": {
+            "desiredState": {
+                "manifest": {
+                    "version": "v1beta2",
+                    "id": "",
+                    "volumes": null,
+                    "containers": [
+                        {
+                            "name": "php-redis",
+                            "image": "brendanburns/php-redis",
+                            "ports": [
+                                {
+                                    "hostPort": 8000,
+                                    "containerPort": 80,
+                                    "protocol": "TCP"
+                                }
+                            ],
+                            "imagePullPolicy": ""
+                        }
+                    ],
+                    "restartPolicy": {
+                        "always": {
+
+                        }
+                    }
+                }
+            },
+            "labels": {
+                "name": "frontend"
+            }
+        }
+    },
+    "currentState": {
+        "replicas": 3,
+        "podTemplate": {
+            "desiredState": {
+                "manifest": {
+                    "version": "",
+                    "id": "",
+                    "volumes": null,
+                    "containers": null,
+                    "restartPolicy": {
+
+                    }
+                }
+            }
+        }
+    },
+    "labels": {
+        "name": "frontend"
+    }
+}

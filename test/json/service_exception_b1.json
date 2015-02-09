@@ -1,0 +1,12 @@
+{
+    "kind": "Status",
+    "apiVersion": "v1beta1",
+    "status": "Failure",
+    "message": "service redisslave already exists",
+    "reason": "AlreadyExists",
+    "details": {
+        "id": "redisslave",
+        "kind": "service"
+    },
+    "code": 409
+}

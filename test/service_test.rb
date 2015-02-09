@@ -31,10 +31,9 @@ class ServiceTest < MiniTest::Test
 
 
   def test_conversion_from_json_v1
-    json_response = "{\n  \"kind\": \"Service\",\n  \"id\": \"redisslave\",\n  \"uid\": \"6a022e83-8ea7-11e4-a6e7-3c970e4a436a\",\n  \"creationTimestamp\": \"2014-12-28T17:37:21+02:00\",\n  \"selfLink\": \"/api/v1beta1/services/redisslave?namespace=default\",\n  \"resourceVersion\": 8,\n  \"apiVersion\": \"v1beta1\",\n  \"namespace\": \"default\",\n  \"port\": 10001,\n  \"protocol\": \"TCP\",\n  \"labels\": {\n    \"name\": \"redisslave\"\n  },\n  \"selector\": {\n    \"name\": \"redisslave\"\n  },\n  \"containerPort\": 6379,\n  \"portalIP\": \"10.0.0.248\"\n}"
-
-    stub_request(:get, /\/services/).
-        to_return(:body => json_response, :status => 200)
+    stub_request(:get, /\/services/)
+      .to_return(body: open_test_json_file('service_b1.json'),
+                 status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta1"
     service = client.get_service "redisslave"
@@ -55,11 +54,9 @@ class ServiceTest < MiniTest::Test
   end
 
   def test_conversion_from_json_v3
-    json_response =  "{\n  \"kind\": \"Service\",\n  \"apiVersion\": \"v1beta3\",\n  \"metadata\": {\n    \"name\": \"kubernetes-ro\",\n    \"namespace\": \"default\",\n    \"selfLink\": \"/api/v1beta3/services/kubernetes-ro?namespace=default\",\n    \"uid\": \"ffb153db-a230-11e4-a36b-3c970e4a436a\",\n    \"resourceVersion\": \"4\",\n    \"creationTimestamp\": \"2015-01-22T14:20:05+02:00\",\n    \"labels\": {\n      \"component\": \"apiserver\",\n      \"provider\": \"kubernetes\"\n    }\n  },\n  \"spec\": {\n    \"port\": 80,\n    \"protocol\": \"TCP\",\n    \"selector\": null,\n    \"portalIP\": \"10.0.0.154\",\n    \"containerPort\": 0,\n    \"sessionAffinity\": \"None\"\n  },\n  \"status\": {}\n}"
-
-
-    stub_request(:get, /\/services/).
-        to_return(:body => json_response, :status => 200)
+    stub_request(:get, /\/services/)
+      .to_return(body: open_test_json_file('service_b3.json'),
+                 status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta3"
     service = client.get_service "redisslave"
