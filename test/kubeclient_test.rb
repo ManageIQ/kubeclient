@@ -25,7 +25,7 @@ class KubeClientTest < MiniTest::Test
   def test_exception
     json_response =  "{\n \"kind\": \"Status\",\n \"apiVersion\": \"v1beta1\",\n  \"status\": \"Failure\",\n \"message\": \"service redisslave already exists\",\n \"reason\": \"AlreadyExists\",\n \"details\": {\n \"id\": \"redisslave\",\n \"kind\": \"service\"\n},\n \"code\": 409\n}"
 
-    stub_request(:post, /.*services*/).
+    stub_request(:post, /\/services/).
         to_return(:body => json_response, :status => 409)
 
     service = Service.new
@@ -45,7 +45,7 @@ class KubeClientTest < MiniTest::Test
 
   def test_entity_list
     json_response = "{\n  \"kind\": \"ServiceList\",\n  \"creationTimestamp\": null,\n  \"selfLink\": \"/api/v1beta1/services\",\n  \"resourceVersion\": 8,\n  \"apiVersion\": \"v1beta1\",\n  \"items\": [\n    {\n      \"id\": \"kubernetes\",\n      \"uid\": \"be10c0ba-8f4e-11e4-814c-3c970e4a436a\",\n      \"creationTimestamp\": \"2014-12-29T13:35:08+02:00\",\n      \"selfLink\": \"/api/v1beta1/services/kubernetes?namespace=default\",\n      \"resourceVersion\": 4,\n      \"namespace\": \"default\",\n      \"port\": 443,\n      \"protocol\": \"TCP\",\n      \"labels\": {\n        \"component\": \"apiserver\",\n        \"provider\": \"kubernetes\"\n      },\n      \"selector\": null,\n      \"containerPort\": 0,\n      \"portalIP\": \"10.0.0.151\"\n    },\n    {\n      \"id\": \"kubernetes-ro\",\n      \"uid\": \"be106b89-8f4e-11e4-814c-3c970e4a436a\",\n      \"creationTimestamp\": \"2014-12-29T13:35:08+02:00\",\n      \"selfLink\": \"/api/v1beta1/services/kubernetes-ro?namespace=default\",\n      \"resourceVersion\": 3,\n      \"namespace\": \"default\",\n      \"port\": 80,\n      \"protocol\": \"TCP\",\n      \"labels\": {\n        \"component\": \"apiserver\",\n        \"provider\": \"kubernetes\"\n      },\n      \"selector\": null,\n      \"containerPort\": 0,\n      \"portalIP\": \"10.0.0.171\"\n    }\n  ]\n}"
-    stub_request(:get, /.*services*/).
+    stub_request(:get, /\/services/).
         to_return(:body => json_response, :status => 200)
     client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta1"
     services = client.get_services
@@ -59,17 +59,17 @@ class KubeClientTest < MiniTest::Test
 
   def test_get_all
     json_response_services = "{\n  \"kind\": \"ServiceList\",\n  \"creationTimestamp\": null,\n  \"selfLink\": \"/api/v1beta1/services\",\n  \"resourceVersion\": 8,\n  \"apiVersion\": \"v1beta1\",\n  \"items\": [\n    {\n      \"id\": \"kubernetes\",\n      \"uid\": \"be10c0ba-8f4e-11e4-814c-3c970e4a436a\",\n      \"creationTimestamp\": \"2014-12-29T13:35:08+02:00\",\n      \"selfLink\": \"/api/v1beta1/services/kubernetes?namespace=default\",\n      \"resourceVersion\": 4,\n      \"namespace\": \"default\",\n      \"port\": 443,\n      \"protocol\": \"TCP\",\n      \"labels\": {\n        \"component\": \"apiserver\",\n        \"provider\": \"kubernetes\"\n      },\n      \"selector\": null,\n      \"containerPort\": 0,\n      \"portalIP\": \"10.0.0.151\"\n    },\n    {\n      \"id\": \"kubernetes-ro\",\n      \"uid\": \"be106b89-8f4e-11e4-814c-3c970e4a436a\",\n      \"creationTimestamp\": \"2014-12-29T13:35:08+02:00\",\n      \"selfLink\": \"/api/v1beta1/services/kubernetes-ro?namespace=default\",\n      \"resourceVersion\": 3,\n      \"namespace\": \"default\",\n      \"port\": 80,\n      \"protocol\": \"TCP\",\n      \"labels\": {\n        \"component\": \"apiserver\",\n        \"provider\": \"kubernetes\"\n      },\n      \"selector\": null,\n      \"containerPort\": 0,\n      \"portalIP\": \"10.0.0.171\"\n    }\n  ]\n}"
-    stub_request(:get, /.*services*/).
+    stub_request(:get, /\/services/).
         to_return(:body => json_response_services, :status => 200)
     json_response_pods =  "{\n   \"kind\": \"PodList\", \n  \"creationTimestamp\": null,\n   \"selfLink\": \"/api/v1beta1/pods\",\n  \"resourceVersion\": 7,\n   \"apiVersion\": \"v1beta1\",   \"items\": [] }"
-    stub_request(:get, /.*pods*/).
+    stub_request(:get, /\/pods/).
         to_return(:body => json_response_pods, :status => 200)
     json_response_nodes = "{\n   \"kind\": \"NodeList\",\n   \"creationTimestamp\": null, \n  \"selfLink\": \"/api/v1beta1/nodes\",\n   \"apiVersion\": \"v1beta1\",\n   \"minions\": [ \n    { \n      \"id\": \"127.0.0.1\",\n       \"uid\": \"a7b13504-9402-11e4-9a08-3c970e4a436a\",\n       \"creationTimestamp\": \"2015-01-04T13:13:05+02:00\",\n       \"selfLink\": \"/api/v1beta1/nodes/127.0.0.1\", \n      \"resourceVersion\": 7,\n       \"resources\": {   \n      \"capacity\": { \n          \"cpu\": 1000,\n           \"memory\": 3221225472    \n     }       }     }   ],   \"items\": [     {       \"id\": \"127.0.0.1\", \n      \"uid\": \"a7b13504-9402-11e4-9a08-3c970e4a436a\", \n      \"creationTimestamp\": \"2015-01-04T13:13:05+02:00\", \n      \"selfLink\": \"/api/v1beta1/nodes/127.0.0.1\",\n       \"resourceVersion\": 7,\n       \"resources\": {         \"capacity\": {           \"cpu\": 1000,           \"memory\": 3221225472         }       }     }   ] }"
-    stub_request(:get, /.*nodes*/).
+    stub_request(:get, /\/nodes/).
         to_return(:body => json_response_nodes, :status => 200)
 
     json_response_replication_controllers =  "{  \"kind\": \"ReplicationControllerList\", \"creationTimestamp\": null, \"selfLink\": \"/api/v1beta1/replicationControllers\", \"resourceVersion\": 7, \"apiVersion\": \"v1beta1\", \"items\": [] }"
-    stub_request(:get, /.*replicationControllers*/).
+    stub_request(:get, /\/replicationControllers/).
         to_return(:body => json_response_replication_controllers, :status => 200)
 
     stub_request(:get, /\/events/)
