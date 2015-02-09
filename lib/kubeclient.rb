@@ -2,6 +2,7 @@ require 'kubeclient/version'
 require 'json'
 require 'rest-client'
 require 'active_support/inflector'
+require 'kubeclient/event'
 require 'kubeclient/pod'
 require 'kubeclient/node'
 require 'kubeclient/service'
@@ -15,7 +16,7 @@ require 'kubeclient/watch_stream'
 module Kubeclient
   class Client
    attr_reader :api_endpoint
-   ENTITIES = %w(Pod Service ReplicationController Node)
+   ENTITIES = %w(Pod Service ReplicationController Node Event)
 
     def initialize(api_endpoint,version)
       if !api_endpoint.end_with? "/"
