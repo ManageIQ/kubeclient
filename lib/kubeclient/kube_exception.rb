@@ -1,3 +1,4 @@
+# Kubernetes HTTP Exceptions
 class KubeException < Exception
   attr_reader :error_code, :message
 
@@ -7,7 +8,6 @@ class KubeException < Exception
   end
 
   def to_s
-    "HTTP status code " + @error_code.to_s + ", " + @message
+    'HTTP status code ' + @error_code.to_s + ', ' + @message
   end
-
 end

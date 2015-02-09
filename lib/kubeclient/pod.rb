@@ -1,4 +1,4 @@
 require 'recursive_open_struct'
-class Pod < RecursiveOpenStruct
 
+class Pod < RecursiveOpenStruct
 end

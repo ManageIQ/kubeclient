@@ -1,4 +1,4 @@
 require 'recursive_open_struct'
-class Node <  RecursiveOpenStruct
 
+class Node <  RecursiveOpenStruct
 end
