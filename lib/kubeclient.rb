@@ -8,6 +8,8 @@ require 'kubeclient/service'
 require 'kubeclient/replication_controller'
 require 'kubeclient/entity_list'
 require 'kubeclient/kube_exception'
+require 'kubeclient/watch'
+require 'kubeclient/watch_stream'
 
 
 module Kubeclient
@@ -66,6 +68,15 @@ module Kubeclient
         end
         result["items"].each { |item | collection.push(create_entity(item, entity))  }
         collection
+     end
+
+     # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
+     define_method("watch_#{entity.underscore.pluralize}") \
+         do |resourceVersion = nil|
+       uri = URI.parse(api_endpoint + '/watch/' + get_resource_name(entity))
+       uri.query = URI.encode_www_form(
+         'resourceVersion' => resourceVersion) unless resourceVersion.nil?
+       WatchStream.new(uri).to_enum
      end
 
      #get a single entity of a specific type by id
