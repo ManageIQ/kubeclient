@@ -1,0 +1,10 @@
+{
+    "kind": "PodList",
+    "creationTimestamp": null,
+    "selfLink": "/api/v1beta1/pods",
+    "resourceVersion": 7,
+    "apiVersion": "v1beta1",
+    "items": [
+
+    ]
+}

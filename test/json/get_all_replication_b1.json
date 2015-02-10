@@ -1,0 +1,10 @@
+{
+    "kind": "ReplicationControllerList",
+    "creationTimestamp": null,
+    "selfLink": "/api/v1beta1/replicationControllers",
+    "resourceVersion": 7,
+    "apiVersion": "v1beta1",
+    "items": [
+
+    ]
+}

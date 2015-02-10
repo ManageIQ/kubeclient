@@ -1,0 +1,15 @@
+{
+    "kind": "Node",
+    "id": "127.0.0.1",
+    "uid": "b0ddfa00-8b5b-11e4-a8c4-3c970e4a436a",
+    "creationTimestamp": "2014-12-24T12:57:45+02:00",
+    "selfLink": "/api/v1beta1/nodes/127.0.0.1",
+    "resourceVersion": 7,
+    "apiVersion": "v1beta1",
+    "resources": {
+        "capacity": {
+            "cpu": 1000,
+            "memory": 3221225472
+        }
+    }
+}
