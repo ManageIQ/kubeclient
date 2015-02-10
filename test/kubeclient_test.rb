@@ -72,16 +72,20 @@ class KubeClientTest < MiniTest::Test
     stub_request(:get, /.*replicationControllers*/).
         to_return(:body => json_response_replication_controllers, :status => 200)
 
+    stub_request(:get, /\/events/)
+      .to_return(body: open_test_json_file('event_list_b3.json'), status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta1"
     result = client.get_all_entities
-    assert_equal(4, result.keys.size)
+    assert_equal(5, result.keys.size)
     assert_instance_of(EntityList, result["node"])
     assert_instance_of(EntityList, result["service"])
     assert_instance_of(EntityList, result["replication_controller"])
     assert_instance_of(EntityList, result["pod"])
+    assert_instance_of(EntityList, result['event'])
     assert_instance_of(Service, result["service"][0])
     assert_instance_of(Node, result["node"][0])
+    assert_instance_of(Event, result['event'][0])
   end
 
   # dup method creates a shallow copy which is not good in this case
