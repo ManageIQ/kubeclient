@@ -33,6 +33,12 @@ module Kubeclient
       RestClient::Resource.new(@api_endpoint)
     end
 
+    def handling_kube_exception
+      yield
+    rescue RestClient::Exception => e
+      raise KubeException.new(e.http_code, JSON.parse(e.response)['message'])
+    end
+
     protected
 
     def create_entity(hash, entity)
@@ -52,12 +58,8 @@ module Kubeclient
       define_method("get_#{entity.underscore.pluralize}") do
         # TODO: labels support
         # TODO: namespace support?
-        begin
-          response = rest_client[get_resource_name(entity)].get # nil, labels
-        rescue  RestClient::Exception => e
-          exception = KubeException.new(e.http_code,
-                                        JSON.parse(e.response)['message'])
-          raise exception
+        response = handling_kube_exception do
+          rest_client[get_resource_name(entity)].get # nil, labels
         end
 
         result = JSON.parse(response)
@@ -88,24 +90,16 @@ module Kubeclient
 
       # get a single entity of a specific type by id
       define_method("get_#{entity.underscore}") do |id|
-        begin
-          response = rest_client[get_resource_name(entity) + "/#{id}"].get
-        rescue  RestClient::Exception => e
-          exception = KubeException.new(e.http_code,
-                                        JSON.parse(e.response)['message'])
-          raise exception
+        response = handling_kube_exception do
+          rest_client[get_resource_name(entity) + "/#{id}"].get
         end
         result = JSON.parse(response)
         create_entity(result, entity)
       end
 
       define_method("delete_#{entity.underscore}") do |id|
-        begin
+        handling_kube_exception do
           rest_client[get_resource_name(entity) + "/#{id}"].delete
-        rescue  RestClient::Exception => e
-          exception = KubeException.new(e.http_code,
-                                        JSON.parse(e.response)['message'])
-          raise exception
         end
       end
 
@@ -113,12 +107,8 @@ module Kubeclient
         # to_hash should be called because of issue #9 in recursive open
         # struct
         hash = entity_config.to_hash
-        begin
+        handling_kube_exception do
           rest_client[get_resource_name(entity)].post(hash.to_json)
-        rescue  RestClient::Exception => e
-          exception = KubeException.new(e.http_code,
-                                        JSON.parse(e.response)['message'])
-          raise exception
         end
       end
 
@@ -130,12 +120,8 @@ module Kubeclient
         # TODO: temporary solution to delete id till this issue is solved
         # https://github.com/GoogleCloudPlatform/kubernetes/issues/3085
         hash.delete(:id)
-        begin
+        handling_kube_exception do
           rest_client[get_resource_name(entity) + "/#{id}"].put(hash.to_json)
-        rescue RestClient::Exception => e
-          exception = KubeException.new(e.http_code,
-                                        JSON.parse(e.response)['message'])
-          raise exception
         end
       end
     end
