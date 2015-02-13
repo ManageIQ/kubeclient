@@ -2,6 +2,7 @@ require 'kubeclient/version'
 require 'json'
 require 'rest-client'
 require 'active_support/inflector'
+require 'em-http-request'
 require 'kubeclient/event'
 require 'kubeclient/pod'
 require 'kubeclient/node'
@@ -11,7 +12,6 @@ require 'kubeclient/endpoint'
 require 'kubeclient/entity_list'
 require 'kubeclient/kube_exception'
 require 'kubeclient/watch'
-require 'kubeclient/watch_stream'
 
 module Kubeclient
   # Kubernetes Client
@@ -82,15 +82,6 @@ module Kubeclient
         collection
       end
 
-      # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
-      define_method("watch_#{entity.underscore.pluralize}") \
-          do |resourceVersion = nil|
-        uri = URI.parse(api_endpoint + '/watch/' + get_resource_name(entity))
-        uri.query = URI.encode_www_form(
-          'resourceVersion' => resourceVersion) unless resourceVersion.nil?
-        WatchStream.new(uri).to_enum
-      end
-
       # get a single entity of a specific type by id
       define_method("get_#{entity.underscore}") do |id|
         response = handling_kube_exception do
@@ -136,6 +127,52 @@ module Kubeclient
         method_name = "get_#{entity.underscore.pluralize}"
         key_name = entity.underscore
         result_hash[key_name] = send(method_name)
+      end
+    end
+
+    def watch(entities)
+      watch_endpoint = api_endpoint + '/watch/'
+      options = { inactivity_timeout: 0, keepalive: true }
+
+      EventMachine.run do
+        multi_request = EventMachine::MultiRequest.new
+
+        entities.each do |entity, version|
+          uri = URI.parse(watch_endpoint + get_resource_name(entity.to_s))
+
+          unless version.nil?
+            uri.query = URI.encode_www_form('resourceVersion' => version)
+          end
+
+          request = EventMachine::HttpRequest.new(uri, options).get
+
+          request.errback do
+            EventMachine.stop
+            fail request.error
+          end
+
+          request.callback do
+            EventMachine.stop
+            unless request.response_header.successful?
+              fail KubeException.new(
+                request.response_header.status,
+                request.response_header.http_reason
+              )
+            end
+          end
+
+          buffer = ''
+          request.stream do |chunk|
+            if request.response_header.successful?
+              buffer += chunk
+              while (notice = buffer.slice!(/.+\n/))
+                yield entity, WatchNotice.new(JSON.parse(notice))
+              end
+            end
+          end
+
+          multi_request.add(entity, request)
+        end
       end
     end
   end
