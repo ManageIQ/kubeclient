@@ -53,6 +53,8 @@ module Kubeclient
       end
     end
 
+    public
+
     ENTITIES.each do |entity|
       # get all entities of a type e.g. get_nodes, get_pods, etc.
       define_method("get_#{entity.underscore.pluralize}") do
@@ -64,13 +66,13 @@ module Kubeclient
 
         result = JSON.parse(response)
 
-        resourceVersion = result.fetch('resourceVersion', nil)
-        if resourceVersion.nil?
-          resourceVersion = result.fetch('metadata', {})
-                                  .fetch('resourceVersion', nil)
+        resource_version = result.fetch('resourceVersion', nil)
+        if resource_version.nil?
+          resource_version =
+            result.fetch('metadata', {}).fetch('resourceVersion', nil)
         end
 
-        collection = EntityList.new(entity, resourceVersion)
+        collection = EntityList.new(entity, resource_version)
 
         result['items'].each do |item|
           collection.push(create_entity(item, entity))
@@ -125,8 +127,6 @@ module Kubeclient
         end
       end
     end
-
-    public
 
     def all_entities
       ENTITIES.each_with_object({}) do |entity, result_hash|
