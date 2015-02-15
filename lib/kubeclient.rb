@@ -128,9 +128,7 @@ module Kubeclient
 
     public
 
-    # FIXME: fix the accessor names
-    # rubocop:disable Style/AccessorMethodName
-    def get_all_entities
+    def all_entities
       ENTITIES.each_with_object({}) do |entity, result_hash|
         # method call for get each entities
         # build hash of entity name to array of the entities

@@ -82,7 +82,7 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_json_file('event_list_b3.json'), status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta1'
-    result = client.get_all_entities
+    result = client.all_entities
     assert_equal(5, result.keys.size)
     assert_instance_of(EntityList, result['node'])
     assert_instance_of(EntityList, result['service'])
