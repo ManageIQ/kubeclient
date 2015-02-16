@@ -48,6 +48,87 @@ module Kubeclient
       raise KubeException.new(e.http_code, JSON.parse(e.response)['message'])
     end
 
+    def get_all_for_entity(entity)
+      # TODO: labels support
+      # TODO: namespace support?
+      response = handling_kube_exception do
+        rest_client[get_resource_name(entity)].get # nil, labels
+      end
+
+      result = JSON.parse(response)
+
+      resource_version = result.fetch('resourceVersion', nil)
+      if resource_version.nil?
+        resource_version =
+          result.fetch('metadata', {}).fetch('resourceVersion', nil)
+      end
+
+      collection = EntityList.new(entity, resource_version)
+
+      result['items'].each do |item|
+        collection.push(create_entity(item, entity))
+      end
+
+      collection
+    end
+
+    def watch_all_for_entity(entity, resource_version = nil)
+      resource_name = get_resource_name(entity.to_s)
+
+      uri = api_endpoint.merge(
+        File.join(api_endpoint.path, 'watch', resource_name))
+
+      unless resource_version.nil?
+        uri.query = URI.encode_www_form('resourceVersion' => resource_version)
+      end
+
+      options = {
+        use_ssl:      uri.scheme == 'https',
+        ca_file:      @ssl_options[:ca_file],
+        verify_ssl:   @ssl_options[:verify_ssl],
+        client_cert:  @ssl_options[:client_cert],
+        client_key:   @ssl_options[:client_key]
+      }
+
+      WatchStream.new(uri, options)
+    end
+
+    def get_for_entity(entity, id)
+      response = handling_kube_exception do
+        rest_client[get_resource_name(entity) + "/#{id}"].get
+      end
+      result = JSON.parse(response)
+      create_entity(result, entity)
+    end
+
+    def delete_for_entity(entity, id)
+      handling_kube_exception do
+        rest_client[get_resource_name(entity) + "/#{id}"].delete
+      end
+    end
+
+    def create_for_entity(entity, entity_config)
+      # to_hash should be called because of issue #9 in recursive open
+      # struct
+      hash = entity_config.to_hash
+      handling_kube_exception do
+        rest_client[get_resource_name(entity)].post(hash.to_json)
+      end
+    end
+
+    def update_for_entity(entity, entity_config)
+      id = entity_config.id
+      # to_hash should be called because of issue #9 in recursive open
+      # struct
+      hash = entity_config.to_hash
+      # TODO: temporary solution to delete id till this issue is solved
+      # https://github.com/GoogleCloudPlatform/kubernetes/issues/3085
+      hash.delete(:id)
+      handling_kube_exception do
+        rest_client[get_resource_name(entity) + "/#{id}"].put(hash.to_json)
+      end
+    end
+
     protected
 
     def create_entity(hash, entity)
@@ -77,88 +158,29 @@ module Kubeclient
     ENTITIES.each do |entity|
       # get all entities of a type e.g. get_nodes, get_pods, etc.
       define_method("get_#{entity.underscore.pluralize}") do
-        # TODO: labels support
-        # TODO: namespace support?
-        response = handling_kube_exception do
-          rest_client[get_resource_name(entity)].get # nil, labels
-        end
-
-        result = JSON.parse(response)
-
-        resource_version = result.fetch('resourceVersion', nil)
-        if resource_version.nil?
-          resource_version =
-            result.fetch('metadata', {}).fetch('resourceVersion', nil)
-        end
-
-        collection = EntityList.new(entity, resource_version)
-
-        result['items'].each do |item|
-          collection.push(create_entity(item, entity))
-        end
-
-        collection
+        get_all_for_entity(entity)
       end
 
       # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
-      define_method("watch_#{entity.underscore.pluralize}") \
-          do |resourceVersion = nil|
-        resource_name = get_resource_name(entity.to_s)
-
-        uri = api_endpoint.merge(
-          File.join(api_endpoint.path, 'watch', resource_name))
-
-        unless resourceVersion.nil?
-          uri.query = URI.encode_www_form(
-            'resourceVersion' => resourceVersion)
-        end
-
-        options = {
-          use_ssl:      uri.scheme == 'https',
-          ca_file:      @ssl_options[:ca_file],
-          verify_ssl:   @ssl_options[:verify_ssl],
-          client_cert:  @ssl_options[:client_cert],
-          client_key:   @ssl_options[:client_key]
-        }
-
-        WatchStream.new(uri, options)
+      define_method("watch_#{entity.underscore.pluralize}") do |resource_version = nil|
+        watch_all_for_entity(entity, resource_version)
       end
 
       # get a single entity of a specific type by id
       define_method("get_#{entity.underscore}") do |id|
-        response = handling_kube_exception do
-          rest_client[get_resource_name(entity) + "/#{id}"].get
-        end
-        result = JSON.parse(response)
-        create_entity(result, entity)
+        get_for_entity(entity, id)
       end
 
       define_method("delete_#{entity.underscore}") do |id|
-        handling_kube_exception do
-          rest_client[get_resource_name(entity) + "/#{id}"].delete
-        end
+        delete_for_entity(entity, id)
       end
 
       define_method("create_#{entity.underscore}") do |entity_config|
-        # to_hash should be called because of issue #9 in recursive open
-        # struct
-        hash = entity_config.to_hash
-        handling_kube_exception do
-          rest_client[get_resource_name(entity)].post(hash.to_json)
-        end
+        create_for_entity(entity, entity_config)
       end
 
       define_method("update_#{entity.underscore}") do |entity_config|
-        id = entity_config.id
-        # to_hash should be called because of issue #9 in recursive open
-        # struct
-        hash = entity_config.to_hash
-        # TODO: temporary solution to delete id till this issue is solved
-        # https://github.com/GoogleCloudPlatform/kubernetes/issues/3085
-        hash.delete(:id)
-        handling_kube_exception do
-          rest_client[get_resource_name(entity) + "/#{id}"].put(hash.to_json)
-        end
+        update_for_entity(entity, entity_config)
       end
     end
 
