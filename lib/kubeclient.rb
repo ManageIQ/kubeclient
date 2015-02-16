@@ -19,9 +19,9 @@ module Kubeclient
     attr_reader :api_endpoint
     ENTITIES = %w(Pod Service ReplicationController Node Event Endpoint)
 
-    def initialize(api_endpoint, version)
-      api_endpoint += '/' unless api_endpoint.end_with? '/'
-      @api_endpoint = api_endpoint + version
+    def initialize(uri, version)
+      @api_endpoint = (uri.is_a? URI) ? uri : URI.parse(uri)
+      @api_endpoint.merge!(File.join(@api_endpoint.path, version))
       # version flag is needed to take care of the differences between
       # versions
       @api_version = version
@@ -85,9 +85,16 @@ module Kubeclient
       # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
       define_method("watch_#{entity.underscore.pluralize}") \
           do |resourceVersion = nil|
-        uri = URI.parse(api_endpoint + '/watch/' + get_resource_name(entity))
-        uri.query = URI.encode_www_form(
-          'resourceVersion' => resourceVersion) unless resourceVersion.nil?
+        resource_name = get_resource_name(entity.to_s)
+
+        uri = api_endpoint.merge(
+          File.join(api_endpoint.path, 'watch', resource_name))
+
+        unless resourceVersion.nil?
+          uri.query = URI.encode_www_form(
+            'resourceVersion' => resourceVersion)
+        end
+
         WatchStream.new(uri)
       end
 
