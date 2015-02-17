@@ -7,6 +7,7 @@ require 'kubeclient/pod'
 require 'kubeclient/node'
 require 'kubeclient/service'
 require 'kubeclient/replication_controller'
+require 'kubeclient/endpoint'
 require 'kubeclient/entity_list'
 require 'kubeclient/kube_exception'
 require 'kubeclient/watch'
@@ -16,7 +17,7 @@ module Kubeclient
   # Kubernetes Client
   class Client
     attr_reader :api_endpoint
-    ENTITIES = %w(Pod Service ReplicationController Node Event)
+    ENTITIES = %w(Pod Service ReplicationController Node Event Endpoint)
 
     def initialize(api_endpoint, version)
       api_endpoint += '/' unless api_endpoint.end_with? '/'
