@@ -11,7 +11,6 @@ require 'kubeclient/endpoint'
 require 'kubeclient/entity_list'
 require 'kubeclient/kube_exception'
 require 'kubeclient/watch'
-require 'kubeclient/watch_stream'
 
 module Kubeclient
   # Kubernetes Client
@@ -84,11 +83,29 @@ module Kubeclient
 
       # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
       define_method("watch_#{entity.underscore.pluralize}") \
-          do |resourceVersion = nil|
+          do |resourceVersion = nil, &block|
         uri = URI.parse(api_endpoint + '/watch/' + get_resource_name(entity))
         uri.query = URI.encode_www_form(
           'resourceVersion' => resourceVersion) unless resourceVersion.nil?
-        WatchStream.new(uri).to_enum
+
+        buffer = ''
+
+        Net::HTTP.start(uri.host, uri.port) do |http|
+          request = Net::HTTP::Get.new(uri)
+
+          http.request(request) do |response|
+            unless response.is_a? Net::HTTPSuccess
+              fail KubeException.new(response.code, response.message)
+            end
+
+            response.read_body do |chunk|
+              buffer << chunk
+              while (line = buffer.slice!(/.+\n/))
+                block.call(WatchNotice.new(JSON.parse(line)))
+              end
+            end
+          end
+        end
       end
 
       # get a single entity of a specific type by id
