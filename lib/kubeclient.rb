@@ -88,7 +88,7 @@ module Kubeclient
         uri = URI.parse(api_endpoint + '/watch/' + get_resource_name(entity))
         uri.query = URI.encode_www_form(
           'resourceVersion' => resourceVersion) unless resourceVersion.nil?
-        WatchStream.new(uri).to_enum
+        WatchStream.new(uri)
       end
 
       # get a single entity of a specific type by id
