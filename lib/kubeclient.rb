@@ -24,13 +24,21 @@ module Kubeclient
       # version flag is needed to take care of the differences between
       # versions
       @api_version = version
+      set_ssl
     end
 
     private
 
     def rest_client
+      options = {
+        ssl_ca_file:      @ssl_options[:ca_file],
+        verify_ssl:       @ssl_options[:verify_mode],
+        ssl_client_cert:  @ssl_options[:client_cert],
+        ssl_client_key:   @ssl_options[:client_key]
+      }
+
       # TODO: should a new one be created for every request?
-      RestClient::Resource.new(@api_endpoint)
+      RestClient::Resource.new(@api_endpoint, options)
     end
 
     def handling_kube_exception
@@ -54,6 +62,16 @@ module Kubeclient
     end
 
     public
+
+    def set_ssl(client_cert: nil, client_key: nil, ca_file: nil,
+                verify_mode: OpenSSL::SSL::VERIFY_PEER)
+      @ssl_options = {
+        ca_file:      ca_file,
+        verify_ssl:   verify_mode,
+        client_cert:  client_cert,
+        client_key:   client_key
+      }
+    end
 
     ENTITIES.each do |entity|
       # get all entities of a type e.g. get_nodes, get_pods, etc.
@@ -94,9 +112,17 @@ module Kubeclient
             'resourceVersion' => resourceVersion)
         end
 
+        options = {
+          use_ssl:      uri.scheme == 'https',
+          ca_file:      @ssl_options[:ca_file],
+          verify_ssl:   @ssl_options[:verify_mode],
+          client_cert:  @ssl_options[:client_cert],
+          client_key:   @ssl_options[:client_key]
+        }
+
         buffer = ''
 
-        Net::HTTP.start(uri.host, uri.port) do |http|
+        Net::HTTP.start(uri.host, uri.port, options) do |http|
           request = Net::HTTP::Get.new(uri)
 
           http.request(request) do |response|
