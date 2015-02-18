@@ -4,14 +4,15 @@ require 'net/http'
 module Kubeclient
   # HTTP Stream used to watch changes on entities
   class WatchStream
-    def initialize(uri)
+    def initialize(uri, options)
       @uri = uri
       @http = nil
+      @options = options
     end
 
     def each
       @finished = false
-      @http = Net::HTTP.start(@uri.host, @uri.port)
+      @http = Net::HTTP.start(@uri.host, @uri.port, @options)
 
       buffer = ''
       request = Net::HTTP::Get.new(@uri)
