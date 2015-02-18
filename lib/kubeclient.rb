@@ -11,7 +11,6 @@ require 'kubeclient/endpoint'
 require 'kubeclient/entity_list'
 require 'kubeclient/kube_exception'
 require 'kubeclient/watch'
-require 'kubeclient/watch_stream'
 
 module Kubeclient
   # Kubernetes Client
@@ -19,19 +18,27 @@ module Kubeclient
     attr_reader :api_endpoint
     ENTITIES = %w(Pod Service ReplicationController Node Event Endpoint)
 
-    def initialize(api_endpoint, version)
-      api_endpoint += '/' unless api_endpoint.end_with? '/'
-      @api_endpoint = api_endpoint + version
+    def initialize(uri, version)
+      @api_endpoint = (uri.is_a? URI) ? uri : URI.parse(uri)
+      @api_endpoint.merge!(File.join(@api_endpoint.path, version))
       # version flag is needed to take care of the differences between
       # versions
       @api_version = version
+      set_ssl
     end
 
     private
 
     def rest_client
+      options = {
+        ssl_ca_file:      @ssl_options[:ca_file],
+        verify_ssl:       @ssl_options[:verify_mode],
+        ssl_client_cert:  @ssl_options[:client_cert],
+        ssl_client_key:   @ssl_options[:client_key]
+      }
+
       # TODO: should a new one be created for every request?
-      RestClient::Resource.new(@api_endpoint)
+      RestClient::Resource.new(@api_endpoint, options)
     end
 
     def handling_kube_exception
@@ -55,6 +62,16 @@ module Kubeclient
     end
 
     public
+
+    def set_ssl(client_cert: nil, client_key: nil, ca_file: nil,
+                verify_mode: OpenSSL::SSL::VERIFY_PEER)
+      @ssl_options = {
+        ca_file:      ca_file,
+        verify_ssl:   verify_mode,
+        client_cert:  client_cert,
+        client_key:   client_key
+      }
+    end
 
     ENTITIES.each do |entity|
       # get all entities of a type e.g. get_nodes, get_pods, etc.
@@ -84,11 +101,43 @@ module Kubeclient
 
       # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
       define_method("watch_#{entity.underscore.pluralize}") \
-          do |resourceVersion = nil|
-        uri = URI.parse(api_endpoint + '/watch/' + get_resource_name(entity))
-        uri.query = URI.encode_www_form(
-          'resourceVersion' => resourceVersion) unless resourceVersion.nil?
-        WatchStream.new(uri).to_enum
+          do |resourceVersion = nil, &block|
+        resource_name = get_resource_name(entity.to_s)
+
+        uri = api_endpoint.merge(
+          File.join(api_endpoint.path, 'watch', resource_name))
+
+        unless resourceVersion.nil?
+          uri.query = URI.encode_www_form(
+            'resourceVersion' => resourceVersion)
+        end
+
+        options = {
+          use_ssl:      uri.scheme == 'https',
+          ca_file:      @ssl_options[:ca_file],
+          verify_ssl:   @ssl_options[:verify_mode],
+          client_cert:  @ssl_options[:client_cert],
+          client_key:   @ssl_options[:client_key]
+        }
+
+        buffer = ''
+
+        Net::HTTP.start(uri.host, uri.port, options) do |http|
+          request = Net::HTTP::Get.new(uri)
+
+          http.request(request) do |response|
+            unless response.is_a? Net::HTTPSuccess
+              fail KubeException.new(response.code, response.message)
+            end
+
+            response.read_body do |chunk|
+              buffer << chunk
+              while (line = buffer.slice!(/.+\n/))
+                block.call(WatchNotice.new(JSON.parse(line)))
+              end
+            end
+          end
+        end
       end
 
       # get a single entity of a specific type by id
