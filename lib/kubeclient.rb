@@ -11,7 +11,6 @@ require 'kubeclient/endpoint'
 require 'kubeclient/entity_list'
 require 'kubeclient/kube_exception'
 require 'kubeclient/watch'
-require 'kubeclient/watch_stream'
 
 module Kubeclient
   # Kubernetes Client
@@ -19,9 +18,9 @@ module Kubeclient
     attr_reader :api_endpoint
     ENTITIES = %w(Pod Service ReplicationController Node Event Endpoint)
 
-    def initialize(api_endpoint, version)
-      api_endpoint += '/' unless api_endpoint.end_with? '/'
-      @api_endpoint = api_endpoint + version
+    def initialize(uri, version)
+      @api_endpoint = (uri.is_a? URI) ? uri : URI.parse(uri)
+      @api_endpoint.merge!(File.join(@api_endpoint.path, version))
       # version flag is needed to take care of the differences between
       # versions
       @api_version = version
@@ -84,11 +83,35 @@ module Kubeclient
 
       # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
       define_method("watch_#{entity.underscore.pluralize}") \
-          do |resourceVersion = nil|
-        uri = URI.parse(api_endpoint + '/watch/' + get_resource_name(entity))
-        uri.query = URI.encode_www_form(
-          'resourceVersion' => resourceVersion) unless resourceVersion.nil?
-        WatchStream.new(uri).to_enum
+          do |resourceVersion = nil, &block|
+        resource_name = get_resource_name(entity.to_s)
+
+        uri = api_endpoint.merge(
+          File.join(api_endpoint.path, 'watch', resource_name))
+
+        unless resourceVersion.nil?
+          uri.query = URI.encode_www_form(
+            'resourceVersion' => resourceVersion)
+        end
+
+        buffer = ''
+
+        Net::HTTP.start(uri.host, uri.port) do |http|
+          request = Net::HTTP::Get.new(uri)
+
+          http.request(request) do |response|
+            unless response.is_a? Net::HTTPSuccess
+              fail KubeException.new(response.code, response.message)
+            end
+
+            response.read_body do |chunk|
+              buffer << chunk
+              while (line = buffer.slice!(/.+\n/))
+                block.call(WatchNotice.new(JSON.parse(line)))
+              end
+            end
+          end
+        end
       end
 
       # get a single entity of a specific type by id
