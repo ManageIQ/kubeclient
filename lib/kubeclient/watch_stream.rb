@@ -7,7 +7,7 @@ module Kubeclient
     def initialize(uri, options)
       @uri = uri
       @http = nil
-      @options = options
+      @options = options.merge(read_timeout: nil)
     end
 
     def each
