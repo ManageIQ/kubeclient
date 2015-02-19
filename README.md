@@ -35,6 +35,21 @@ or for the v3:
 
 `client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta3"`
 
+It is also possible to use https and configure ssl with:
+
+`client = Kubeclient::Client.new 'https://localhost:8443/api/' , "v1beta3"`
+`client.ssl_options(` <br>
+`  client_cert: OpenSSL::X509::Certificate.new(File.read('/path/to/client.crt')),` <br>
+`  client_key:  OpenSSL::PKey::RSA.new(File.read('/path/to/client.key')),` <br>
+`  ca_file:     '/path/to/ca.crt', ` <br>
+`  verify_ssl:  OpenSSL::SSL::VERIFY_PEER` <br>
+`)` <br>
+
+For testing and development purpose you can disable the ssl check with:
+
+`client.ssl_options(verify_ssl: OpenSSL::SSL::VERIFY_NONE)`
+
+
 Examples:
 
 1. Get all pods (and respectively: get_services, get_nodes, get_replication_controllers)

@@ -25,13 +25,21 @@ module Kubeclient
       # version flag is needed to take care of the differences between
       # versions
       @api_version = version
+      ssl_options
     end
 
     private
 
     def rest_client
+      options = {
+        ssl_ca_file:      @ssl_options[:ca_file],
+        verify_ssl:       @ssl_options[:verify_ssl],
+        ssl_client_cert:  @ssl_options[:client_cert],
+        ssl_client_key:   @ssl_options[:client_key]
+      }
+
       # TODO: should a new one be created for every request?
-      RestClient::Resource.new(@api_endpoint)
+      RestClient::Resource.new(@api_endpoint, options)
     end
 
     def handling_kube_exception
@@ -55,6 +63,16 @@ module Kubeclient
     end
 
     public
+
+    def ssl_options(client_cert: nil, client_key: nil, ca_file: nil,
+                    verify_ssl: OpenSSL::SSL::VERIFY_PEER)
+      @ssl_options = {
+        ca_file:      ca_file,
+        verify_ssl:   verify_ssl,
+        client_cert:  client_cert,
+        client_key:   client_key
+      }
+    end
 
     ENTITIES.each do |entity|
       # get all entities of a type e.g. get_nodes, get_pods, etc.
@@ -95,7 +113,15 @@ module Kubeclient
             'resourceVersion' => resourceVersion)
         end
 
-        WatchStream.new(uri)
+        options = {
+          use_ssl:      uri.scheme == 'https',
+          ca_file:      @ssl_options[:ca_file],
+          verify_ssl:   @ssl_options[:verify_ssl],
+          client_cert:  @ssl_options[:client_cert],
+          client_key:   @ssl_options[:client_key]
+        }
+
+        WatchStream.new(uri, options)
       end
 
       # get a single entity of a specific type by id
