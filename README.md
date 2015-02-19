@@ -82,9 +82,13 @@ The below example is for v1beta1 <br>
 7. Receive entity updates <br>
 It is possible to receive live update notices watching the relevant entities:
 <br>
-`client.watch_pods.each do |notice|` <br>
+`watcher = client.watch_pods` <br>
+`watcher.each do |notice|` <br>
 `  # process notice data` <br>
 `end` <br>
+It is possible to interrupt the watcher from another thread with:
+<br>
+`watcher.finish` <br>
 
 ## Contributing
 
