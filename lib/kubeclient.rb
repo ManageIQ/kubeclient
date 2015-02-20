@@ -48,7 +48,7 @@ module Kubeclient
       raise KubeException.new(e.http_code, JSON.parse(e.response)['message'])
     end
 
-    def get_all_for_entity(entity)
+    def get_entities(entity)
       # TODO: labels support
       # TODO: namespace support?
       response = handling_kube_exception do
@@ -66,13 +66,13 @@ module Kubeclient
       collection = EntityList.new(entity, resource_version)
 
       result['items'].each do |item|
-        collection.push(create_entity(item, entity))
+        collection.push(new_entity(item, entity))
       end
 
       collection
     end
 
-    def watch_all_for_entity(entity, resource_version = nil)
+    def watch_entities(entity, resource_version = nil)
       resource_name = get_resource_name(entity.to_s)
 
       uri = api_endpoint.merge(
@@ -93,21 +93,21 @@ module Kubeclient
       WatchStream.new(uri, options)
     end
 
-    def get_for_entity(entity, id)
+    def get_entity(entity, id)
       response = handling_kube_exception do
         rest_client[get_resource_name(entity) + "/#{id}"].get
       end
       result = JSON.parse(response)
-      create_entity(result, entity)
+      new_entity(result, entity)
     end
 
-    def delete_for_entity(entity, id)
+    def delete_entity(entity, id)
       handling_kube_exception do
         rest_client[get_resource_name(entity) + "/#{id}"].delete
       end
     end
 
-    def create_for_entity(entity, entity_config)
+    def create_entity(entity, entity_config)
       # to_hash should be called because of issue #9 in recursive open
       # struct
       hash = entity_config.to_hash
@@ -116,7 +116,7 @@ module Kubeclient
       end
     end
 
-    def update_for_entity(entity, entity_config)
+    def update_entity(entity, entity_config)
       id = entity_config.id
       # to_hash should be called because of issue #9 in recursive open
       # struct
@@ -131,7 +131,7 @@ module Kubeclient
 
     protected
 
-    def create_entity(hash, entity)
+    def new_entity(hash, entity)
       entity.classify.constantize.new(hash)
     end
 
@@ -156,31 +156,34 @@ module Kubeclient
     end
 
     ENTITIES.each do |entity|
+      method_name = entity.underscore
+      method_name_plural = method_name.pluralize
+
       # get all entities of a type e.g. get_nodes, get_pods, etc.
-      define_method("get_#{entity.underscore.pluralize}") do
-        get_all_for_entity(entity)
+      define_method("get_#{method_name_plural}") do
+        get_entities(entity)
       end
 
       # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
-      define_method("watch_#{entity.underscore.pluralize}") do |resource_version = nil|
-        watch_all_for_entity(entity, resource_version)
+      define_method("watch_#{method_name_plural}") do |resource_version = nil|
+        watch_entities(entity, resource_version)
       end
 
       # get a single entity of a specific type by id
-      define_method("get_#{entity.underscore}") do |id|
-        get_for_entity(entity, id)
+      define_method("get_#{method_name}") do |id|
+        get_entity(entity, id)
       end
 
-      define_method("delete_#{entity.underscore}") do |id|
-        delete_for_entity(entity, id)
+      define_method("delete_#{method_name}") do |id|
+        delete_entity(entity, id)
       end
 
-      define_method("create_#{entity.underscore}") do |entity_config|
-        create_for_entity(entity, entity_config)
+      define_method("create_#{method_name}") do |entity_config|
+        create_entity(entity, entity_config)
       end
 
-      define_method("update_#{entity.underscore}") do |entity_config|
-        update_for_entity(entity, entity_config)
+      define_method("update_#{method_name}") do |entity_config|
+        update_entity(entity, entity_config)
       end
     end
 
