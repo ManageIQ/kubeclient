@@ -55,6 +55,10 @@ Examples:
 <br>
 `pods = client.get_pods`
 <br>
+You can get entities which have specific labels by specifying input parameter named `labels`: <br>
+`pods = client.get_pods(labels: 'name=redis-master')` <br>
+You can specify multiple labels and that returns entities which have both labels:  <br>
+`pods = client.get_pods(labels: 'name=redis-master,app=redis')`
 
 2. Get a specific node (and respectively: get_service "service id" , get_pod "pod id" , get_replication_controller "rc id" )
 <br>

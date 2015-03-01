@@ -53,11 +53,13 @@ module Kubeclient
       raise KubeException.new(e.http_code, JSON.parse(e.response)['message'])
     end
 
-    def get_entities(entity_type)
-      # TODO: labels support
+    def get_entities(entity_type, options)
+      params = {}
+      params['labels'] = options[:labels] if options[:labels]
+
       # TODO: namespace support?
       response = handling_kube_exception do
-        rest_client[get_resource_name(entity_type)].get # nil, labels
+        rest_client[get_resource_name(entity_type)].get(params: params)
       end
 
       result = JSON.parse(response)
@@ -165,8 +167,8 @@ module Kubeclient
       entity_name_plural = entity_name.pluralize
 
       # get all entities of a type e.g. get_nodes, get_pods, etc.
-      define_method("get_#{entity_name_plural}") do
-        get_entities(entity_type)
+      define_method("get_#{entity_name_plural}") do |options = {}|
+        get_entities(entity_type, options)
       end
 
       # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
