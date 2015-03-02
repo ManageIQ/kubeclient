@@ -17,7 +17,7 @@ module Kubeclient
   # Kubernetes Client
   class Client
     attr_reader :api_endpoint
-    ENTITIES = %w(Pod Service ReplicationController Node Event Endpoint)
+    ENTITY_TYPES = %w(Pod Service ReplicationController Node Event Endpoint)
 
     def initialize(uri, version)
       @api_endpoint = (uri.is_a? URI) ? uri : URI.parse(uri)
@@ -48,11 +48,11 @@ module Kubeclient
       raise KubeException.new(e.http_code, JSON.parse(e.response)['message'])
     end
 
-    def get_entities(entity)
+    def get_entities(entity_type)
       # TODO: labels support
       # TODO: namespace support?
       response = handling_kube_exception do
-        rest_client[get_resource_name(entity)].get # nil, labels
+        rest_client[get_resource_name(entity_type)].get # nil, labels
       end
 
       result = JSON.parse(response)
@@ -63,17 +63,17 @@ module Kubeclient
           result.fetch('metadata', {}).fetch('resourceVersion', nil)
       end
 
-      collection = EntityList.new(entity, resource_version)
+      collection = EntityList.new(entity_type, resource_version)
 
       result['items'].each do |item|
-        collection.push(new_entity(item, entity))
+        collection.push(new_entity(item, entity_type))
       end
 
       collection
     end
 
-    def watch_entities(entity, resource_version = nil)
-      resource_name = get_resource_name(entity.to_s)
+    def watch_entities(entity_type, resource_version = nil)
+      resource_name = get_resource_name(entity_type.to_s)
 
       uri = api_endpoint.merge(
         File.join(api_endpoint.path, 'watch', resource_name))
@@ -93,30 +93,30 @@ module Kubeclient
       WatchStream.new(uri, options)
     end
 
-    def get_entity(entity, id)
+    def get_entity(entity_type, id)
       response = handling_kube_exception do
-        rest_client[get_resource_name(entity) + "/#{id}"].get
+        rest_client[get_resource_name(entity_type) + "/#{id}"].get
       end
       result = JSON.parse(response)
-      new_entity(result, entity)
+      new_entity(result, entity_type)
     end
 
-    def delete_entity(entity, id)
+    def delete_entity(entity_type, id)
       handling_kube_exception do
-        rest_client[get_resource_name(entity) + "/#{id}"].delete
+        rest_client[get_resource_name(entity_type) + "/#{id}"].delete
       end
     end
 
-    def create_entity(entity, entity_config)
+    def create_entity(entity_type, entity_config)
       # to_hash should be called because of issue #9 in recursive open
       # struct
       hash = entity_config.to_hash
       handling_kube_exception do
-        rest_client[get_resource_name(entity)].post(hash.to_json)
+        rest_client[get_resource_name(entity_type)].post(hash.to_json)
       end
     end
 
-    def update_entity(entity, entity_config)
+    def update_entity(entity_type, entity_config)
       id = entity_config.id
       # to_hash should be called because of issue #9 in recursive open
       # struct
@@ -125,21 +125,21 @@ module Kubeclient
       # https://github.com/GoogleCloudPlatform/kubernetes/issues/3085
       hash.delete(:id)
       handling_kube_exception do
-        rest_client[get_resource_name(entity) + "/#{id}"].put(hash.to_json)
+        rest_client[get_resource_name(entity_type) + "/#{id}"].put(hash.to_json)
       end
     end
 
     protected
 
-    def new_entity(hash, entity)
-      entity.classify.constantize.new(hash)
+    def new_entity(hash, entity_type)
+      entity_type.classify.constantize.new(hash)
     end
 
-    def get_resource_name(entity)
+    def get_resource_name(entity_type)
       if @api_version == 'v1beta1'
-        entity.pluralize.camelize(:lower)
+        entity_type.pluralize.camelize(:lower)
       else
-        entity.pluralize.downcase
+        entity_type.pluralize.downcase
       end
     end
 
@@ -155,44 +155,44 @@ module Kubeclient
       }
     end
 
-    ENTITIES.each do |entity|
-      method_name = entity.underscore
-      method_name_plural = method_name.pluralize
+    ENTITY_TYPES.each do |entity_type|
+      entity_name = entity_type.underscore
+      entity_name_plural = entity_name.pluralize
 
       # get all entities of a type e.g. get_nodes, get_pods, etc.
-      define_method("get_#{method_name_plural}") do
-        get_entities(entity)
+      define_method("get_#{entity_name_plural}") do
+        get_entities(entity_type)
       end
 
       # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
-      define_method("watch_#{method_name_plural}") do |resource_version = nil|
-        watch_entities(entity, resource_version)
+      define_method("watch_#{entity_name_plural}") do |resource_version = nil|
+        watch_entities(entity_type, resource_version)
       end
 
       # get a single entity of a specific type by id
-      define_method("get_#{method_name}") do |id|
-        get_entity(entity, id)
+      define_method("get_#{entity_name}") do |id|
+        get_entity(entity_type, id)
       end
 
-      define_method("delete_#{method_name}") do |id|
-        delete_entity(entity, id)
+      define_method("delete_#{entity_name}") do |id|
+        delete_entity(entity_type, id)
       end
 
-      define_method("create_#{method_name}") do |entity_config|
-        create_entity(entity, entity_config)
+      define_method("create_#{entity_name}") do |entity_config|
+        create_entity(entity_type, entity_config)
       end
 
-      define_method("update_#{method_name}") do |entity_config|
-        update_entity(entity, entity_config)
+      define_method("update_#{entity_name}") do |entity_config|
+        update_entity(entity_type, entity_config)
       end
     end
 
     def all_entities
-      ENTITIES.each_with_object({}) do |entity, result_hash|
+      ENTITY_TYPES.each_with_object({}) do |entity_type, result_hash|
         # method call for get each entities
         # build hash of entity name to array of the entities
-        method_name = "get_#{entity.underscore.pluralize}"
-        key_name = entity.underscore
+        method_name = "get_#{entity_type.underscore.pluralize}"
+        key_name = entity_type.underscore
         result_hash[key_name] = send(method_name)
       end
     end
