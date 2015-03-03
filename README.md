@@ -108,9 +108,11 @@ It is possible to interrupt the watcher from another thread with:
 
 1. Fork it ( https://github.com/[my-github-username]/kubeclient/fork )
 2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create a new Pull Request
+3. Test your changes with `rake test rubocop`, add new tests if needed.
+4. If you added a new functionality, add it to README
+5. Commit your changes (`git commit -am 'Add some feature'`)
+6. Push to the branch (`git push origin my-new-feature`)
+7. Create a new Pull Request
 
 ## Tests
 
