@@ -85,18 +85,24 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_json_file('endpoint_list_b3.json'),
                  status: 200)
 
+    stub_request(:get, /\/namespaces/)
+      .to_return(body: open_test_json_file('namespace_list_b3.json'),
+                 status: 200)
+
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta1'
     result = client.all_entities
-    assert_equal(6, result.keys.size)
+    assert_equal(7, result.keys.size)
     assert_instance_of(EntityList, result['node'])
     assert_instance_of(EntityList, result['service'])
     assert_instance_of(EntityList, result['replication_controller'])
     assert_instance_of(EntityList, result['pod'])
     assert_instance_of(EntityList, result['event'])
+    assert_instance_of(EntityList, result['namespace'])
     assert_instance_of(Service, result['service'][0])
     assert_instance_of(Node, result['node'][0])
     assert_instance_of(Event, result['event'][0])
     assert_instance_of(Endpoint, result['endpoint'][0])
+    assert_instance_of(Namespace, result['namespace'][0])
   end
 
   private

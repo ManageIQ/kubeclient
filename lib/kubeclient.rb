@@ -17,7 +17,8 @@ module Kubeclient
   # Kubernetes Client
   class Client
     attr_reader :api_endpoint
-    ENTITIES = %w(Pod Service ReplicationController Node Event Endpoint)
+    ENTITIES = %w(Pod Service ReplicationController Node Event Endpoint
+                  Namespace)
 
     def initialize(uri, version)
       @api_endpoint = (uri.is_a? URI) ? uri : URI.parse(uri)
@@ -78,7 +79,7 @@ module Kubeclient
       # get all entities of a type e.g. get_nodes, get_pods, etc.
       define_method("get_#{entity.underscore.pluralize}") do
         # TODO: labels support
-        # TODO: namespace support?
+        # TODO: namespace support - getting entities per a specific namespace
         response = handling_kube_exception do
           rest_client[get_resource_name(entity)].get # nil, labels
         end

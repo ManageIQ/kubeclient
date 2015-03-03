@@ -6,8 +6,7 @@
 [![Dependency Status](https://gemnasium.com/abonas/kubeclient.svg)](https://gemnasium.com/abonas/kubeclient)
 
 A Ruby client for Kubernetes REST api.
-The client supports GET, POST, PUT, DELETE on pods, services and replication controllers.
-Also, GET and DELETE is supported for nodes.
+The client supports GET, POST, PUT, DELETE on nodes, pods, services, replication controllers and namespaces.
 The client currently supports Kubernetes REST api version v1beta1 and v1beta3.
 
 ## Installation
