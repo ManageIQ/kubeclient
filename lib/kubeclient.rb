@@ -10,7 +10,7 @@ require 'kubeclient/replication_controller'
 require 'kubeclient/endpoint'
 require 'kubeclient/entity_list'
 require 'kubeclient/kube_exception'
-require 'kubeclient/watch'
+require 'kubeclient/watch_notice'
 require 'kubeclient/watch_stream'
 
 module Kubeclient
