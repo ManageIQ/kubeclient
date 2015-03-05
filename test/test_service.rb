@@ -1,10 +1,7 @@
-require 'minitest/autorun'
-require 'webmock/minitest'
-require 'json'
-require './lib/kubeclient'
+require 'test_helper'
 
 # Service entity tests
-class ServiceTest < MiniTest::Test
+class TestService < MiniTest::Test
   def test_get_from_json_v1
     mock = Service.new(
       'kind' => 'Service',

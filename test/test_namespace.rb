@@ -1,10 +1,7 @@
-require 'minitest/autorun'
-require 'webmock/minitest'
-require 'json'
-require './lib/kubeclient'
+require 'test_helper'
 
 # Namespace entity tests
-class NamespaceTest < MiniTest::Test
+class TestNamespace < MiniTest::Test
   def test_get_namespace_v1beta3
     stub_request(:get, /\/namespaces/)
       .to_return(body: open_test_json_file('namespace_b3.json'),

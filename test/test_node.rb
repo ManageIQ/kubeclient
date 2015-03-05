@@ -1,10 +1,7 @@
-require 'minitest/autorun'
-require 'webmock/minitest'
-require 'json'
-require './lib/kubeclient'
+require 'test_helper'
 
 # Node entity tests
-class NodeTest < MiniTest::Test
+class TestNode < MiniTest::Test
   def test_get_from_json_v1
     stub_request(:get, /\/nodes/)
       .to_return(body: open_test_json_file('node_b1.json'),

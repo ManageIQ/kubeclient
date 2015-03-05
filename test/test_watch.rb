@@ -1,10 +1,7 @@
-require 'minitest/autorun'
-require 'webmock/minitest'
-require 'json'
-require './lib/kubeclient'
+require 'test_helper'
 
 # Watch entity tests
-class WatchTest < MiniTest::Test
+class TestWatch < MiniTest::Test
   def test_watch_pod_success
     expected = [
       { 'type' => 'ADDED', 'resourceVersion' => '1389' },
