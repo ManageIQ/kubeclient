@@ -1,6 +1,5 @@
 require 'minitest/autorun'
 require 'webmock/minitest'
-require 'kubeclient/node'
 require 'json'
 require './lib/kubeclient'
 

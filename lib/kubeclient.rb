@@ -2,12 +2,6 @@ require 'kubeclient/version'
 require 'json'
 require 'rest-client'
 require 'active_support/inflector'
-require 'kubeclient/event'
-require 'kubeclient/pod'
-require 'kubeclient/node'
-require 'kubeclient/service'
-require 'kubeclient/replication_controller'
-require 'kubeclient/endpoint'
 require 'kubeclient/entity_list'
 require 'kubeclient/kube_exception'
 require 'kubeclient/watch_notice'
@@ -20,6 +14,15 @@ module Kubeclient
 
     ENTITY_TYPES = %w(Pod Service ReplicationController Node Event Endpoint
                       Namespace)
+
+    # Dynamically creating classes definitions (class Pod, class Service, etc.),
+    # The classes are extending RecursiveOpenStruct.
+    # This cancels the need to define the classes
+    # manually on every new entity addition,
+    # and especially since currently the class body is empty
+    ENTITY_TYPES.each do |entity_type|
+      Object.const_set(entity_type, Class.new(RecursiveOpenStruct))
+    end
 
     def initialize(uri, version)
       @api_endpoint = (uri.is_a? URI) ? uri : URI.parse(uri)

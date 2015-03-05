@@ -1,7 +1,6 @@
 require 'minitest/autorun'
 require 'webmock/minitest'
 require './lib/kubeclient'
-require 'kubeclient/replication_controller'
 require 'json'
 
 # Replication Controller entity tests
