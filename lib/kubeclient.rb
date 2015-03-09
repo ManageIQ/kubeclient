@@ -7,6 +7,7 @@ require 'kubeclient/kube_exception'
 require 'kubeclient/watch_notice'
 require 'kubeclient/watch_stream'
 
+# A Ruby client for Kubernetes REST api.
 module Kubeclient
   ENTITY_TYPES = %w(Pod Service ReplicationController Node Event Endpoint
                     Namespace)
