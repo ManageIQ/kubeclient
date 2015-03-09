@@ -1,10 +1,7 @@
-require 'minitest/autorun'
-require 'webmock/minitest'
-require './lib/kubeclient'
-require 'json'
+require 'test_helper'
 
 # Replication Controller entity tests
-class ReplicationControllerTest < MiniTest::Test
+class TestReplicationController < MiniTest::Test
   def test_get_from_json_v1
     stub_request(:get, /\/replicationControllers/)
       .to_return(body: open_test_json_file('replication_controller_b1.json'),

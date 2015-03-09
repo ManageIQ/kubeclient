@@ -1,7 +1,4 @@
-require 'minitest/autorun'
-require 'json'
-require 'webmock/minitest'
-require './lib/kubeclient'
+require 'test_helper'
 
 def open_test_json_file(name)
   File.new(File.join(File.dirname(__FILE__), 'json', name))

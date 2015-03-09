@@ -4,8 +4,8 @@ require 'rubocop/rake_task'
 
 task default: [:test, :rubocop]
 
-task :test do
-  Dir.glob('./test/*_test.rb').each { |file| require file }
+Rake::TestTask.new do |t|
+  t.libs << 'test'
 end
 
 RuboCop::RakeTask.new
