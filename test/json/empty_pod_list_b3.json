@@ -1,0 +1,9 @@
+{
+  "kind": "PodList",
+  "apiVersion": "v1beta3",
+  "metadata": {
+      "selfLink": "/api/v1beta3/pods",
+      "resourceVersion": "565"
+  },
+  "items": []
+}

@@ -58,6 +58,17 @@ class KubeClientTest < MiniTest::Test
     assert_instance_of(Service, services[1])
   end
 
+  def test_empty_list
+    stub_request(:get, /\/pods/)
+      .to_return(body: open_test_json_file('empty_pod_list_b3.json'),
+                 status: 200)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
+    pods = client.get_pods
+    assert_instance_of(EntityList, pods)
+    assert_equal(0, pods.size)
+  end
+
   def test_get_all
     stub_request(:get, /\/services/)
       .to_return(body: open_test_json_file('get_all_services_b1.json'),
