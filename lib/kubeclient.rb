@@ -7,22 +7,23 @@ require 'kubeclient/kube_exception'
 require 'kubeclient/watch_notice'
 require 'kubeclient/watch_stream'
 
+# A Ruby client for Kubernetes REST api.
 module Kubeclient
+  ENTITY_TYPES = %w(Pod Service ReplicationController Node Event Endpoint
+                    Namespace)
+
+  # Dynamically creating classes definitions (class Pod, class Service, etc.),
+  # The classes are extending RecursiveOpenStruct.
+  # This cancels the need to define the classes
+  # manually on every new entity addition,
+  # and especially since currently the class body is empty
+  ENTITY_TYPES.each do |entity_type|
+    const_set(entity_type, Class.new(RecursiveOpenStruct))
+  end
+
   # Kubernetes Client
   class Client
     attr_reader :api_endpoint
-
-    ENTITY_TYPES = %w(Pod Service ReplicationController Node Event Endpoint
-                      Namespace)
-
-    # Dynamically creating classes definitions (class Pod, class Service, etc.),
-    # The classes are extending RecursiveOpenStruct.
-    # This cancels the need to define the classes
-    # manually on every new entity addition,
-    # and especially since currently the class body is empty
-    ENTITY_TYPES.each do |entity_type|
-      Object.const_set(entity_type, Class.new(RecursiveOpenStruct))
-    end
 
     def initialize(uri, version)
       @api_endpoint = (uri.is_a? URI) ? uri : URI.parse(uri)
