@@ -70,13 +70,11 @@ module Kubeclient
           result.fetch('metadata', {}).fetch('resourceVersion', nil)
       end
 
-      collection = EntityList.new(entity_type, resource_version)
-
-      result['items'].each do |item|
-        collection.push(new_entity(item, entity_type))
+      collection = result['items'].map do |item|
+        new_entity(item, entity_type)
       end
 
-      collection
+      EntityList.new(entity_type, resource_version, collection)
     end
 
     def watch_entities(entity_type, resource_version = nil)
