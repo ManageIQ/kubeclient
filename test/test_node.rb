@@ -10,7 +10,7 @@ class TestNode < MiniTest::Test
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta1'
     node = client.get_node('127.0.0.1')
 
-    assert_instance_of(Node, node)
+    assert_instance_of(Kubeclient::Node, node)
     assert_respond_to(node, 'creationTimestamp')
     assert_respond_to(node, 'uid')
     assert_respond_to(node, 'id')
@@ -30,7 +30,7 @@ class TestNode < MiniTest::Test
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
     node = client.get_node('127.0.0.1')
 
-    assert_instance_of(Node, node)
+    assert_instance_of(Kubeclient::Node, node)
 
     assert_equal('01018013-a231-11e4-a36b-3c970e4a436a', node.metadata.uid)
     assert_equal('127.0.0.1', node.metadata.name)

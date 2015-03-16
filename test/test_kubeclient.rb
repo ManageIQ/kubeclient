@@ -7,7 +7,7 @@ end
 # Kubernetes client entity tests
 class KubeClientTest < MiniTest::Test
   def test_json
-    our_object = Service.new
+    our_object = Kubeclient::Service.new
     our_object.foo = 'bar'
     our_object.nested = {}
     our_object.nested.again = {}
@@ -25,7 +25,7 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_json_file('service_exception_b1.json'),
                  status: 409)
 
-    service = Service.new
+    service = Kubeclient::Service.new
     service.id = 'redisslave'
     service.port = 80
     service.container_port = 6379
@@ -54,8 +54,8 @@ class KubeClientTest < MiniTest::Test
     assert_instance_of(EntityList, services)
     assert_equal('Service', services.kind)
     assert_equal(2, services.size)
-    assert_instance_of(Service, services[0])
-    assert_instance_of(Service, services[1])
+    assert_instance_of(Kubeclient::Service, services[0])
+    assert_instance_of(Kubeclient::Service, services[1])
   end
 
   def test_empty_list
@@ -106,11 +106,11 @@ class KubeClientTest < MiniTest::Test
     assert_instance_of(EntityList, result['pod'])
     assert_instance_of(EntityList, result['event'])
     assert_instance_of(EntityList, result['namespace'])
-    assert_instance_of(Service, result['service'][0])
-    assert_instance_of(Node, result['node'][0])
-    assert_instance_of(Event, result['event'][0])
-    assert_instance_of(Endpoint, result['endpoint'][0])
-    assert_instance_of(Namespace, result['namespace'][0])
+    assert_instance_of(Kubeclient::Service, result['service'][0])
+    assert_instance_of(Kubeclient::Node, result['node'][0])
+    assert_instance_of(Kubeclient::Event, result['event'][0])
+    assert_instance_of(Kubeclient::Endpoint, result['endpoint'][0])
+    assert_instance_of(Kubeclient::Namespace, result['namespace'][0])
   end
 
   private
