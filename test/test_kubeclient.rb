@@ -51,7 +51,7 @@ class KubeClientTest < MiniTest::Test
     services = client.get_services
 
     refute_empty(services)
-    assert_instance_of(EntityList, services)
+    assert_instance_of(Kubeclient::EntityList, services)
     assert_equal('Service', services.kind)
     assert_equal(2, services.size)
     assert_instance_of(Kubeclient::Service, services[0])
@@ -65,7 +65,7 @@ class KubeClientTest < MiniTest::Test
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
     pods = client.get_pods
-    assert_instance_of(EntityList, pods)
+    assert_instance_of(Kubeclient::EntityList, pods)
     assert_equal(0, pods.size)
   end
 
@@ -100,12 +100,12 @@ class KubeClientTest < MiniTest::Test
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta1'
     result = client.all_entities
     assert_equal(7, result.keys.size)
-    assert_instance_of(EntityList, result['node'])
-    assert_instance_of(EntityList, result['service'])
-    assert_instance_of(EntityList, result['replication_controller'])
-    assert_instance_of(EntityList, result['pod'])
-    assert_instance_of(EntityList, result['event'])
-    assert_instance_of(EntityList, result['namespace'])
+    assert_instance_of(Kubeclient::EntityList, result['node'])
+    assert_instance_of(Kubeclient::EntityList, result['service'])
+    assert_instance_of(Kubeclient::EntityList, result['replication_controller'])
+    assert_instance_of(Kubeclient::EntityList, result['pod'])
+    assert_instance_of(Kubeclient::EntityList, result['event'])
+    assert_instance_of(Kubeclient::EntityList, result['namespace'])
     assert_instance_of(Kubeclient::Service, result['service'][0])
     assert_instance_of(Kubeclient::Node, result['node'][0])
     assert_instance_of(Kubeclient::Event, result['event'][0])
