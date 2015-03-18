@@ -48,7 +48,12 @@ module Kubeclient
     def handling_kube_exception
       yield
     rescue RestClient::Exception => e
-      raise KubeException.new(e.http_code, JSON.parse(e.response)['message'])
+      begin
+        err_message = JSON.parse(e.response)['message']
+      rescue JSON::ParserError
+        err_message = e.message
+      end
+      raise KubeException.new(e.http_code, err_message)
     end
 
     def get_entities(entity_type, klass, options)
