@@ -34,6 +34,12 @@ or for the v3:
 
 `client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta3"`
 
+Another option is to initialize the client with URI object:
+
+`uri = URI::HTTP.build(host: "somehostname", port: 8080)`
+`client = Kubeclient::Client.new uri`
+
+
 It is also possible to use https and configure ssl with:
 
 `client = Kubeclient::Client.new 'https://localhost:8443/api/' , "v1beta3"`
