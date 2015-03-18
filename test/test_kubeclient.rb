@@ -42,6 +42,22 @@ class KubeClientTest < MiniTest::Test
     assert_equal(409, exception.error_code)
   end
 
+  def test_nonjson_exception
+    stub_request(:get, /\/servic/)
+      .to_return(body: open_test_json_file('service_illegal_json_404.json'),
+                 status: 404)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
+
+    exception = assert_raises(KubeException) do
+      client.get_services
+    end
+
+    assert_instance_of(KubeException, exception)
+    assert_equal('404 Resource Not Found', exception.message)
+    assert_equal(404, exception.error_code)
+  end
+
   def test_entity_list
     stub_request(:get, /\/services/)
       .to_return(body: open_test_json_file('entity_list_b1.json'),
