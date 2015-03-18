@@ -1,7 +1,7 @@
 require 'delegate'
 
-# Kubernetes Entity List
 module Kubeclient
+  # Kubernetes Entity List
   class EntityList < DelegateClass(Array)
     attr_reader :kind, :resourceVersion
 
