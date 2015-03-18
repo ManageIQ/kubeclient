@@ -3,7 +3,7 @@ require 'test_helper'
 # Service entity tests
 class TestService < MiniTest::Test
   def test_get_from_json_v1
-    mock = Service.new(
+    mock = Kubeclient::Service.new(
       'kind' => 'Service',
       'id' => 'redis-service',
       'uid' => 'fb01a69c-8ae2-11e4-acc5-3c970e4a436a',
@@ -28,7 +28,7 @@ class TestService < MiniTest::Test
   end
 
   def test_construct_our_own_service
-    our_service = Service.new
+    our_service = Kubeclient::Service.new
     our_service.id = 'redis-service'
     our_service.port = 80
     our_service.protocol = 'TCP'
@@ -52,7 +52,7 @@ class TestService < MiniTest::Test
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta1'
     service = client.get_service 'redisslave'
 
-    assert_instance_of(Service, service)
+    assert_instance_of(Kubeclient::Service, service)
     # checking that creationTimestamp was renamed properly
     assert_equal('2014-12-28T17:37:21+02:00', service.creationTimestamp)
     assert_equal('6a022e83-8ea7-11e4-a6e7-3c970e4a436a', service.uid)
@@ -74,7 +74,7 @@ class TestService < MiniTest::Test
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
     service = client.get_service 'redisslave'
 
-    assert_instance_of(Service, service)
+    assert_instance_of(Kubeclient::Service, service)
     # checking that creationTimestamp was renamed properly
     assert_equal('2015-01-22T14:20:05+02:00',
                  service.metadata.creationTimestamp)
@@ -90,7 +90,7 @@ class TestService < MiniTest::Test
   end
 
   def test_delete_service
-    our_service = Service.new
+    our_service = Kubeclient::Service.new
     our_service.id = 'redis-service'
     our_service.port = 80
     our_service.protocol = 'TCP'

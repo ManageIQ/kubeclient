@@ -10,7 +10,7 @@ class TestNamespace < MiniTest::Test
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
     namespace = client.get_namespace 'staging'
 
-    assert_instance_of(Namespace, namespace)
+    assert_instance_of(Kubeclient::Namespace, namespace)
     assert_equal('e388bc10-c021-11e4-a514-3c970e4a436a', namespace.metadata.uid)
     assert_equal('staging', namespace.metadata.name)
     assert_equal('1168', namespace.metadata.resourceVersion)
@@ -18,7 +18,7 @@ class TestNamespace < MiniTest::Test
   end
 
   def test_delete_namespace_v1beta3
-    our_namespace = Namespace.new
+    our_namespace = Kubeclient::Namespace.new
     our_namespace.name = 'staging'
 
     stub_request(:delete, /\/namespaces/)

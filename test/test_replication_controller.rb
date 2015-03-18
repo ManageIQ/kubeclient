@@ -10,7 +10,7 @@ class TestReplicationController < MiniTest::Test
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta1'
     rc = client.get_replication_controller 'frontendController'
 
-    assert_instance_of(ReplicationController, rc)
+    assert_instance_of(Kubeclient::ReplicationController, rc)
     assert_equal('frontendController', rc.id)
     assert_equal('f4e5966c-8eb2-11e4-a6e7-3c970e4a436a', rc.uid)
     assert_equal('default', rc.namespace)
@@ -32,7 +32,7 @@ class TestReplicationController < MiniTest::Test
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
     rc = client.get_replication_controller 'frontendController'
 
-    assert_instance_of(ReplicationController, rc)
+    assert_instance_of(Kubeclient::ReplicationController, rc)
     assert_equal('guestbook-controller', rc.metadata.name)
     assert_equal('c71aa4c0-a240-11e4-a265-3c970e4a436a', rc.metadata.uid)
     assert_equal('default', rc.metadata.namespace)
