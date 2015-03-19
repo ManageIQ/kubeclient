@@ -2,20 +2,6 @@ require 'test_helper'
 
 # Pod entity tests
 class TestPod < MiniTest::Test
-  def test_get_from_json_v1
-    stub_request(:get, /\/pods/)
-      .to_return(body: open_test_json_file('pod_b1.json'),
-                 status: 200)
-
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta1'
-    pod = client.get_pod 'redis-master-pod'
-
-    assert_instance_of(Kubeclient::Pod, pod)
-    assert_equal('redis-master-pod', pod.id)
-    assert_equal('redis-master',
-                 pod.desiredState.manifest.containers[0]['name'])
-  end
-
   def test_get_from_json_v3
     stub_request(:get, /\/pods/)
       .to_return(body: open_test_json_file('pod_b3.json'),

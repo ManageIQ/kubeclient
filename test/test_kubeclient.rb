@@ -22,7 +22,7 @@ class KubeClientTest < MiniTest::Test
 
   def test_exception
     stub_request(:post, /\/services/)
-      .to_return(body: open_test_json_file('service_exception_b1.json'),
+      .to_return(body: open_test_json_file('namespace_exception_b3.json'),
                  status: 409)
 
     service = Kubeclient::Service.new
@@ -31,23 +31,24 @@ class KubeClientTest < MiniTest::Test
     service.container_port = 6379
     service.protocol = 'TCP'
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta1'
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
 
     exception = assert_raises(KubeException) do
       service = client.create_service service
     end
 
     assert_instance_of(KubeException, exception)
-    assert_equal('service redisslave already exists', exception.message)
+    assert_equal("converting  to : type names don't match (Pod, Namespace)",
+                 exception.message)
     assert_equal(409, exception.error_code)
   end
 
   def test_entity_list
     stub_request(:get, /\/services/)
-      .to_return(body: open_test_json_file('entity_list_b1.json'),
+      .to_return(body: open_test_json_file('entity_list_b3.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta1'
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
     services = client.get_services
 
     refute_empty(services)
@@ -71,20 +72,20 @@ class KubeClientTest < MiniTest::Test
 
   def test_get_all
     stub_request(:get, /\/services/)
-      .to_return(body: open_test_json_file('get_all_services_b1.json'),
+      .to_return(body: open_test_json_file('get_all_services_b3.json'),
                  status: 200)
 
     stub_request(:get, /\/pods/)
-      .to_return(body: open_test_json_file('get_all_pods_b1.json'),
+      .to_return(body: open_test_json_file('pod_list_b3.json'),
                  status: 200)
 
     stub_request(:get, /\/nodes/)
-      .to_return(body: open_test_json_file('get_all_nodes_b1.json'),
+      .to_return(body: open_test_json_file('node_list_b3.json'),
                  status: 200)
 
-    stub_request(:get, /\/replicationControllers/)
-      .to_return(body: open_test_json_file('get_all_replication_b1.json'),
-                 status: 200)
+    stub_request(:get, /\/replicationcontrollers/)
+      .to_return(body: open_test_json_file('replication_controller_list_' \
+                                    'b3.json'), status: 200)
 
     stub_request(:get, /\/events/)
       .to_return(body: open_test_json_file('event_list_b3.json'), status: 200)
@@ -97,7 +98,7 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_json_file('namespace_list_b3.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta1'
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
     result = client.all_entities
     assert_equal(7, result.keys.size)
     assert_instance_of(Kubeclient::EntityList, result['node'])
