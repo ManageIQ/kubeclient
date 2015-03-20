@@ -58,7 +58,9 @@ module Kubeclient
 
     def get_entities(entity_type, klass, options)
       params = {}
-      params['labels'] = options[:labels] if options[:labels]
+      if options[:label_selector]
+        params['label-selector'] = options[:label_selector]
+      end
 
       # TODO: namespace support?
       response = handling_kube_exception do
