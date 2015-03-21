@@ -7,7 +7,7 @@
 
 A Ruby client for Kubernetes REST api.
 The client supports GET, POST, PUT, DELETE on nodes, pods, services, replication controllers and namespaces.
-The client currently supports Kubernetes REST api version v1beta1 and v1beta3.
+The client currently supports Kubernetes REST api version v1beta3.
 
 ## Installation
 
@@ -28,7 +28,7 @@ Or install it yourself as:
 ## Usage
 
 Initialize the client: <br>
-`client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta1"`
+`client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta3"`
 
 or for the v3:
 
@@ -75,25 +75,25 @@ Input parameter - id (string) specifying service id, pod id, replication control
 
 4. Create a service (and respectively: create_pod pod_object, create_replication_controller rc_obj) <br>
 Input parameter - object of type Service, Pod, ReplicationController. <br>
-The below example is for v1beta1
+The below example is for v1beta3
 <br>
 `service = Service.new` <br>
-`service.id = "redis-master"`<br>
-`service.port = 6379`<br>
-`service.containerPort  = "redis-server"`<br>
-`service.selector = {}`<br>
-`service.selector.name = "redis"`<br>
-`service.selector.role = "master"`<br>
+`service.metadata.name = "redis-master"`<br>
+`service.spec.port = 6379`<br>
+`service.spec.containerPort  = "redis-server"`<br>
+`service.spec.selector = {}`<br>
+`service.spec.selector.name = "redis"`<br>
+`service.spec.selector.role = "master"`<br>
 `client.create_service service`<br>
 <br>
 
 5. Update entity (update pod, service, replication controller) <br>
 Input parameter - object of type Service, Pod, ReplicationController <br>
-The below example is for v1beta1 <br>
+The below example is for v1beta3 <br>
 `client.update_service service1`
 <br>
 
-6. Get all entities - Returns a hash with 4 keys (node, service,pod, replication_controller). Each key points to an EntityList of same type. This method
+6. all_entities - Returns a hash with 7 keys (node, service, pod, replication_controller, namespace, endpoint and event). Each key points to an EntityList of same type. This method
  is a convenience method instead of calling each entity's get method separately. <br>
 `client.get_all_entities`
 

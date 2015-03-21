@@ -4,9 +4,9 @@
     "metadata": {
         "name": "127.0.0.1",
         "selfLink": "/api/v1beta3/nodes/127.0.0.1",
-        "uid": "01018013-a231-11e4-a36b-3c970e4a436a",
-        "resourceVersion": "7",
-        "creationTimestamp": "2015-01-22T14:20:08+02:00"
+        "uid": "041143c5-ce39-11e4-ac24-3c970e4a436a",
+        "resourceVersion": "1724",
+        "creationTimestamp": "2015-03-19T15:08:20+02:00"
     },
     "spec": {
         "capacity": {
@@ -19,8 +19,10 @@
         "conditions": [
             {
                 "kind": "Ready",
-                "status": "Full",
-                "lastTransitionTime": null
+                "status": "None",
+                "lastProbeTime": "2015-03-20T14:16:52+02:00",
+                "lastTransitionTime": "2015-03-19T15:08:20+02:00",
+                "reason": "Node health check failed: kubelet /healthz endpoint returns not ok"
             }
         ]
     }
