@@ -65,6 +65,15 @@ class KubeClientTest < MiniTest::Test
     assert_equal(409, exception.error_code)
   end
 
+  def test_vers
+    stub_request(:get, 'http://localhost:8080/api/')
+      .to_return(status: 200, body: open_test_json_file('versions_list.json'))
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
+    response = client.api
+    assert_includes(response, 'versions')
+  end
+
   def test_nonjson_exception
     stub_request(:get, /\/servic/)
       .to_return(body: open_test_json_file('service_illegal_json_404.json'),
