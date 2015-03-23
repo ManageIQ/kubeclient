@@ -144,11 +144,7 @@ module Kubeclient
     end
 
     def get_resource_name(entity_type)
-      if @api_version == 'v1beta1'
-        entity_type.pluralize.camelize(:lower)
-      else
-        entity_type.pluralize.downcase
-      end
+      entity_type.pluralize.downcase
     end
 
     public
