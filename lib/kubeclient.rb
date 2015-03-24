@@ -36,15 +36,16 @@ module Kubeclient
     private
 
     def rest_client
-      options = {
-        ssl_ca_file:      @ssl_options[:ca_file],
-        verify_ssl:       @ssl_options[:verify_ssl],
-        ssl_client_cert:  @ssl_options[:client_cert],
-        ssl_client_key:   @ssl_options[:client_key]
-      }
+      @rest_client ||= begin
+        options = {
+          ssl_ca_file:      @ssl_options[:ca_file],
+          verify_ssl:       @ssl_options[:verify_ssl],
+          ssl_client_cert:  @ssl_options[:client_cert],
+          ssl_client_key:   @ssl_options[:client_key]
+        }
 
-      # TODO: should a new one be created for every request?
-      RestClient::Resource.new(@api_endpoint, options)
+        RestClient::Resource.new(@api_endpoint, options)
+      end
     end
 
     def handling_kube_exception
