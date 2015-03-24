@@ -22,8 +22,10 @@ module Kubeclient
       [Kubeclient.const_set(et, Class.new(RecursiveOpenStruct)), et]
     end
 
-    def initialize(uri, version)
+    def initialize(uri, version = 'v1beta3')
       @api_endpoint = (uri.is_a? URI) ? uri : URI.parse(uri)
+
+      @api_endpoint.path = '/api' if @api_endpoint.path.empty?
       @api_endpoint.merge!(File.join(@api_endpoint.path, version))
       # version flag is needed to take care of the differences between
       # versions

@@ -20,6 +20,25 @@ class KubeClientTest < MiniTest::Test
     assert_equal(expected, JSON.parse(JSON.dump(our_object.to_h)))
   end
 
+  def test_pass_uri
+    # URI::Generic#hostname= was added in ruby 1.9.3 and will automatically
+    # wrap an ipv6 address in []
+    uri = URI::HTTP.build(port: 8080)
+    uri.hostname = 'localhost'
+    client = Kubeclient::Client.new uri
+    assert_equal 'http://localhost:8080/api/v1beta3', client.api_endpoint.to_s
+  end
+
+  def test_no_path_in_uri
+    client = Kubeclient::Client.new 'http://localhost:8080', 'v1beta3'
+    assert_equal 'http://localhost:8080/api/v1beta3', client.api_endpoint.to_s
+  end
+
+  def test_no_version_passed
+    client = Kubeclient::Client.new 'http://localhost:8080'
+    assert_equal 'http://localhost:8080/api/v1beta3', client.api_endpoint.to_s
+  end
+
   def test_exception
     stub_request(:post, /\/services/)
       .to_return(body: open_test_json_file('namespace_exception_b3.json'),
