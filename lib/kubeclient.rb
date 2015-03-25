@@ -48,7 +48,7 @@ module Kubeclient
 
     private
 
-    def handling_kube_exception
+    def handle_exception
       yield
     rescue RestClient::Exception => e
       begin
@@ -66,7 +66,7 @@ module Kubeclient
       end
 
       # TODO: namespace support?
-      response = handling_kube_exception do
+      response = handle_exception do
         rest_client[get_resource_name(entity_type)].get(params: params)
       end
 
@@ -105,7 +105,7 @@ module Kubeclient
     end
 
     def get_entity(entity_type, klass, id)
-      response = handling_kube_exception do
+      response = handle_exception do
         rest_client[get_resource_name(entity_type) + "/#{id}"].get
       end
       result = JSON.parse(response)
@@ -113,7 +113,7 @@ module Kubeclient
     end
 
     def delete_entity(entity_type, id)
-      handling_kube_exception do
+      handle_exception do
         rest_client[get_resource_name(entity_type) + "/#{id}"].delete
       end
     end
@@ -122,7 +122,7 @@ module Kubeclient
       # to_hash should be called because of issue #9 in recursive open
       # struct
       hash = entity_config.to_hash
-      handling_kube_exception do
+      handle_exception do
         rest_client[get_resource_name(entity_type)].post(hash.to_json)
       end
     end
@@ -135,7 +135,7 @@ module Kubeclient
       # TODO: temporary solution to delete id till this issue is solved
       # https://github.com/GoogleCloudPlatform/kubernetes/issues/3085
       hash.delete(:id)
-      handling_kube_exception do
+      handle_exception do
         rest_client[get_resource_name(entity_type) + "/#{id}"].put(hash.to_json)
       end
     end
