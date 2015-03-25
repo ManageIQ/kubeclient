@@ -24,16 +24,13 @@ module Kubeclient
 
     def initialize(uri, version = 'v1beta3')
       @api_endpoint = (uri.is_a? URI) ? uri : URI.parse(uri)
-
       @api_endpoint.path = '/api' if @api_endpoint.path.empty?
-      @api_endpoint.merge!(File.join(@api_endpoint.path, version))
-      # version flag is needed to take care of the differences between
-      # versions
+      if @api_endpoint.path.end_with? '/'
+        @api_endpoint.path = @api_endpoint.path.chop
+      end
       @api_version = version
       ssl_options
     end
-
-    private
 
     def rest_client
       @rest_client ||= begin
@@ -43,10 +40,13 @@ module Kubeclient
           ssl_client_cert:  @ssl_options[:client_cert],
           ssl_client_key:   @ssl_options[:client_key]
         }
-
-        RestClient::Resource.new(@api_endpoint, options)
+        endpoint_with_version = @api_endpoint.merge(@api_endpoint.path + '/' \
+                                                    + @api_version)
+        RestClient::Resource.new(endpoint_with_version, options)
       end
     end
+
+    private
 
     def handling_kube_exception
       yield
@@ -86,8 +86,8 @@ module Kubeclient
     def watch_entities(entity_type, resource_version = nil)
       resource_name = get_resource_name(entity_type.to_s)
 
-      uri = api_endpoint.merge(
-        File.join(api_endpoint.path, 'watch', resource_name))
+      uri = @api_endpoint.merge(@api_endpoint.path + '/' + @api_version \
+                                + '/watch/' + resource_name)
 
       unless resource_version.nil?
         uri.query = URI.encode_www_form('resourceVersion' => resource_version)

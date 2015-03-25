@@ -26,17 +26,20 @@ class KubeClientTest < MiniTest::Test
     uri = URI::HTTP.build(port: 8080)
     uri.hostname = 'localhost'
     client = Kubeclient::Client.new uri
-    assert_equal 'http://localhost:8080/api/v1beta3', client.api_endpoint.to_s
+    rest_client = client.rest_client
+    assert_equal 'http://localhost:8080/api/v1beta3', rest_client.url.to_s
   end
 
   def test_no_path_in_uri
     client = Kubeclient::Client.new 'http://localhost:8080', 'v1beta3'
-    assert_equal 'http://localhost:8080/api/v1beta3', client.api_endpoint.to_s
+    rest_client = client.rest_client
+    assert_equal 'http://localhost:8080/api/v1beta3', rest_client.url.to_s
   end
 
   def test_no_version_passed
     client = Kubeclient::Client.new 'http://localhost:8080'
-    assert_equal 'http://localhost:8080/api/v1beta3', client.api_endpoint.to_s
+    rest_client = client.rest_client
+    assert_equal 'http://localhost:8080/api/v1beta3', rest_client.url.to_s
   end
 
   def test_exception
