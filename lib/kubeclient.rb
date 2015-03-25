@@ -211,5 +211,10 @@ module Kubeclient
       end
       JSON.parse(response)
     end
+
+    def api_valid?
+      result = api
+      result.is_a?(Hash) && result['versions'].is_a?(Array)
+    end
   end
 end
