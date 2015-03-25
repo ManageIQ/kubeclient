@@ -65,13 +65,45 @@ class KubeClientTest < MiniTest::Test
     assert_equal(409, exception.error_code)
   end
 
-  def test_vers
+  def test_api
     stub_request(:get, 'http://localhost:8080/api/')
       .to_return(status: 200, body: open_test_json_file('versions_list.json'))
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
     response = client.api
     assert_includes(response, 'versions')
+  end
+
+  def test_api_valid
+    stub_request(:get, 'http://localhost:8080/api/')
+      .to_return(status: 200, body: open_test_json_file('versions_list.json'))
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
+    assert client.api_valid?
+  end
+
+  def test_api_valid_with_invalid_json
+    stub_request(:get, 'http://localhost:8080/api/')
+      .to_return(status: 200, body: '{}')
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
+    refute client.api_valid?
+  end
+
+  def test_api_valid_with_bad_endpoint
+    stub_request(:get, 'http://localhost:8080/api/')
+      .to_return(status: [404, 'Resource Not Found'])
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
+    assert_raises(KubeException) { client.api_valid? }
+  end
+
+  def test_api_valid_with_non_json
+    stub_request(:get, 'http://localhost:8080/api/')
+      .to_return(status: 200, body: '<html></html>')
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
+    assert_raises(JSON::ParserError) { client.api_valid? }
   end
 
   def test_nonjson_exception
