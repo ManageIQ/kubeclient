@@ -101,7 +101,7 @@ The below example is for v1beta3 <br>
 
 6. all_entities - Returns a hash with 7 keys (node, service, pod, replication_controller, namespace, endpoint and event). Each key points to an EntityList of same type. This method
  is a convenience method instead of calling each entity's get method separately. <br>
-`client.get_all_entities`
+`client.all_entities`
 
 7. Receive entity updates <br>
 It is possible to receive live update notices watching the relevant entities:
