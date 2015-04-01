@@ -30,9 +30,9 @@ Or install it yourself as:
 Initialize the client: <br>
 `client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta3"`
 
-or for the v3:
+Or without specifying version (it will be set by default to "v1beta3"
 
-`client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta3"`
+`client = Kubeclient::Client.new 'http://localhost:8080/api/' `
 
 Another option is to initialize the client with URI object:
 
