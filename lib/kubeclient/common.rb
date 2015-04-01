@@ -136,6 +136,8 @@ module Kubeclient
         # to_hash should be called because of issue #9 in recursive open
         # struct
         hash = entity_config.to_hash
+        hash['kind'] = entity_type
+        hash['apiVersion'] = @api_version
         handle_exception do
           rest_client[get_resource_name(entity_type)].post(hash.to_json)
         end
