@@ -16,7 +16,7 @@ class TestWatch < MiniTest::Test
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
 
     client.watch_pods.to_enum.with_index do |notice, index|
-      assert_instance_of(WatchNotice, notice)
+      assert_instance_of(Kubeclient::Common::WatchNotice, notice)
       assert_equal(expected[index]['type'], notice.type)
       assert_equal('Pod', notice.object.kind)
       assert_equal('php', notice.object.metadata.name)
