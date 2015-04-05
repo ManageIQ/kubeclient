@@ -4,7 +4,7 @@ require 'test_helper'
 class TestService < MiniTest::Test
   def test_construct_our_own_service
     our_service = Kubeclient::Service.new
-    our_service.id = 'redis-service'
+    our_service.name = 'redis-service'
     our_service.port = 80
     our_service.protocol = 'TCP'
     our_service.labels = {}
@@ -44,7 +44,7 @@ class TestService < MiniTest::Test
 
   def test_delete_service
     our_service = Kubeclient::Service.new
-    our_service.id = 'redis-service'
+    our_service.name = 'redis-service'
     our_service.port = 80
     our_service.protocol = 'TCP'
     our_service.labels = {}

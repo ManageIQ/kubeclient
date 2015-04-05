@@ -48,7 +48,7 @@ class KubeClientTest < MiniTest::Test
                  status: 409)
 
     service = Kubeclient::Service.new
-    service.id = 'redisslave'
+    service.name = 'redisslave'
     service.port = 80
     service.container_port = 6379
     service.protocol = 'TCP'
