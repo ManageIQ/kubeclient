@@ -40,13 +40,13 @@ module Kubeclient
             watch_entities(entity_type, resource_version)
           end
 
-          # get a single entity of a specific type by id
-          define_method("get_#{entity_name}") do |id|
-            get_entity(entity_type, klass, id)
+          # get a single entity of a specific type by name
+          define_method("get_#{entity_name}") do |name|
+            get_entity(entity_type, klass, name)
           end
 
-          define_method("delete_#{entity_name}") do |id|
-            delete_entity(entity_type, id)
+          define_method("delete_#{entity_name}") do |name|
+            delete_entity(entity_type, name)
           end
 
           define_method("create_#{entity_name}") do |entity_config|
@@ -118,17 +118,17 @@ module Kubeclient
         EntityList.new(entity_type, resource_version, collection)
       end
 
-      def get_entity(entity_type, klass, id)
+      def get_entity(entity_type, klass, name)
         response = handle_exception do
-          rest_client[get_resource_name(entity_type) + "/#{id}"].get
+          rest_client[get_resource_name(entity_type) + "/#{name}"].get
         end
         result = JSON.parse(response)
         new_entity(result, klass)
       end
 
-      def delete_entity(entity_type, id)
+      def delete_entity(entity_type, name)
         handle_exception do
-          rest_client[get_resource_name(entity_type) + "/#{id}"].delete
+          rest_client[get_resource_name(entity_type) + "/#{name}"].delete
         end
       end
 
@@ -142,7 +142,7 @@ module Kubeclient
       end
 
       def update_entity(entity_type, entity_config)
-        id = entity_config.id
+        name = entity_config.name
         # to_hash should be called because of issue #9 in recursive open
         # struct
         hash = entity_config.to_hash
@@ -150,7 +150,7 @@ module Kubeclient
         # https://github.com/GoogleCloudPlatform/kubernetes/issues/3085
         hash.delete(:id)
         handle_exception do
-          rest_client[get_resource_name(entity_type) + "/#{id}"]
+          rest_client[get_resource_name(entity_type) + "/#{name}"]
             .put(hash.to_json)
         end
       end
