@@ -74,7 +74,7 @@ module Kubeclient
       end
 
       def watch_entities(entity_type, resource_version = nil)
-        resource_name = get_resource_name(entity_type.to_s)
+        resource_name = resource_name(entity_type.to_s)
 
         uri = @api_endpoint.merge(@api_endpoint.path + '/' + @api_version \
                                   + '/watch/' + resource_name)
@@ -102,7 +102,7 @@ module Kubeclient
 
         # TODO: namespace support?
         response = handle_exception do
-          rest_client[get_resource_name(entity_type)].get(params: params)
+          rest_client[resource_name(entity_type)].get(params: params)
         end
 
         result = JSON.parse(response)
@@ -120,7 +120,7 @@ module Kubeclient
 
       def get_entity(entity_type, klass, name)
         response = handle_exception do
-          rest_client[get_resource_name(entity_type) + "/#{name}"].get
+          rest_client[resource_name(entity_type) + "/#{name}"].get
         end
         result = JSON.parse(response)
         new_entity(result, klass)
@@ -128,7 +128,7 @@ module Kubeclient
 
       def delete_entity(entity_type, name)
         handle_exception do
-          rest_client[get_resource_name(entity_type) + "/#{name}"].delete
+          rest_client[resource_name(entity_type) + "/#{name}"].delete
         end
       end
 
@@ -137,7 +137,7 @@ module Kubeclient
         # struct
         hash = entity_config.to_hash
         handle_exception do
-          rest_client[get_resource_name(entity_type)].post(hash.to_json)
+          rest_client[resource_name(entity_type)].post(hash.to_json)
         end
       end
 
@@ -150,7 +150,7 @@ module Kubeclient
         # https://github.com/GoogleCloudPlatform/kubernetes/issues/3085
         hash.delete(:id)
         handle_exception do
-          rest_client[get_resource_name(entity_type) + "/#{name}"]
+          rest_client[resource_name(entity_type) + "/#{name}"]
             .put(hash.to_json)
         end
       end
@@ -169,12 +169,8 @@ module Kubeclient
         end
       end
 
-      def get_resource_name(entity_type)
-        if @api_version == 'v1beta1'
-          entity_type.pluralize.camelize(:lower)
-        else
-          entity_type.pluralize.downcase
-        end
+      def resource_name(entity_type)
+        entity_type.pluralize.downcase
       end
 
       def ssl_options(client_cert: nil, client_key: nil, ca_file: nil,
