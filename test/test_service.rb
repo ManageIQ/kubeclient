@@ -5,8 +5,7 @@ class TestService < MiniTest::Test
   def test_construct_our_own_service
     our_service = Kubeclient::Service.new
     our_service.name = 'redis-service'
-    our_service.port = 80
-    our_service.protocol = 'TCP'
+    # TODO, new ports assignment to be added
     our_service.labels = {}
     our_service.labels.component = 'apiserver'
     our_service.labels.provider = 'kubernetes'
@@ -24,29 +23,29 @@ class TestService < MiniTest::Test
       .to_return(body: open_test_json_file('service_b3.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
+    client = Kubeclient::Client.new 'http://localhost:8080/api/'
     service = client.get_service 'redisslave'
 
     assert_instance_of(Kubeclient::Service, service)
-    # checking that creationTimestamp was renamed properly
-    assert_equal('2015-01-22T14:20:05+02:00',
+    assert_equal('2015-04-05T13:00:31Z',
                  service.metadata.creationTimestamp)
-    assert_equal('ffb153db-a230-11e4-a36b-3c970e4a436a', service.metadata.uid)
-    assert_equal('kubernetes-ro', service.metadata.name)
-    assert_equal('4', service.metadata.resourceVersion)
+    assert_equal('bdb80a8f-db93-11e4-b293-f8b156af4ae1', service.metadata.uid)
+    assert_equal('redis-slave', service.metadata.name)
+    assert_equal('2815', service.metadata.resourceVersion)
     assert_equal('v1beta3', service.apiVersion)
-    assert_equal('10.0.0.154', service.spec.portalIP)
-    assert_equal(0, service.spec.containerPort)
-    assert_equal('TCP', service.spec.protocol)
-    assert_equal(80, service.spec.port)
-    assert_equal('default', service.metadata.namespace)
+    assert_equal('10.0.0.140', service.spec.portalIP)
+    assert_equal('development', service.metadata.namespace)
+
+    assert_equal('TCP', service.spec.ports[0].protocol)
+    assert_equal(6379, service.spec.ports[0].port)
+    assert_equal('', service.spec.ports[0].name)
+    assert_equal('redis-server', service.spec.ports[0].targetPort)
   end
 
   def test_delete_service
     our_service = Kubeclient::Service.new
     our_service.name = 'redis-service'
-    our_service.port = 80
-    our_service.protocol = 'TCP'
+    # TODO, new ports assignment to be added
     our_service.labels = {}
     our_service.labels.component = 'apiserver'
     our_service.labels.provider = 'kubernetes'

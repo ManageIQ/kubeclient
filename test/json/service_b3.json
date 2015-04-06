@@ -2,26 +2,32 @@
     "kind": "Service",
     "apiVersion": "v1beta3",
     "metadata": {
-        "name": "kubernetes-ro",
-        "namespace": "default",
-        "selfLink": "/api/v1beta3/services/kubernetes-ro?namespace=default",
-        "uid": "ffb153db-a230-11e4-a36b-3c970e4a436a",
-        "resourceVersion": "4",
-        "creationTimestamp": "2015-01-22T14:20:05+02:00",
+        "name": "redis-slave",
+        "namespace": "development",
+        "selfLink": "/api/v1beta3/namespaces/development/services/redis-slave",
+        "uid": "bdb80a8f-db93-11e4-b293-f8b156af4ae1",
+        "resourceVersion": "2815",
+        "creationTimestamp": "2015-04-05T13:00:31Z",
         "labels": {
-            "component": "apiserver",
-            "provider": "kubernetes"
+            "name": "redis",
+            "role": "slave"
         }
     },
     "spec": {
-        "port": 80,
-        "protocol": "TCP",
-        "selector": null,
-        "portalIP": "10.0.0.154",
-        "containerPort": 0,
+        "ports": [
+            {
+                "name": "",
+                "protocol": "TCP",
+                "port": 6379,
+                "targetPort": "redis-server"
+            }
+        ],
+        "selector": {
+            "name": "redis",
+            "role": "slave"
+        },
+        "portalIP": "10.0.0.140",
         "sessionAffinity": "None"
     },
-    "status": {
-
-    }
+    "status": {}
 }
