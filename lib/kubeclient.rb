@@ -20,7 +20,13 @@ module Kubeclient
     # and especially since currently the class body is empty
     ENTITY_TYPES = %w(Pod Service ReplicationController Node Event Endpoint
                       Namespace).map do |et|
-      [Kubeclient.const_set(et, Class.new(RecursiveOpenStruct)), et]
+      clazz = Class.new(RecursiveOpenStruct) do
+        def initialize(hash = nil, args = {})
+          args.merge!(recurse_over_arrays: true)
+          super(hash, args)
+        end
+      end
+      [Kubeclient.const_set(et, clazz), et]
     end
 
     def initialize(uri, version = 'v1beta3')

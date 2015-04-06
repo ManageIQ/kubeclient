@@ -151,7 +151,7 @@ class KubeClientTest < MiniTest::Test
 
   def test_get_all
     stub_request(:get, /\/services/)
-      .to_return(body: open_test_json_file('get_all_services_b3.json'),
+      .to_return(body: open_test_json_file('service_list_b3.json'),
                  status: 200)
 
     stub_request(:get, /\/pods/)
