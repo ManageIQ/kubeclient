@@ -67,17 +67,17 @@ module Kubeclient
             ssl_client_cert: @ssl_options[:client_cert],
             ssl_client_key: @ssl_options[:client_key]
           }
-          endpoint_with_version = @api_endpoint.merge(@api_endpoint.path + '/' \
-                                                      + @api_version)
-          RestClient::Resource.new(endpoint_with_version, options)
+          endpoint_with_ver = @api_endpoint
+                              .merge("#{@api_endpoint.path}/#{@api_version}")
+          RestClient::Resource.new(endpoint_with_ver, options)
         end
       end
 
       def watch_entities(entity_type, resource_version = nil)
-        resource_name = get_resource_name(entity_type.to_s)
+        resource = get_resource_name(entity_type.to_s)
 
-        uri = @api_endpoint.merge(@api_endpoint.path + '/' + @api_version \
-                                  + '/watch/' + resource_name)
+        uri = @api_endpoint
+              .merge("#{@api_endpoint.path}/#{@api_version}/watch/#{resource}")
 
         unless resource_version.nil?
           uri.query = URI.encode_www_form('resourceVersion' => resource_version)

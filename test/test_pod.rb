@@ -3,7 +3,7 @@ require 'test_helper'
 # Pod entity tests
 class TestPod < MiniTest::Test
   def test_get_from_json_v3
-    stub_request(:get, /\/pods/)
+    stub_request(:get, %r{/pods})
       .to_return(body: open_test_json_file('pod_b3.json'),
                  status: 200)
 
