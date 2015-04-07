@@ -19,7 +19,7 @@ class TestService < MiniTest::Test
   end
 
   def test_conversion_from_json_v3
-    stub_request(:get, /\/services/)
+    stub_request(:get, %r{/services})
       .to_return(body: open_test_json_file('service_b3.json'),
                  status: 200)
 
@@ -50,7 +50,7 @@ class TestService < MiniTest::Test
     our_service.labels.component = 'apiserver'
     our_service.labels.provider = 'kubernetes'
 
-    stub_request(:delete, /\/services/)
+    stub_request(:delete, %r{/services})
       .to_return(status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'

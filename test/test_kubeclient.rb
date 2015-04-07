@@ -43,7 +43,7 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_exception
-    stub_request(:post, /\/services/)
+    stub_request(:post, %r{/services})
       .to_return(body: open_test_json_file('namespace_exception_b3.json'),
                  status: 409)
 
@@ -107,7 +107,7 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_nonjson_exception
-    stub_request(:get, /\/servic/)
+    stub_request(:get, %r{/servic})
       .to_return(body: open_test_json_file('service_illegal_json_404.json'),
                  status: 404)
 
@@ -123,7 +123,7 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_entity_list
-    stub_request(:get, /\/services/)
+    stub_request(:get, %r{/services})
       .to_return(body: open_test_json_file('entity_list_b3.json'),
                  status: 200)
 
@@ -139,7 +139,7 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_empty_list
-    stub_request(:get, /\/pods/)
+    stub_request(:get, %r{/pods})
       .to_return(body: open_test_json_file('empty_pod_list_b3.json'),
                  status: 200)
 
@@ -150,30 +150,30 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_get_all
-    stub_request(:get, /\/services/)
+    stub_request(:get, %r{/services})
       .to_return(body: open_test_json_file('service_list_b3.json'),
                  status: 200)
 
-    stub_request(:get, /\/pods/)
+    stub_request(:get, %r{/pods})
       .to_return(body: open_test_json_file('pod_list_b3.json'),
                  status: 200)
 
-    stub_request(:get, /\/nodes/)
+    stub_request(:get, %r{/nodes})
       .to_return(body: open_test_json_file('node_list_b3.json'),
                  status: 200)
 
-    stub_request(:get, /\/replicationcontrollers/)
+    stub_request(:get, %r{/replicationcontrollers})
       .to_return(body: open_test_json_file('replication_controller_list_' \
                                     'b3.json'), status: 200)
 
-    stub_request(:get, /\/events/)
+    stub_request(:get, %r{/events})
       .to_return(body: open_test_json_file('event_list_b3.json'), status: 200)
 
-    stub_request(:get, /\/endpoints/)
+    stub_request(:get, %r{/endpoints})
       .to_return(body: open_test_json_file('endpoint_list_b3.json'),
                  status: 200)
 
-    stub_request(:get, /\/namespaces/)
+    stub_request(:get, %r{/namespaces})
       .to_return(body: open_test_json_file('namespace_list_b3.json'),
                  status: 200)
 

@@ -3,7 +3,7 @@ require 'test_helper'
 # Namespace entity tests
 class TestNamespace < MiniTest::Test
   def test_get_namespace_v1beta3
-    stub_request(:get, /\/namespaces/)
+    stub_request(:get, %r{/namespaces})
       .to_return(body: open_test_json_file('namespace_b3.json'),
                  status: 200)
 
@@ -21,7 +21,7 @@ class TestNamespace < MiniTest::Test
     our_namespace = Kubeclient::Namespace.new
     our_namespace.name = 'staging'
 
-    stub_request(:delete, /\/namespaces/)
+    stub_request(:delete, %r{/namespaces})
       .to_return(status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'

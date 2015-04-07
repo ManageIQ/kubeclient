@@ -3,7 +3,7 @@ require 'test_helper'
 # Node entity tests
 class TestNode < MiniTest::Test
   def test_get_from_json_v3
-    stub_request(:get, /\/nodes/)
+    stub_request(:get, %r{/nodes})
       .to_return(body: open_test_json_file('node_b3.json'),
                  status: 200)
 
