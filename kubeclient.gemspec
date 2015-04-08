@@ -27,5 +27,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'rest-client'
   spec.add_dependency 'activesupport'
   spec.add_dependency 'json'
-  spec.add_dependency 'recursive-open-struct'
+  spec.add_dependency 'recursive-open-struct', '= 0.6.1'
 end
