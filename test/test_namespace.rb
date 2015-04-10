@@ -27,4 +27,19 @@ class TestNamespace < MiniTest::Test
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
     client.delete_namespace our_namespace.name
   end
+
+  def test_create_namespace
+    stub_request(:post, %r{/namespaces})
+      .to_return(body: open_test_json_file('created_namespace_b3.json'),
+                 status: 201)
+
+    namespace = Kubeclient::Namespace.new
+    namespace.metadata = {}
+    namespace.metadata.name = 'development'
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+    created_namespace = client.create_namespace namespace
+    assert_instance_of(Kubeclient::Namespace, created_namespace)
+    assert_equal(namespace.metadata.name, created_namespace.metadata.name)
+  end
 end

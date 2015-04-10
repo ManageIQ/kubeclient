@@ -4,18 +4,35 @@ require 'test_helper'
 class TestService < MiniTest::Test
   def test_construct_our_own_service
     our_service = Kubeclient::Service.new
-    our_service.name = 'redis-service'
-    # TODO, new ports assignment to be added
-    our_service.labels = {}
-    our_service.labels.component = 'apiserver'
-    our_service.labels.provider = 'kubernetes'
+    our_service.metadata = {}
+    our_service.metadata.name = 'guestbook'
+    our_service.metadata.namespace = 'staging'
+    our_service.metadata.labels = {}
+    our_service.metadata.labels.name = 'guestbook'
 
-    assert_equal('kubernetes', our_service.labels.provider)
-    assert_equal('apiserver', our_service.labels.component)
+    our_service.spec = {}
+    our_service.spec.ports = [{ 'port' => 3000,
+                                'targetPort' => 'http-server',
+                                'protocol' => 'TCP'
+    }]
+
+    assert_equal('guestbook', our_service.metadata.labels.name)
 
     hash = our_service.to_h
 
-    assert_equal our_service.labels.provider, hash[:labels][:provider]
+    assert_equal our_service.metadata.labels.name,
+                 hash[:metadata][:labels][:name]
+
+    stub_request(:post, %r{namespaces/staging/services})
+      .to_return(body: open_test_json_file('created_service_b3.json'),
+                 status: 201)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+    created = client.create_service our_service
+
+    assert_instance_of(Kubeclient::Service, created)
+    assert_equal(created.metadata.name, our_service.metadata.name)
+    assert_equal(created.spec.ports.size, our_service.spec.ports.size)
   end
 
   def test_conversion_from_json_v3
