@@ -22,6 +22,12 @@ module Kubeclient
                            if @api_endpoint.path.end_with? '/'
       end
 
+      def build_namespace_prefix(entity_config)
+        namespace = entity_config.metadata.namespace
+        ns_prefix = namespace.to_s.empty? ? '' : "namespaces/#{namespace}/"
+        ns_prefix
+      end
+
       public
 
       def self.define_entity_methods(entity_types)
@@ -50,7 +56,7 @@ module Kubeclient
           end
 
           define_method("create_#{entity_name}") do |entity_config|
-            create_entity(entity_type, entity_config)
+            create_entity(entity_type, entity_config, klass)
           end
 
           define_method("update_#{entity_name}") do |entity_config|
@@ -74,7 +80,7 @@ module Kubeclient
       end
 
       def watch_entities(entity_type, resource_version = nil)
-        resource = get_resource_name(entity_type.to_s)
+        resource = resource_name(entity_type.to_s)
 
         uri = @api_endpoint
               .merge("#{@api_endpoint.path}/#{@api_version}/watch/#{resource}")
@@ -104,7 +110,7 @@ module Kubeclient
 
         # TODO: namespace support?
         response = handle_exception do
-          rest_client[get_resource_name(entity_type)].get(params: params)
+          rest_client[resource_name(entity_type)].get(params: params)
         end
 
         result = JSON.parse(response)
@@ -122,7 +128,7 @@ module Kubeclient
 
       def get_entity(entity_type, klass, name)
         response = handle_exception do
-          rest_client[get_resource_name(entity_type) + "/#{name}"].get
+          rest_client[resource_name(entity_type) + "/#{name}"].get
         end
         result = JSON.parse(response)
         new_entity(result, klass)
@@ -130,22 +136,27 @@ module Kubeclient
 
       def delete_entity(entity_type, name)
         handle_exception do
-          rest_client[get_resource_name(entity_type) + "/#{name}"].delete
+          rest_client[resource_name(entity_type) + "/#{name}"].delete
         end
       end
 
-      def create_entity(entity_type, entity_config)
+      def create_entity(entity_type, entity_config, klass)
         # to_hash should be called because of issue #9 in recursive open
         # struct
         hash = entity_config.to_hash
+
+        ns_prefix = build_namespace_prefix(entity_config)
+
         # TODO: temporary solution to add "kind" and apiVersion to request
         # until this issue is solved
         # https://github.com/GoogleCloudPlatform/kubernetes/issues/6439
         hash['kind'] = entity_type
         hash['apiVersion'] = @api_version
-        handle_exception do
-          rest_client[get_resource_name(entity_type)].post(hash.to_json)
+        response = handle_exception do
+          rest_client[ns_prefix + resource_name(entity_type)].post(hash.to_json)
         end
+        result = JSON.parse(response)
+        new_entity(result, klass)
       end
 
       def update_entity(entity_type, entity_config)
@@ -153,11 +164,9 @@ module Kubeclient
         # to_hash should be called because of issue #9 in recursive open
         # struct
         hash = entity_config.to_hash
-        # TODO: temporary solution to delete id till this issue is solved
-        # https://github.com/GoogleCloudPlatform/kubernetes/issues/3085
-        hash.delete(:id)
+        namespace = build_namespace_prefix(entity_config)
         handle_exception do
-          rest_client[get_resource_name(entity_type) + "/#{name}"]
+          rest_client[namespace + resource_name(entity_type) + "/#{name}"]
             .put(hash.to_json)
         end
       end
@@ -176,7 +185,7 @@ module Kubeclient
         end
       end
 
-      def get_resource_name(entity_type)
+      def resource_name(entity_type)
         if @api_version == 'v1beta1'
           entity_type.pluralize.camelize(:lower)
         else

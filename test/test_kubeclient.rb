@@ -48,12 +48,14 @@ class KubeClientTest < MiniTest::Test
                  status: 409)
 
     service = Kubeclient::Service.new
-    service.name = 'redisslave'
-    service.port = 80
-    service.container_port = 6379
-    service.protocol = 'TCP'
+    service.metadata = {}
+    service.metadata.name = 'redisslave'
+    service.metadata.namespace = 'default'
+    # service.port = 80
+    # service.container_port = 6379
+    # service.protocol = 'TCP'
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
+    client = Kubeclient::Client.new 'http://localhost:8080/api/'
 
     exception = assert_raises(KubeException) do
       service = client.create_service service
