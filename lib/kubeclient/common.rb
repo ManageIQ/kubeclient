@@ -66,17 +66,20 @@ module Kubeclient
         end
       end
 
+      def create_rest_client(path = nil)
+        path ||= @api_endpoint.path
+        options = {
+          ssl_ca_file: @ssl_options[:ca_file],
+          verify_ssl: @ssl_options[:verify_ssl],
+          ssl_client_cert: @ssl_options[:client_cert],
+          ssl_client_key: @ssl_options[:client_key]
+        }
+        RestClient::Resource.new(@api_endpoint.merge(path).to_s, options)
+      end
+
       def rest_client
         @rest_client ||= begin
-          options = {
-            ssl_ca_file: @ssl_options[:ca_file],
-            verify_ssl: @ssl_options[:verify_ssl],
-            ssl_client_cert: @ssl_options[:client_cert],
-            ssl_client_key: @ssl_options[:client_key]
-          }
-          endpoint_with_ver = @api_endpoint
-                              .merge("#{@api_endpoint.path}/#{@api_version}")
-          RestClient::Resource.new(endpoint_with_ver, options)
+          create_rest_client("#{@api_endpoint.path}/#{@api_version}")
         end
       end
 

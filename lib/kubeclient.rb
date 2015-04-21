@@ -41,7 +41,7 @@ module Kubeclient
 
     def api
       response = handle_exception do
-        RestClient::Resource.new(@api_endpoint.to_s).get
+        create_rest_client.get
       end
       JSON.parse(response)
     end
