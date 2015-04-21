@@ -76,6 +76,18 @@ class KubeClientTest < MiniTest::Test
     assert_includes(response, 'versions')
   end
 
+  def test_api_ssl_failure
+    error_message = 'certificate verify failed'
+
+    stub_request(:get, 'http://localhost:8080/api')
+      .to_raise(OpenSSL::SSL::SSLError.new(error_message))
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+
+    exception = assert_raises(KubeException) { client.api }
+    assert_equal(error_message, exception.message)
+  end
+
   def test_api_valid
     stub_request(:get, 'http://localhost:8080/api')
       .to_return(status: 200, body: open_test_json_file('versions_list.json'))

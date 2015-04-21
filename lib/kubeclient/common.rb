@@ -8,10 +8,11 @@ module Kubeclient
         yield
       rescue RestClient::Exception => e
         begin
-          err_message = JSON.parse(e.response)['message']
+          json_error_msg = JSON.parse(e.response || '') || {}
         rescue JSON::ParserError
-          err_message = e.message
+          json_error_msg = {}
         end
+        err_message = json_error_msg['message'] || e.message
         raise KubeException.new(e.http_code, err_message)
       end
 
