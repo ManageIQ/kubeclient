@@ -73,4 +73,28 @@ class TestService < MiniTest::Test
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
     client.delete_service our_service.id
   end
+
+  def test_get_service_no_ns
+    # when not specifying namespace for entities which
+    # are not node or namespace, the request will fail
+    stub_request(:get, %r{/services/redis-slave})
+      .to_return(status: 404)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+
+    exception = assert_raises(KubeException) do
+      client.get_service 'redis-slave'
+    end
+    assert_equal(404, exception.error_code)
+  end
+
+  def test_get_service
+    stub_request(:get, %r{/namespaces/development/services/redis-slave})
+      .to_return(body: open_test_json_file('service_b3.json'),
+                 status: 200)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+    service = client.get_service 'redis-slave', 'development'
+    assert_equal('redis-slave', service.metadata.name)
+  end
 end

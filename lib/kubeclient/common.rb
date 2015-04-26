@@ -23,10 +23,8 @@ module Kubeclient
                            if @api_endpoint.path.end_with? '/'
       end
 
-      def build_namespace_prefix(entity_config)
-        namespace = entity_config.metadata.namespace
-        ns_prefix = namespace.to_s.empty? ? '' : "namespaces/#{namespace}/"
-        ns_prefix
+      def build_namespace_prefix(namespace)
+        namespace.to_s.empty? ? '' : "namespaces/#{namespace}/"
       end
 
       public
@@ -48,8 +46,8 @@ module Kubeclient
           end
 
           # get a single entity of a specific type by name
-          define_method("get_#{entity_name}") do |name|
-            get_entity(entity_type, klass, name)
+          define_method("get_#{entity_name}") do |name, namespace = nil|
+            get_entity(entity_type, klass, name, namespace)
           end
 
           define_method("delete_#{entity_name}") do |name|
@@ -130,9 +128,10 @@ module Kubeclient
         EntityList.new(entity_type, resource_version, collection)
       end
 
-      def get_entity(entity_type, klass, name)
+      def get_entity(entity_type, klass, name, namespace = nil)
+        ns_prefix = build_namespace_prefix(namespace)
         response = handle_exception do
-          rest_client[resource_name(entity_type) + "/#{name}"].get
+          rest_client[ns_prefix + resource_name(entity_type) + "/#{name}"].get
         end
         result = JSON.parse(response)
         new_entity(result, klass)
@@ -149,7 +148,7 @@ module Kubeclient
         # struct
         hash = entity_config.to_hash
 
-        ns_prefix = build_namespace_prefix(entity_config)
+        ns_prefix = build_namespace_prefix(entity_config.metadata.namespace)
 
         # TODO: temporary solution to add "kind" and apiVersion to request
         # until this issue is solved
@@ -168,9 +167,9 @@ module Kubeclient
         # to_hash should be called because of issue #9 in recursive open
         # struct
         hash = entity_config.to_hash
-        namespace = build_namespace_prefix(entity_config)
+        ns_prefix = build_namespace_prefix(entity_config.metadata.namespace)
         handle_exception do
-          rest_client[namespace + resource_name(entity_type) + "/#{name}"]
+          rest_client[ns_prefix + resource_name(entity_type) + "/#{name}"]
             .put(hash.to_json)
         end
       end

@@ -6,7 +6,7 @@
 [![Dependency Status](https://gemnasium.com/abonas/kubeclient.svg)](https://gemnasium.com/abonas/kubeclient)
 
 A Ruby client for Kubernetes REST api.
-The client supports GET, POST, PUT, DELETE on nodes, pods, services, replication controllers and namespaces.
+The client supports GET, POST, PUT, DELETE on nodes, pods, services, replication controllers, namespaces and endpoints.
 The client currently supports Kubernetes REST api version v1beta3.
 
 ## Installation
@@ -66,11 +66,15 @@ You can get entities which have specific labels by specifying input parameter na
 You can specify multiple labels and that returns entities which have both labels:  <br>
 `pods = client.get_pods(label_selector: 'name=redis-master,app=redis')`
 
-2. Get a specific node (and respectively: get_service "service id" , get_pod "pod id" , get_replication_controller "rc id" )
+2. Get a specific node (and respectively: get_service "service name" , get_pod "pod name" , get_replication_controller "rc name" )
 <br>
-`node1 = client.get_node "127.0.0.1"`
+The GET request should include the namespace name, except for nodes and namespaces entities.
 <br>
-Note - Kubernetes doesn't work with the uid, but rather with the 'id' property.
+`node = client.get_node "127.0.0.1"`
+<br>
+`service = client.get_service "guestbook", 'development'`
+<br>
+Note - Kubernetes doesn't work with the uid, but rather with the 'name' property.
 Querying with uid causes 404.
 
 3. Delete a service (and respectively delete_pod "pod id" , delete_replication_controller "rc id", delete node "node id") <br>
