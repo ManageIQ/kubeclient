@@ -61,9 +61,9 @@ Examples:
 <br>
 `pods = client.get_pods`
 <br>
-You can get entities which have specific labels by specifying input parameter named `label-selector`: <br>
+You can get entities which have specific labels by specifying a parameter named `label_selector` (named `labelSelector` in Kubernetes server): <br>
 `pods = client.get_pods(label_selector: 'name=redis-master')` <br>
-You can specify multiple labels and that returns entities which have both labels:  <br>
+You can specify multiple labels (that option will return entities which have both labels:  <br>
 `pods = client.get_pods(label_selector: 'name=redis-master,app=redis')`
 
 2. Get a specific node (and respectively: get_service "service id" , get_pod "pod id" , get_replication_controller "rc id" )
