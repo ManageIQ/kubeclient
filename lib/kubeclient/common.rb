@@ -189,11 +189,7 @@ module Kubeclient
       end
 
       def resource_name(entity_type)
-        if @api_version == 'v1beta1'
-          entity_type.pluralize.camelize(:lower)
-        else
-          entity_type.pluralize.downcase
-        end
+        entity_type.pluralize.downcase
       end
 
       def ssl_options(client_cert: nil, client_key: nil, ca_file: nil,
