@@ -71,11 +71,15 @@ class TestService < MiniTest::Test
     our_service.labels.component = 'apiserver'
     our_service.labels.provider = 'kubernetes'
 
-    stub_request(:delete, %r{/services})
+    stub_request(:delete, %r{/namespaces/default/services})
       .to_return(status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
-    client.delete_service our_service.id
+    client.delete_service our_service.name, 'default'
+
+    assert_requested(:delete,
+                     'http://localhost:8080/api/v1beta3/namespaces/default/services/redis-service',
+                     times: 1)
   end
 
   def test_get_service_no_ns

@@ -30,6 +30,10 @@ class TestNamespace < MiniTest::Test
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
     client.delete_namespace our_namespace.name
+
+    assert_requested(:delete,
+                     'http://localhost:8080/api/v1beta3/namespaces/staging',
+                     times: 1)
   end
 
   def test_create_namespace
