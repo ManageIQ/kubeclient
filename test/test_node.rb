@@ -17,5 +17,9 @@ class TestNode < MiniTest::Test
     assert_equal('1724', node.metadata.resourceVersion)
     assert_equal('v1beta3', node.apiVersion)
     assert_equal('2015-03-19T15:08:20+02:00', node.metadata.creationTimestamp)
+
+    assert_requested(:get,
+                     'http://localhost:8080/api/v1beta3/nodes/127.0.0.1',
+                     times: 1)
   end
 end

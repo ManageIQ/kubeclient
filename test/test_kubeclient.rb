@@ -150,6 +150,10 @@ class KubeClientTest < MiniTest::Test
     assert_equal(2, services.size)
     assert_instance_of(Kubeclient::Service, services[0])
     assert_instance_of(Kubeclient::Service, services[1])
+
+    assert_requested(:get,
+                     'http://localhost:8080/api/v1beta3/services',
+                     times: 1)
   end
 
   def test_empty_list
