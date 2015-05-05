@@ -50,8 +50,8 @@ module Kubeclient
             get_entity(entity_type, klass, name, namespace)
           end
 
-          define_method("delete_#{entity_name}") do |name|
-            delete_entity(entity_type, name)
+          define_method("delete_#{entity_name}") do |name, namespace = nil|
+            delete_entity(entity_type, name, namespace)
           end
 
           define_method("create_#{entity_name}") do |entity_config|
@@ -137,9 +137,11 @@ module Kubeclient
         new_entity(result, klass)
       end
 
-      def delete_entity(entity_type, name)
+      def delete_entity(entity_type, name, namespace = nil)
+        ns_prefix = build_namespace_prefix(namespace)
         handle_exception do
-          rest_client[resource_name(entity_type) + "/#{name}"].delete
+          rest_client[ns_prefix + resource_name(entity_type) + "/#{name}"]
+            .delete
         end
       end
 
