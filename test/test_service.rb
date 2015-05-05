@@ -41,7 +41,7 @@ class TestService < MiniTest::Test
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/'
-    service = client.get_service 'redisslave'
+    service = client.get_service 'redis-slave', 'development'
 
     assert_instance_of(Kubeclient::Service, service)
     assert_equal('2015-04-05T13:00:31Z',
@@ -57,6 +57,10 @@ class TestService < MiniTest::Test
     assert_equal(6379, service.spec.ports[0].port)
     assert_equal('', service.spec.ports[0].name)
     assert_equal('redis-server', service.spec.ports[0].targetPort)
+
+    assert_requested(:get,
+                     'http://localhost:8080/api/v1beta3/namespaces/development/services/redis-slave',
+                     times: 1)
   end
 
   def test_delete_service
@@ -96,5 +100,9 @@ class TestService < MiniTest::Test
     client = Kubeclient::Client.new 'http://localhost:8080/api/'
     service = client.get_service 'redis-slave', 'development'
     assert_equal('redis-slave', service.metadata.name)
+
+    assert_requested(:get,
+                     'http://localhost:8080/api/v1beta3/namespaces/development/services/redis-slave',
+                     times: 1)
   end
 end

@@ -15,6 +15,10 @@ class TestNamespace < MiniTest::Test
     assert_equal('staging', namespace.metadata.name)
     assert_equal('1168', namespace.metadata.resourceVersion)
     assert_equal('v1beta3', namespace.apiVersion)
+
+    assert_requested(:get,
+                     'http://localhost:8080/api/v1beta3/namespaces/staging',
+                     times: 1)
   end
 
   def test_delete_namespace_v1beta3
