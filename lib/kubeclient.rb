@@ -48,7 +48,7 @@ module Kubeclient
 
     def api_valid?
       result = api
-      result.is_a?(Hash) && result['versions'].is_a?(Array)
+      result.is_a?(Hash) && (result['versions'] || []).include?(@api_version)
     end
 
     define_entity_methods(ENTITY_TYPES)

@@ -92,13 +92,33 @@ class KubeClientTest < MiniTest::Test
     stub_request(:get, 'http://localhost:8080/api')
       .to_return(status: 200, body: open_test_json_file('versions_list.json'))
 
+    args = ['http://localhost:8080/api/']
+
+    [nil, 'v1beta1', 'v1beta2', 'v1beta3'].each do |version|
+      client = Kubeclient::Client.new(*(version ? args + [version] : args))
+      assert client.api_valid?
+    end
+  end
+
+  def test_api_valid_with_invalid_version
+    stub_request(:get, 'http://localhost:8080/api')
+      .to_return(status: 200, body: open_test_json_file('versions_list.json'))
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'foobar1'
+    refute client.api_valid?
+  end
+
+  def test_api_valid_with_unreported_versions
+    stub_request(:get, 'http://localhost:8080/api')
+      .to_return(status: 200, body: '{}')
+
     client = Kubeclient::Client.new 'http://localhost:8080/api/'
-    assert client.api_valid?
+    refute client.api_valid?
   end
 
   def test_api_valid_with_invalid_json
     stub_request(:get, 'http://localhost:8080/api')
-      .to_return(status: 200, body: '{}')
+      .to_return(status: 200, body: '[]')
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/'
     refute client.api_valid?
