@@ -194,6 +194,18 @@ module Kubeclient
         entity_type.pluralize.downcase
       end
 
+      def api_valid?
+        result = api
+        result.is_a?(Hash) && (result['versions'] || []).include?(@api_version)
+      end
+
+      def api
+        response = handle_exception do
+          create_rest_client.get
+        end
+        JSON.parse(response)
+      end
+
       def ssl_options(client_cert: nil, client_key: nil, ca_file: nil,
                       verify_ssl: OpenSSL::SSL::VERIFY_PEER)
         @ssl_options = {

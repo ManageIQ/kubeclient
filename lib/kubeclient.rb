@@ -39,18 +39,6 @@ module Kubeclient
       retrieve_all_entities(ENTITY_TYPES)
     end
 
-    def api
-      response = handle_exception do
-        create_rest_client.get
-      end
-      JSON.parse(response)
-    end
-
-    def api_valid?
-      result = api
-      result.is_a?(Hash) && (result['versions'] || []).include?(@api_version)
-    end
-
     define_entity_methods(ENTITY_TYPES)
   end
 end
