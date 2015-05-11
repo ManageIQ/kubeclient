@@ -97,8 +97,8 @@ module Kubeclient
           # ruby Net::HTTP uses verify_mode instead of verify_ssl
           # http://ruby-doc.org/stdlib-1.9.3/libdoc/net/http/rdoc/Net/HTTP.html
           verify_mode: @ssl_options[:verify_ssl],
-          client_cert: @ssl_options[:client_cert],
-          client_key: @ssl_options[:client_key]
+          cert: @ssl_options[:client_cert],
+          key: @ssl_options[:client_key]
         }
 
         WatchStream.new(uri, options)
