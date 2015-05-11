@@ -70,7 +70,8 @@ module Kubeclient
           ssl_ca_file: @ssl_options[:ca_file],
           verify_ssl: @ssl_options[:verify_ssl],
           ssl_client_cert: @ssl_options[:client_cert],
-          ssl_client_key: @ssl_options[:client_key]
+          ssl_client_key: @ssl_options[:client_key],
+          bearer_token: @bearer_token
         }
         RestClient::Resource.new(@api_endpoint.merge(path).to_s, options)
       end
@@ -98,7 +99,8 @@ module Kubeclient
           # http://ruby-doc.org/stdlib-1.9.3/libdoc/net/http/rdoc/Net/HTTP.html
           verify_mode: @ssl_options[:verify_ssl],
           cert: @ssl_options[:client_cert],
-          key: @ssl_options[:client_key]
+          key: @ssl_options[:client_key],
+          bearer_token: @bearer_token
         }
 
         WatchStream.new(uri, options)
@@ -214,6 +216,13 @@ module Kubeclient
           client_cert: client_cert,
           client_key: client_key
         }
+      end
+
+      def bearer_token(bearer_token)
+        @bearer_token = bearer_token
+        RestClient.add_before_execution_proc do |req|
+          req['authorization'] = "Bearer #{@bearer_token}"
+        end
       end
     end
   end

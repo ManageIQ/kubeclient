@@ -17,6 +17,10 @@ module Kubeclient
         buffer = ''
         request = Net::HTTP::Get.new(@uri)
 
+        if @options[:bearer_token]
+          request['authorization'] = "Bearer #{@options[:bearer_token]}"
+        end
+
         @http.request(request) do |response|
           unless response.is_a? Net::HTTPSuccess
             fail KubeException.new(response.code, response.message)
