@@ -64,6 +64,21 @@ For testing and development purpose you can disable the ssl check with:
 client.ssl_options(verify_ssl: OpenSSL::SSL::VERIFY_NONE)
 ```
 
+If you are using bearer tokens for authentication as described
+[here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/authentication.md) then you can specify the
+bearer token to use for authentication:
+
+```ruby
+client.bearer_token('MDExMWJkMjItOWY1Ny00OGM5LWJlNDEtMjBiMzgxODkxYzYz')
+```
+
+If you are running your app using kubeclient inside a Kubernetes cluster, then you can have a bearer token file
+mounted inside your pod by using a
+[Service Account](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/design/service_accounts.md). This
+will mount a bearer token [secret](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/design/secrets.md)
+a/ `/var/run/secrets/kubernetes.io/serviceaccount/token` (see [here](https://github.com/GoogleCloudPlatform/kubernetes/pull/7101)
+for more details).
+
 ## Examples:
 
 #### Get all pods
