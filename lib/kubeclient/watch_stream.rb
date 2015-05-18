@@ -15,11 +15,7 @@ module Kubeclient
         @http = Net::HTTP.start(@uri.host, @uri.port, @options)
 
         buffer = ''
-        request = Net::HTTP::Get.new(@uri)
-
-        if @options[:bearer_token]
-          request['authorization'] = "Bearer #{@options[:bearer_token]}"
-        end
+        request = generate_request
 
         @http.request(request) do |response|
           unless response.is_a? Net::HTTPSuccess
@@ -34,6 +30,19 @@ module Kubeclient
         end
       rescue Errno::EBADF
         raise unless @finished
+      end
+
+      def generate_request
+        request = Net::HTTP::Get.new(@uri)
+        if @options[:basic_auth_user] && @options[:basic_auth_password]
+          request.basic_auth @options[:basic_auth_user],
+                             @options[:basic_auth_password]
+        end
+
+        if @options[:bearer_token]
+          request['authorization'] = "Bearer #{@options[:bearer_token]}"
+        end
+        request
       end
 
       def finish

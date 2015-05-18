@@ -245,6 +245,7 @@ class KubeClientTest < MiniTest::Test
 
     assert_equal('Pod', pods.kind)
     assert_equal(1, pods.size)
+    RestClient.reset_before_execution_procs
   end
 
   def test_api_bearer_token_failure
@@ -260,6 +261,35 @@ class KubeClientTest < MiniTest::Test
 
     exception = assert_raises(KubeException) { client.get_pods }
     assert_equal(403, exception.error_code)
+    assert_equal(error_message, exception.message)
+    RestClient.reset_before_execution_procs
+  end
+
+  def test_api_basic_auth_success
+    stub_request(:get, 'http://username:password@localhost:8080/api/v1beta3/pods')
+      .to_return(body: open_test_json_file('pod_list_b3.json'),
+                 status: 200)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+    client.basic_auth('username', 'password')
+
+    pods = client.get_pods
+
+    assert_equal('Pod', pods.kind)
+    assert_equal(1, pods.size)
+  end
+
+  def test_api_basic_auth_failure
+    error_message = 'HTTP status code 401, 401 Unauthorized'
+
+    stub_request(:get, 'http://username:password@localhost:8080/api/v1beta3/pods')
+      .to_raise(KubeException.new(401, error_message))
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+    client.basic_auth('username', 'password')
+
+    exception = assert_raises(KubeException) { client.get_pods }
+    assert_equal(401, exception.error_code)
     assert_equal(error_message, exception.message)
   end
 

@@ -71,7 +71,9 @@ module Kubeclient
           verify_ssl: @ssl_options[:verify_ssl],
           ssl_client_cert: @ssl_options[:client_cert],
           ssl_client_key: @ssl_options[:client_key],
-          bearer_token: @bearer_token
+          bearer_token: @bearer_token,
+          user: @basic_auth_user,
+          password: @basic_auth_password
         }
         RestClient::Resource.new(@api_endpoint.merge(path).to_s, options)
       end
@@ -100,7 +102,9 @@ module Kubeclient
           verify_mode: @ssl_options[:verify_ssl],
           cert: @ssl_options[:client_cert],
           key: @ssl_options[:client_key],
-          bearer_token: @bearer_token
+          bearer_token: @bearer_token,
+          basic_auth_user: @basic_auth_user,
+          basic_auth_password: @basic_auth_password
         }
 
         WatchStream.new(uri, options)
@@ -223,6 +227,11 @@ module Kubeclient
         RestClient.add_before_execution_proc do |req|
           req['authorization'] = "Bearer #{@bearer_token}"
         end
+      end
+
+      def basic_auth(user, password)
+        @basic_auth_user = user
+        @basic_auth_password = password
       end
     end
   end
