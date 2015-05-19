@@ -64,13 +64,16 @@ For testing and development purpose you can disable the ssl check with:
 client.ssl_options(verify_ssl: OpenSSL::SSL::VERIFY_NONE)
 ```
 
-If you are using basic or bearer authentication as described
+If you are using basic authentication or bearer tokens as described
 [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/authentication.md) then you can specify one
 of the following:
 
 ```ruby
 client.bearer_token('MDExMWJkMjItOWY1Ny00OGM5LWJlNDEtMjBiMzgxODkxYzYz')
-or
+```
+<br>
+or <br>
+```ruby
 client.basic_auth('username', 'password')
 ```
 
