@@ -277,6 +277,9 @@ class KubeClientTest < MiniTest::Test
 
     assert_equal('Pod', pods.kind)
     assert_equal(1, pods.size)
+    assert_requested(:get,
+                     'http://username:password@localhost:8080/api/v1beta3/pods',
+                     times: 1)
   end
 
   def test_api_basic_auth_failure
@@ -291,6 +294,9 @@ class KubeClientTest < MiniTest::Test
     exception = assert_raises(KubeException) { client.get_pods }
     assert_equal(401, exception.error_code)
     assert_equal(error_message, exception.message)
+    assert_requested(:get,
+                     'http://username:password@localhost:8080/api/v1beta3/pods',
+                     times: 1)
   end
 
   private
