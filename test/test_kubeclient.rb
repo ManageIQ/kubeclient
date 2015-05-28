@@ -232,6 +232,21 @@ class KubeClientTest < MiniTest::Test
     assert_instance_of(Kubeclient::Namespace, result['namespace'][0])
   end
 
+  def test_api_bearer_token_with_params_success
+    stub_request(:get, 'http://localhost:8080/api/v1beta3/pods?labelSelector=name=redis-master')
+      .with(headers: { Authorization: 'Bearer valid_token' })
+      .to_return(body: open_test_json_file('pod_list_b3.json'),
+                 status: 200)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+    client.bearer_token('valid_token')
+
+    pods = client.get_pods(label_selector: 'name=redis-master')
+
+    assert_equal('Pod', pods.kind)
+    assert_equal(1, pods.size)
+  end
+
   def test_api_bearer_token_success
     stub_request(:get, 'http://localhost:8080/api/v1beta3/pods')
       .with(headers: { Authorization: 'Bearer valid_token' })
@@ -245,7 +260,6 @@ class KubeClientTest < MiniTest::Test
 
     assert_equal('Pod', pods.kind)
     assert_equal(1, pods.size)
-    RestClient.reset_before_execution_procs
   end
 
   def test_api_bearer_token_failure
@@ -262,7 +276,6 @@ class KubeClientTest < MiniTest::Test
     exception = assert_raises(KubeException) { client.get_pods }
     assert_equal(403, exception.error_code)
     assert_equal(error_message, exception.message)
-    RestClient.reset_before_execution_procs
   end
 
   def test_api_basic_auth_success
