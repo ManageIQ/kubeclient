@@ -39,8 +39,8 @@ module Kubeclient
                              @options[:basic_auth_password]
         end
 
-        if @options[:bearer_token]
-          request['authorization'] = "Bearer #{@options[:bearer_token]}"
+        @options[:headers].each do |header, value|
+          request[header] = value
         end
         request
       end

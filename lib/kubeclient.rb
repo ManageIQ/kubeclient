@@ -32,6 +32,7 @@ module Kubeclient
     def initialize(uri, version = 'v1beta3')
       handle_uri(uri, '/api')
       @api_version = version
+      @headers = {}
       ssl_options
     end
 

@@ -71,7 +71,6 @@ module Kubeclient
           verify_ssl: @ssl_options[:verify_ssl],
           ssl_client_cert: @ssl_options[:client_cert],
           ssl_client_key: @ssl_options[:client_key],
-          bearer_token: @bearer_token,
           user: @basic_auth_user,
           password: @basic_auth_password
         }
@@ -102,9 +101,9 @@ module Kubeclient
           verify_mode: @ssl_options[:verify_ssl],
           cert: @ssl_options[:client_cert],
           key: @ssl_options[:client_key],
-          bearer_token: @bearer_token,
           basic_auth_user: @basic_auth_user,
-          basic_auth_password: @basic_auth_password
+          basic_auth_password: @basic_auth_password,
+          headers: @headers
         }
 
         WatchStream.new(uri, options)
@@ -113,12 +112,13 @@ module Kubeclient
       def get_entities(entity_type, klass, options)
         params = {}
         if options[:label_selector]
-          params['labelSelector'] = options[:label_selector]
+          params['params'] = { labelSelector: options[:label_selector] }
         end
 
         # TODO: namespace support?
         response = handle_exception do
-          rest_client[resource_name(entity_type)].get(params: params)
+          rest_client[resource_name(entity_type)]
+          .get(params.merge(@headers))
         end
 
         result = JSON.parse(response)
@@ -137,7 +137,8 @@ module Kubeclient
       def get_entity(entity_type, klass, name, namespace = nil)
         ns_prefix = build_namespace_prefix(namespace)
         response = handle_exception do
-          rest_client[ns_prefix + resource_name(entity_type) + "/#{name}"].get
+          rest_client[ns_prefix + resource_name(entity_type) + "/#{name}"]
+          .get(@headers)
         end
         result = JSON.parse(response)
         new_entity(result, klass)
@@ -147,7 +148,7 @@ module Kubeclient
         ns_prefix = build_namespace_prefix(namespace)
         handle_exception do
           rest_client[ns_prefix + resource_name(entity_type) + "/#{name}"]
-            .delete
+            .delete(@headers)
         end
       end
 
@@ -164,7 +165,8 @@ module Kubeclient
         hash['kind'] = entity_type
         hash['apiVersion'] = @api_version
         response = handle_exception do
-          rest_client[ns_prefix + resource_name(entity_type)].post(hash.to_json)
+          rest_client[ns_prefix + resource_name(entity_type)]
+          .post(hash.to_json, @headers)
         end
         result = JSON.parse(response)
         new_entity(result, klass)
@@ -178,7 +180,7 @@ module Kubeclient
         ns_prefix = build_namespace_prefix(entity_config.metadata.namespace)
         handle_exception do
           rest_client[ns_prefix + resource_name(entity_type) + "/#{name}"]
-            .put(hash.to_json)
+            .put(hash.to_json, @headers)
         end
       end
 
@@ -207,7 +209,7 @@ module Kubeclient
 
       def api
         response = handle_exception do
-          create_rest_client.get
+          create_rest_client.get(@headers)
         end
         JSON.parse(response)
       end
@@ -223,10 +225,8 @@ module Kubeclient
       end
 
       def bearer_token(bearer_token)
-        @bearer_token = bearer_token
-        RestClient.add_before_execution_proc do |req|
-          req['authorization'] = "Bearer #{@bearer_token}"
-        end
+        @headers ||= {}
+        @headers[:Authorization] = "Bearer #{bearer_token}"
       end
 
       def basic_auth(user, password)
