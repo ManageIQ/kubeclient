@@ -45,23 +45,25 @@ uri = URI::HTTP.build(host: "somehostname", port: 8080)
 client = Kubeclient::Client.new uri
 ```
 
-
 It is also possible to use https and configure ssl with:
 
 ```ruby
-client = Kubeclient::Client.new 'https://localhost:8443/api/' , "v1beta3"
-client.ssl_options(
+ssl_options = {
   client_cert: OpenSSL::X509::Certificate.new(File.read('/path/to/client.crt')),
   client_key:  OpenSSL::PKey::RSA.new(File.read('/path/to/client.key')),
   ca_file:     '/path/to/ca.crt',
   verify_ssl:  OpenSSL::SSL::VERIFY_PEER
-)
+}
+client = Kubeclient::Client.new 'https://localhost:8443/api/' , "v1beta3",
+                                ssl_options: ssl_options
 ```
 
 For testing and development purpose you can disable the ssl check with:
 
 ```ruby
-client.ssl_options(verify_ssl: OpenSSL::SSL::VERIFY_NONE)
+ssl_options = { verify_ssl: OpenSSL::SSL::VERIFY_NONE }
+client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1beta3',
+                                ssl_options: ssl_options
 ```
 
 If you are using basic authentication or bearer tokens as described
@@ -69,14 +71,22 @@ If you are using basic authentication or bearer tokens as described
 of the following:
 
 ```ruby
-client.basic_auth('username', 'password')
+auth_options = {
+  user: 'username',
+  password: 'password'
+}
+client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1beta3',
+                                auth_options: auth_options
 ```
 
-<br>
-or <br>
+or
 
 ```ruby
-client.bearer_token('MDExMWJkMjItOWY1Ny00OGM5LWJlNDEtMjBiMzgxODkxYzYz')
+auth_options = {
+  bearer_token: 'MDExMWJkMjItOWY1Ny00OGM5LWJlNDEtMjBiMzgxODkxYzYz'
+}
+client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1beta3',
+                                auth_options: auth_options
 ```
 
 If you are running your app using kubeclient inside a Kubernetes cluster, then you can have a bearer token file

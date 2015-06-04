@@ -40,7 +40,7 @@ module Kubeclient
         end
 
         @options[:headers].each do |header, value|
-          request[header] = value
+          request[header.to_s] = value
         end
         request
       end

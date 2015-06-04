@@ -238,8 +238,10 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_json_file('pod_list_b3.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
-    client.bearer_token('valid_token')
+    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+                                    auth_options: {
+                                      bearer_token: 'valid_token'
+                                    }
 
     pods = client.get_pods(label_selector: 'name=redis-master')
 
@@ -253,8 +255,10 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_json_file('pod_list_b3.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
-    client.bearer_token('valid_token')
+    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+                                    auth_options: {
+                                      bearer_token: 'valid_token'
+                                    }
 
     pods = client.get_pods
 
@@ -270,8 +274,10 @@ class KubeClientTest < MiniTest::Test
       .with(headers: { Authorization: 'Bearer invalid_token' })
       .to_raise(KubeException.new(403, error_message))
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
-    client.bearer_token('invalid_token')
+    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+                                    auth_options: {
+                                      bearer_token: 'invalid_token'
+                                    }
 
     exception = assert_raises(KubeException) { client.get_pods }
     assert_equal(403, exception.error_code)
@@ -283,8 +289,11 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_json_file('pod_list_b3.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
-    client.basic_auth('username', 'password')
+    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+                                    auth_options: {
+                                      user: 'username',
+                                      password: 'password'
+                                    }
 
     pods = client.get_pods
 
@@ -301,8 +310,11 @@ class KubeClientTest < MiniTest::Test
     stub_request(:get, 'http://username:password@localhost:8080/api/v1beta3/pods')
       .to_raise(KubeException.new(401, error_message))
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
-    client.basic_auth('username', 'password')
+    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+                                    auth_options: {
+                                      user: 'username',
+                                      password: 'password'
+                                    }
 
     exception = assert_raises(KubeException) { client.get_pods }
     assert_equal(401, exception.error_code)
@@ -310,6 +322,25 @@ class KubeClientTest < MiniTest::Test
     assert_requested(:get,
                      'http://username:password@localhost:8080/api/v1beta3/pods',
                      times: 1)
+  end
+
+  def test_init_user_no_password
+    assert_raises(ArgumentError) do
+      Kubeclient::Client.new 'http://localhost:8080',
+                             auth_options: {
+                               user: 'username'
+                             }
+    end
+  end
+
+  def test_init_user_and_bearer_token
+    assert_raises(ArgumentError) do
+      Kubeclient::Client.new 'http://localhost:8080',
+                             auth_options: {
+                               user: 'username',
+                               bearer_token: 'token'
+                             }
+    end
   end
 
   private
