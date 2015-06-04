@@ -69,12 +69,14 @@ If you are using basic authentication or bearer tokens as described
 of the following:
 
 ```ruby
-client.bearer_token('MDExMWJkMjItOWY1Ny00OGM5LWJlNDEtMjBiMzgxODkxYzYz')
+client.basic_auth('username', 'password')
 ```
+
 <br>
 or <br>
+
 ```ruby
-client.basic_auth('username', 'password')
+client.bearer_token('MDExMWJkMjItOWY1Ny00OGM5LWJlNDEtMjBiMzgxODkxYzYz')
 ```
 
 If you are running your app using kubeclient inside a Kubernetes cluster, then you can have a bearer token file
@@ -86,8 +88,8 @@ for more details).
 
 ## Examples:
 
-#### Get all pods
-And respectively: `get_services`, `get_nodes`, `get_replication_controllers`
+#### Get all instances of a specific entity type
+Such as: `get_pods`, `get_services`, `get_nodes`, `get_replication_controllers`
 
 ```ruby
 pods = client.get_pods
@@ -102,8 +104,8 @@ You can specify multiple labels (that option will return entities which have bot
 pods = client.get_pods(label_selector: 'name=redis-master,app=redis')
 ```
 
-#### Get a specific node
-And respectively: `get_service "service name"` , `get_pod "pod name"` , `get_replication_controller "rc name"`
+#### Get a specific instance of an entity (by name)
+Such as: `get_service "service name"` , `get_pod "pod name"` , `get_replication_controller "rc name"`
 
 The GET request should include the namespace name, except for nodes and namespaces entities.
 
@@ -118,17 +120,17 @@ service = client.get_service "guestbook", 'development'
 Note - Kubernetes doesn't work with the uid, but rather with the 'name' property.
 Querying with uid causes 404.
 
-#### Delete a service
+#### Delete an entity (by name)
 
-And respectively `delete_pod "pod id"` , `delete_replication_controller "rc id"`, `delete node "node id"`
+For example: `delete_pod "pod name"` , `delete_replication_controller "rc name"`, `delete node "node name"`
 
-Input parameter - id (string) specifying service id, pod id, replication controller id.
+Input parameter - name (string) specifying service name, pod name, replication controller name.
 ```ruby
 client.delete_service "redis-service"
 ```
 
-#### Create a service
-And respectively: `create_pod pod_object`, `create_replication_controller rc_obj`
+#### Create an entity
+For example: `create_pod pod_object`, `create_replication_controller rc_obj`
 
 Input parameter - object of type `Service`, `Pod`, `ReplicationController`.
 
@@ -145,8 +147,8 @@ service.spec.selector.role = "master"
 client.create_service service`
 ```
 
-#### Update entity
-And respectively `update_pod`, `update_service`, `update_replication_controller`
+#### Update an entity
+For example: `update_pod`, `update_service`, `update_replication_controller`
 
 Input parameter - object of type `Service`, `Pod`, `ReplicationController`
 
@@ -156,7 +158,7 @@ The below example is for v1beta3
 client.update_service service1
 ```
 
-#### all_entities
+#### Get all entities of all types : all_entities
 Returns a hash with 7 keys (node, service, pod, replication_controller, namespace, endpoint and event). Each key points to an EntityList of same type.
 
 This method is a convenience method instead of calling each entity's get method separately.
