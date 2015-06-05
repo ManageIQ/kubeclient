@@ -89,12 +89,31 @@ client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1beta3',
                                 auth_options: auth_options
 ```
 
+or
+
+```ruby
+auth_options = {
+  bearer_token_file: '/path/to/token_file'
+}
+client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1beta3',
+                                auth_options: auth_options
+```
+
 If you are running your app using kubeclient inside a Kubernetes cluster, then you can have a bearer token file
 mounted inside your pod by using a
 [Service Account](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/design/service_accounts.md). This
 will mount a bearer token [secret](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/design/secrets.md)
 a/ `/var/run/secrets/kubernetes.io/serviceaccount/token` (see [here](https://github.com/GoogleCloudPlatform/kubernetes/pull/7101)
-for more details).
+for more details). For example:
+
+```ruby
+auth_options = {
+  bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token'
+
+}
+client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1beta3',
+                                auth_options: auth_options
+```
 
 ## Examples:
 
