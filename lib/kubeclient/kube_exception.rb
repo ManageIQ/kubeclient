@@ -1,5 +1,5 @@
 # Kubernetes HTTP Exceptions
-class KubeException < Exception
+class KubeException < StandardError
   attr_reader :error_code, :message
 
   def initialize(error_code, message)
