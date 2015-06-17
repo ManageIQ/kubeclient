@@ -94,7 +94,7 @@ class KubeClientTest < MiniTest::Test
 
     args = ['http://localhost:8080/api/']
 
-    [nil, 'v1beta1', 'v1beta2', 'v1beta3'].each do |version|
+    [nil, 'v1beta3', 'v1'].each do |version|
       client = Kubeclient::Client.new(*(version ? args + [version] : args))
       assert client.api_valid?
     end
