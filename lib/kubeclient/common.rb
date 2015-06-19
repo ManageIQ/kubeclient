@@ -214,24 +214,11 @@ module Kubeclient
         JSON.parse(response)
       end
 
-      def ssl_options(client_cert: nil, client_key: nil, ca_file: nil,
-                      verify_ssl: OpenSSL::SSL::VERIFY_PEER)
-        @ssl_options = {
-          ca_file: ca_file,
-          verify_ssl: verify_ssl,
-          client_cert: client_cert,
-          client_key: client_key
-        }
-      end
+      private
 
       def bearer_token(bearer_token)
         @headers ||= {}
         @headers[:Authorization] = "Bearer #{bearer_token}"
-      end
-
-      def basic_auth(user, password)
-        @basic_auth_user = user
-        @basic_auth_password = password
       end
     end
   end
