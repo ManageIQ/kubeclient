@@ -176,6 +176,26 @@ class KubeClientTest < MiniTest::Test
                      times: 1)
   end
 
+  def test_entity_list_with_namespace
+    stub_request(:get, %r{/services})
+      .to_return(body: open_test_json_file('entity_list_b3_mynamespace.json'),
+                 status: 200)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
+    services = client.get_services(namespace: 'mynamespace')
+
+    refute_empty(services)
+    assert_instance_of(Kubeclient::Common::EntityList, services)
+    assert_equal('Service', services.kind)
+    assert_equal(2, services.size)
+    assert_instance_of(Kubeclient::Service, services[0])
+    assert_instance_of(Kubeclient::Service, services[1])
+
+    assert_requested(:get,
+                     'http://localhost:8080/api/v1beta3/namespaces/mynamespace/services',
+                     times: 1)
+  end
+
   def test_empty_list
     stub_request(:get, %r{/pods})
       .to_return(body: open_test_json_file('empty_pod_list_b3.json'),

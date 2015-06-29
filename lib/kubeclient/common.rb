@@ -115,9 +115,9 @@ module Kubeclient
           params['params'] = { labelSelector: options[:label_selector] }
         end
 
-        # TODO: namespace support?
+        ns_prefix = build_namespace_prefix(options[:namespace])
         response = handle_exception do
-          rest_client[resource_name(entity_type)]
+          rest_client[ns_prefix + resource_name(entity_type)]
           .get(params.merge(@headers))
         end
 
