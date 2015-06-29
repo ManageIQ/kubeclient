@@ -173,7 +173,7 @@ module Kubeclient
       end
 
       def update_entity(entity_type, entity_config)
-        name = entity_config.name
+        name = entity_config.metadata.name
         # to_hash should be called because of issue #9 in recursive open
         # struct
         hash = entity_config.to_hash

@@ -109,4 +109,28 @@ class TestService < MiniTest::Test
                      'http://localhost:8080/api/v1beta3/namespaces/development/services/redis-slave',
                      times: 1)
   end
+
+  def test_update_service
+    entity = 'service'
+    object = Kubeclient::Service.new
+    name = 'my_service'
+    object.metadata = {
+      'name' => name
+    }
+
+    stub_request(:put, %r{/services/#{name}})\
+      .to_return(
+        body: open_test_json_file('service_update_b3.json'),
+        status: 200
+      )
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
+    client.update_entity entity, object
+
+    assert_requested(
+      :put,
+      "http://localhost:8080/api/v1beta3/services/#{name}",
+      times: 1
+    )
+  end
 end
