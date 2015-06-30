@@ -37,11 +37,8 @@ module Kubeclient
                      ca_file: nil,
                      verify_ssl: OpenSSL::SSL::VERIFY_PEER
                    },
-                   auth_options: {
-                     user: nil,
-                     password: nil,
-                     bearer_token: nil
-                   })
+                   auth_options: {}
+                  )
 
       fail ArgumentError, 'Missing uri' if uri.nil?
 
@@ -52,10 +49,15 @@ module Kubeclient
       @headers = {}
       @ssl_options = ssl_options
 
-      @basic_auth_user = auth_options[:user]
-      @basic_auth_password = auth_options[:password]
-
-      bearer_token(auth_options[:bearer_token]) if auth_options[:bearer_token]
+      if auth_options[:user]
+        @basic_auth_user = auth_options[:user]
+        @basic_auth_password = auth_options[:password]
+      elsif auth_options[:bearer_token]
+        bearer_token(auth_options[:bearer_token])
+      elsif auth_options[:bearer_token_file]
+        validate_bearer_token_file(auth_options[:bearer_token_file])
+        bearer_token(File.read(auth_options[:bearer_token_file]))
+      end
     end
 
     def all_entities
@@ -67,13 +69,24 @@ module Kubeclient
     private
 
     def validate_auth_options(opts)
-      fail ArgumentError,
-           'Missing password' if opts[:user] &&
-                                 (opts[:password].nil? ||
-                                 opts[:password].empty?)
-      fail ArgumentError,
-           'Specify either user/password or bearer token' if opts[:user] &&
-                                                             opts[:bearer_token]
+      exclusive_keys = [:bearer_token, :bearer_token_file, :user]
+
+      return if exclusive_keys.none? { |s| opts.key?(s) }
+
+      msg = 'Invalid auth options: specify only one of user/password,' \
+            ' bearer_token or bearer_token_file'
+      fail ArgumentError, msg unless exclusive_keys.one? { |s| opts.key?(s)  }
+
+      msg = 'Basic auth requires both user & password'
+      fail ArgumentError, msg if opts.key?(:user) && !opts.key?(:password)
+    end
+
+    def validate_bearer_token_file(bearer_token_file)
+      msg = "Token file #{bearer_token_file} does not exist"
+      fail ArgumentError, msg unless File.file?(bearer_token_file)
+
+      msg = "Cannot read token file #{bearer_token_file}"
+      fail ArgumentError, msg unless File.readable?(bearer_token_file)
     end
   end
 end

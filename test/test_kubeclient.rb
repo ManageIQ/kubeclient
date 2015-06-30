@@ -325,22 +325,69 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_init_user_no_password
-    assert_raises(ArgumentError) do
+    expected_msg = 'Basic auth requires both user & password'
+    exception = assert_raises(ArgumentError) do
       Kubeclient::Client.new 'http://localhost:8080',
                              auth_options: {
                                user: 'username'
                              }
     end
+    assert_equal expected_msg, exception.message
   end
 
   def test_init_user_and_bearer_token
-    assert_raises(ArgumentError) do
+    expected_msg = 'Invalid auth options: specify only one of user/password,' \
+                   ' bearer_token or bearer_token_file'
+    exception = assert_raises(ArgumentError) do
       Kubeclient::Client.new 'http://localhost:8080',
                              auth_options: {
                                user: 'username',
                                bearer_token: 'token'
                              }
     end
+    assert_equal expected_msg, exception.message
+  end
+
+  def test_bearer_token_and_bearer_token_file
+    expected_msg = 'Invalid auth options: specify only one of user/password,' \
+                   ' bearer_token or bearer_token_file'
+    exception = assert_raises(ArgumentError) do
+      Kubeclient::Client.new 'http://localhost:8080',
+                             auth_options: {
+                               bearer_token: 'token',
+                               bearer_token_file: 'token-file'
+                             }
+    end
+    assert_equal expected_msg, exception.message
+  end
+
+  def test_bearer_token_file_not_exist
+    expected_msg = 'Token file token-file does not exist'
+    exception = assert_raises(ArgumentError) do
+      Kubeclient::Client.new 'http://localhost:8080',
+                             auth_options: {
+                               bearer_token_file: 'token-file'
+                             }
+    end
+    assert_equal expected_msg, exception.message
+  end
+
+  def test_api_bearer_token_file_success
+    stub_request(:get, 'http://localhost:8080/api/v1beta3/pods')
+      .with(headers: { Authorization: 'Bearer valid_token' })
+      .to_return(body: open_test_json_file('pod_list_b3.json'),
+                 status: 200)
+
+    file = File.join(File.dirname(__FILE__), 'valid_token_file')
+    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+                                    auth_options: {
+                                      bearer_token_file: file
+                                    }
+
+    pods = client.get_pods
+
+    assert_equal('Pod', pods.kind)
+    assert_equal(1, pods.size)
   end
 
   private
