@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'vcr'
 
 def open_test_json_file(name)
   File.new(File.join(File.dirname(__FILE__), 'json', name))
@@ -230,6 +231,62 @@ class KubeClientTest < MiniTest::Test
     assert_instance_of(Kubeclient::Event, result['event'][0])
     assert_instance_of(Kubeclient::Endpoint, result['endpoint'][0])
     assert_instance_of(Kubeclient::Namespace, result['namespace'][0])
+  end
+
+  def test_get_all_v1
+    VCR.configure do |c|
+      c.cassette_library_dir = 'test/cassettes'
+      c.hook_into :webmock
+    end
+
+    client = Kubeclient::Client.new 'http://10.35.0.23:8080/api/', 'v1'
+    # keeping the below for convenience for future recording of newer inputs
+    # The recording is based on the entities from guestbook-go example
+    # https://github.com/GoogleCloudPlatform/kubernetes/tree/master/examples/guestbook-go
+    VCR.use_cassette('kubernetes_all_entities') do # :record => :new_episodes)
+      result = client.all_entities
+
+      assert_equal(7, result.keys.size)
+      assert_instance_of(Kubeclient::Common::EntityList, result['node'])
+      assert_instance_of(Kubeclient::Common::EntityList, result['service'])
+      assert_instance_of(Kubeclient::Common::EntityList,
+                         result['replication_controller'])
+      assert_instance_of(Kubeclient::Common::EntityList, result['pod'])
+      assert_instance_of(Kubeclient::Common::EntityList, result['event'])
+      assert_instance_of(Kubeclient::Common::EntityList, result['namespace'])
+      assert_instance_of(Kubeclient::Common::EntityList, result['endpoint'])
+      assert_instance_of(Kubeclient::Service, result['service'][0])
+      assert_instance_of(Kubeclient::Node, result['node'][0])
+      assert_instance_of(Kubeclient::Event, result['event'][0])
+      assert_instance_of(Kubeclient::Endpoint, result['endpoint'][0])
+      assert_instance_of(Kubeclient::Namespace, result['namespace'][0])
+    end
+
+    assert_requested(:get,
+                     'http://10.35.0.23:8080/api/v1/pods',
+                     times: 1)
+    assert_requested(:get,
+                     'http://10.35.0.23:8080/api/v1/services',
+                     times: 1)
+    assert_requested(:get,
+                     'http://10.35.0.23:8080/api/v1/nodes',
+                     times: 1)
+    assert_requested(:get,
+                     'http://10.35.0.23:8080/api/v1/replicationcontrollers',
+                     times: 1)
+    assert_requested(:get,
+                     'http://10.35.0.23:8080/api/v1/endpoints',
+                     times: 1)
+    assert_requested(:get,
+                     'http://10.35.0.23:8080/api/v1/namespaces',
+                     times: 1)
+    assert_requested(:get,
+                     'http://10.35.0.23:8080/api/v1/events',
+                     times: 1)
+
+    assert_not_requested(:get,
+                         'http://10.35.0.23:8080/api/v1beta3',
+                         times: 1)
   end
 
   def test_api_bearer_token_with_params_success
