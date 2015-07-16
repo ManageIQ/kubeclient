@@ -2,49 +2,57 @@ require 'test_helper'
 
 # Namespace entity tests
 class TestSecret < MiniTest::Test
-  def test_get_namespace_v1
+  def test_get_secret_v1
     stub_request(:get, %r{/secrets})
-      .to_return(body: open_test_json_file('secret.json'),
+      .to_return(body: open_test_json_file('created_secret.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    secret = client.get_secret 'secret'
+    secret = client.get_secret 'test-secret', 'dev'
 
     assert_instance_of(Kubeclient::Secret, secret)
-    assert_equal('e388bc10-c021-11e4-a514-3c970e4a436a', namespace.metadata.uid)
-    assert_equal('staging', namespace.metadata.name)
-    assert_equal('v1', namespace.apiVersion)
+    assert_equal('4e38a198-2bcb-11e5-a483-0e840567604d', secret.metadata.uid)
+    assert_equal('test-secret', secret.metadata.name)
+    assert_equal('v1', secret.apiVersion)
+    assert_equal('Y2F0J3MgYXJlIGF3ZXNvbWUK', secret.data['super-secret'])
 
     assert_requested(:get,
-                     'http://localhost:8080/api/v1/secrets/secret',
+                     'http://localhost:8080/api/v1/namespaces/dev/secrets/test-secret',
                      times: 1)
   end
 
-  def test_delete_namespace_v1
-
-    stub_request(:delete, %r{/namespaces})
+  def test_delete_secret_v1
+    stub_request(:delete, %r{/secrets})
       .to_return(status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
-    client.delete_namespace our_namespace.name
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client.delete_secret 'test-secret', 'dev'
 
     assert_requested(:delete,
-                     'http://localhost:8080/api/v1beta3/namespaces/staging',
+                     'http://localhost:8080/api/v1/namespaces/dev/secrets/test-secret',
                      times: 1)
   end
 
-  def test_create_namespace
-    stub_request(:post, %r{/namespaces})
-      .to_return(body: open_test_json_file('created_namespace_b3.json'),
+  def test_create_secret_v1
+    stub_request(:post, %r{/secrets})
+      .to_return(body: open_test_json_file('created_secret.json'),
                  status: 201)
 
-    namespace = Kubeclient::Namespace.new
-    namespace.metadata = {}
-    namespace.metadata.name = 'development'
+    secret = Kubeclient::Secret.new
+    secret.metadata = {}
+    secret.metadata.name = 'test-secret'
+    secret.metadata.namespace = 'dev'
+    secret.data = {}
+    secret.data['super-secret'] = 'Y2F0J3MgYXJlIGF3ZXNvbWUK'
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/'
-    created_namespace = client.create_namespace namespace
-    assert_instance_of(Kubeclient::Namespace, created_namespace)
-    assert_equal(namespace.metadata.name, created_namespace.metadata.name)
+    created_secret = client.create_secret secret
+    assert_instance_of(Kubeclient::Secret, created_secret)
+    assert_equal(secret.metadata.name, created_secret.metadata.name)
+    assert_equal(secret.metadata.namespace, created_secret.metadata.namespace)
+    assert_equal(
+      secret.data['super-secret'],
+      created_secret.data['super-secret']
+    )
   end
 end
