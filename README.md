@@ -151,7 +151,7 @@ Querying with uid causes 404.
 
 #### Delete an entity (by name)
 
-For example: `delete_pod "pod name"` , `delete_replication_controller "rc name"`, `delete node "node name"`
+For example: `delete_pod "pod name"` , `delete_replication_controller "rc name"`, `delete_node "node name"`, `delete_secret "secret name"`
 
 Input parameter - name (string) specifying service name, pod name, replication controller name.
 ```ruby
