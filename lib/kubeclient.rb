@@ -19,7 +19,7 @@ module Kubeclient
     # manually on every new entity addition,
     # and especially since currently the class body is empty
     ENTITY_TYPES = %w(Pod Service ReplicationController Node Event Endpoint
-                      Namespace).map do |et|
+                      Namespace Secret).map do |et|
       clazz = Class.new(RecursiveOpenStruct) do
         def initialize(hash = nil, args = {})
           args.merge!(recurse_over_arrays: true)

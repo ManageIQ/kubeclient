@@ -215,9 +215,13 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_json_file('namespace_list_b3.json'),
                  status: 200)
 
+    stub_request(:get, %r{/secrets})
+      .to_return(body: open_test_json_file('secret_list_b3.json'),
+                 status: 200)
+
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
     result = client.all_entities
-    assert_equal(7, result.keys.size)
+    assert_equal(8, result.keys.size)
     assert_instance_of(Kubeclient::Common::EntityList, result['node'])
     assert_instance_of(Kubeclient::Common::EntityList, result['service'])
     assert_instance_of(Kubeclient::Common::EntityList,
@@ -225,11 +229,13 @@ class KubeClientTest < MiniTest::Test
     assert_instance_of(Kubeclient::Common::EntityList, result['pod'])
     assert_instance_of(Kubeclient::Common::EntityList, result['event'])
     assert_instance_of(Kubeclient::Common::EntityList, result['namespace'])
+    assert_instance_of(Kubeclient::Common::EntityList, result['secret'])
     assert_instance_of(Kubeclient::Service, result['service'][0])
     assert_instance_of(Kubeclient::Node, result['node'][0])
     assert_instance_of(Kubeclient::Event, result['event'][0])
     assert_instance_of(Kubeclient::Endpoint, result['endpoint'][0])
     assert_instance_of(Kubeclient::Namespace, result['namespace'][0])
+    assert_instance_of(Kubeclient::Secret, result['secret'][0])
   end
 
   def test_api_bearer_token_with_params_success
