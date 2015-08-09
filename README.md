@@ -6,7 +6,7 @@
 [![Dependency Status](https://gemnasium.com/abonas/kubeclient.svg)](https://gemnasium.com/abonas/kubeclient)
 
 A Ruby client for Kubernetes REST api.
-The client supports GET, POST, PUT, DELETE on nodes, pods, secrets, services, replication controllers, namespaces and endpoints.
+The client supports GET, POST, PUT, DELETE on nodes, pods, secrets, services, replication controllers, namespaces, resource quotas and endpoints.
 The client currently supports Kubernetes REST api version v1beta3.
 
 ## Installation
@@ -118,7 +118,7 @@ client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1beta3',
 ## Examples:
 
 #### Get all instances of a specific entity type
-Such as: `get_pods`, `get_secrets`, `get_services`, `get_nodes`, `get_replication_controllers`
+Such as: `get_pods`, `get_secrets`, `get_services`, `get_nodes`, `get_replication_controllers`, `get_resource_quotas`
 
 ```ruby
 pods = client.get_pods
@@ -134,7 +134,7 @@ pods = client.get_pods(label_selector: 'name=redis-master,app=redis')
 ```
 
 #### Get a specific instance of an entity (by name)
-Such as: `get_service "service name"` , `get_pod "pod name"` , `get_replication_controller "rc name"`, `get_secret "secret name"`
+Such as: `get_service "service name"` , `get_pod "pod name"` , `get_replication_controller "rc name"`, `get_secret "secret name"`, `get_resource_quota "resource quota name"`
 
 The GET request should include the namespace name, except for nodes and namespaces entities.
 
@@ -159,7 +159,7 @@ client.delete_service "redis-service"
 ```
 
 #### Create an entity
-For example: `create_pod pod_object`, `create_replication_controller rc_obj`, `create_secret secret_object`
+For example: `create_pod pod_object`, `create_replication_controller rc_obj`, `create_secret secret_object`, `create_resource_quota resource_quota_object`
 
 Input parameter - object of type `Service`, `Pod`, `ReplicationController`.
 
@@ -177,9 +177,9 @@ client.create_service service`
 ```
 
 #### Update an entity
-For example: `update_pod`, `update_service`, `update_replication_controller`, `update_secret`
+For example: `update_pod`, `update_service`, `update_replication_controller`, `update_secret`, `update_resource_quota`
 
-Input parameter - object of type `Service`, `Pod`, `ReplicationController`
+Input parameter - object of type `Pod`, `Service`, `ReplicationController` etc.
 
 The below example is for v1beta3
 
@@ -188,7 +188,7 @@ client.update_service service1
 ```
 
 #### Get all entities of all types : all_entities
-Returns a hash with 8 keys (node, secret, service, pod, replication_controller, namespace, endpoint and event). Each key points to an EntityList of same type.
+Returns a hash with 9 keys (node, secret, service, pod, replication_controller, namespace, resource_quota, endpoint and event). Each key points to an EntityList of same type.
 
 This method is a convenience method instead of calling each entity's get method separately.
 

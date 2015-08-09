@@ -12,14 +12,13 @@ module Kubeclient
   # Kubernetes Client
   class Client < Common::Client
     attr_reader :api_endpoint
-
     # Dynamically creating classes definitions (class Pod, class Service, etc.),
     # The classes are extending RecursiveOpenStruct.
     # This cancels the need to define the classes
     # manually on every new entity addition,
     # and especially since currently the class body is empty
     ENTITY_TYPES = %w(Pod Service ReplicationController Node Event Endpoint
-                      Namespace Secret).map do |et|
+                      Namespace Secret ResourceQuota).map do |et|
       clazz = Class.new(RecursiveOpenStruct) do
         def initialize(hash = nil, args = {})
           args.merge!(recurse_over_arrays: true)

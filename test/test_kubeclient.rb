@@ -219,9 +219,13 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_json_file('secret_list_b3.json'),
                  status: 200)
 
+    stub_request(:get, %r{/resourcequotas})
+      .to_return(body: open_test_json_file('resource_quota_list.json'),
+                 status: 200)
+
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
     result = client.all_entities
-    assert_equal(8, result.keys.size)
+    assert_equal(9, result.keys.size)
     assert_instance_of(Kubeclient::Common::EntityList, result['node'])
     assert_instance_of(Kubeclient::Common::EntityList, result['service'])
     assert_instance_of(Kubeclient::Common::EntityList,
@@ -236,6 +240,7 @@ class KubeClientTest < MiniTest::Test
     assert_instance_of(Kubeclient::Endpoint, result['endpoint'][0])
     assert_instance_of(Kubeclient::Namespace, result['namespace'][0])
     assert_instance_of(Kubeclient::Secret, result['secret'][0])
+    assert_instance_of(Kubeclient::ResourceQuota, result['resource_quota'][0])
   end
 
   def test_api_bearer_token_with_params_success
