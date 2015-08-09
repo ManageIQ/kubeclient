@@ -128,7 +128,6 @@ module Kubeclient
 
     def watch_entities(entity_type, resource_version = nil)
       resource = resource_name(entity_type.to_s)
-
       uri = @api_endpoint
             .merge("#{@api_endpoint.path}/#{@api_version}/watch/#{resource}")
 
@@ -152,15 +151,15 @@ module Kubeclient
       Kubeclient::Common::WatchStream.new(uri, options)
     end
 
-    def get_entities(entity_type, klass, options)
+    def get_entities(entity_type, klass, options = {})
       params = {}
       if options[:label_selector]
         params['params'] = { labelSelector: options[:label_selector] }
       end
 
-      # TODO: namespace support?
+      ns_prefix = build_namespace_prefix(options[:namespace])
       response = handle_exception do
-        rest_client[resource_name(entity_type)]
+        rest_client[ns_prefix + resource_name(entity_type)]
         .get(params.merge(@headers))
       end
 
