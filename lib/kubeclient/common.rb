@@ -83,17 +83,8 @@ module Kubeclient
         end
       end
 
-      def watch_entities(entity_type, resource_version = nil)
-        resource = resource_name(entity_type.to_s)
-
-        uri = @api_endpoint
-              .merge("#{@api_endpoint.path}/#{@api_version}/watch/#{resource}")
-
-        unless resource_version.nil?
-          uri.query = URI.encode_www_form('resourceVersion' => resource_version)
-        end
-
-        options = {
+      def build_options(uri)
+        {
           use_ssl: uri.scheme == 'https',
           ca_file: @ssl_options[:ca_file],
           # ruby Net::HTTP uses verify_mode instead of verify_ssl
@@ -105,8 +96,19 @@ module Kubeclient
           basic_auth_password: @basic_auth_password,
           headers: @headers
         }
+      end
 
-        WatchStream.new(uri, options)
+      def watch_entities(entity_type, resource_version = nil)
+        resource = resource_name(entity_type.to_s)
+
+        uri = @api_endpoint
+              .merge("#{@api_endpoint.path}/#{@api_version}/watch/#{resource}")
+
+        unless resource_version.nil?
+          uri.query = URI.encode_www_form('resourceVersion' => resource_version)
+        end
+
+        WatchStream.new(uri, build_options(uri))
       end
 
       def get_entities(entity_type, klass, options)
@@ -200,6 +202,14 @@ module Kubeclient
 
       def resource_name(entity_type)
         entity_type.pluralize.downcase
+      end
+
+      def proxy_url_service(type, service, port_name, namespace = '')
+        ns_prefix = build_namespace_prefix(namespace)
+        url = rest_client["proxy/#{ns_prefix}#{type}/#{service}:#{port_name}"].url
+        uri = URI.parse(url)
+        client = HttpProxyWrapper.new(uri, build_options(uri))
+        client
       end
 
       def api_valid?

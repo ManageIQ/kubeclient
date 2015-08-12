@@ -1,0 +1,7 @@
+{
+  "hello": "world",
+  "foo": 2,
+  "list": [
+    "element"
+  ]
+}
