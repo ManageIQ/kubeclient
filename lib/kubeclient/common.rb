@@ -220,6 +220,19 @@ module Kubeclient
         @headers ||= {}
         @headers[:Authorization] = "Bearer #{bearer_token}"
       end
+
+      def validate_auth_options(opts)
+        exclusive_keys = [:bearer_token, :bearer_token_file, :user]
+
+        return if exclusive_keys.none? { |s| opts.key?(s) }
+
+        msg = 'Invalid auth options: specify only one of user/password,' \
+            ' bearer_token or bearer_token_file'
+        fail ArgumentError, msg unless exclusive_keys.one? { |s| opts.key?(s)  }
+
+        msg = 'Basic auth requires both user & password'
+        fail ArgumentError, msg if opts.key?(:user) && !opts.key?(:password)
+      end
     end
   end
 end
