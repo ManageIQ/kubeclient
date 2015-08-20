@@ -157,7 +157,7 @@ module Kubeclient
         # struct
         hash = entity_config.to_hash
 
-        ns_prefix = build_namespace_prefix(entity_config.metadata.namespace)
+        ns_prefix = build_namespace_prefix(entity_config.metadata['table'][:namespace])
 
         # TODO: temporary solution to add "kind" and apiVersion to request
         # until this issue is solved
@@ -177,7 +177,7 @@ module Kubeclient
         # to_hash should be called because of issue #9 in recursive open
         # struct
         hash = entity_config.to_hash
-        ns_prefix = build_namespace_prefix(entity_config.metadata.namespace)
+        ns_prefix = build_namespace_prefix(entity_config.metadata['table'][:namespace])
         handle_exception do
           rest_client[ns_prefix + resource_name(entity_type) + "/#{name}"]
             .put(hash.to_json, @headers)
