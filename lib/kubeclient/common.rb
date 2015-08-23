@@ -32,7 +32,7 @@ module Kubeclient
       def self.define_entity_methods(entity_types)
         entity_types.each do |klass, entity_type|
           entity_name = entity_type.underscore
-          entity_name_plural = entity_name.pluralize
+          entity_name_plural = pluralize_entity(entity_name)
 
           # get all entities of a type e.g. get_nodes, get_pods, etc.
           define_method("get_#{entity_name_plural}") do |options = {}|
@@ -62,6 +62,11 @@ module Kubeclient
             update_entity(entity_type, entity_config)
           end
         end
+      end
+
+      def self.pluralize_entity(entity_name)
+        return entity_name + 's' if entity_name.end_with? 'quota'
+        entity_name.pluralize
       end
 
       def create_rest_client(path = nil)
@@ -192,14 +197,15 @@ module Kubeclient
         entity_types.each_with_object({}) do |(_, entity_type), result_hash|
           # method call for get each entities
           # build hash of entity name to array of the entities
-          method_name = "get_#{entity_type.underscore.pluralize}"
+          entity_name = self.class.pluralize_entity entity_type.underscore
+          method_name = "get_#{entity_name}"
           key_name = entity_type.underscore
           result_hash[key_name] = send(method_name)
         end
       end
 
       def resource_name(entity_type)
-        entity_type.pluralize.downcase
+        self.class.pluralize_entity entity_type.downcase
       end
 
       def api_valid?
