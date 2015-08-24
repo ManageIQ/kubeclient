@@ -1,0 +1,74 @@
+{
+    "kind": "ServiceList",
+    "apiVersion": "v1beta3",
+    "metadata": {
+        "selfLink": "/api/v1beta3/namespaces/mynamespace/services",
+        "resourceVersion": "475878"
+    },
+    "items": [
+        {
+            "metadata": {
+                "name": "gateway",
+                "namespace": "mynamespace",
+                "selfLink": "/api/v1beta3/namespaces/mynamespace/services/gateway",
+                "uid": "81a1f96a-1a56-11e5-8483-025a3ef4da9b",
+                "resourceVersion": "473066",
+                "creationTimestamp": "2015-06-24T09:50:54Z",
+                "labels": {
+                    "name": "gateway"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "protocol": "TCP",
+                        "port": 9000,
+                        "targetPort": 9000,
+                        "nodePort": 0
+                    }
+                ],
+                "selector": {
+                    "name": "gateway"
+                },
+                "portalIP": "10.245.32.237",
+                "type": "ClusterIP",
+                "sessionAffinity": "None"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        },
+        {
+            "metadata": {
+                "name": "parks",
+                "namespace": "mynamespace",
+                "selfLink": "/api/v1beta3/namespaces/mynamespace/services/parks",
+                "uid": "81a6f80a-1a56-11e5-8483-025a3ef4da9b",
+                "resourceVersion": "473067",
+                "creationTimestamp": "2015-06-24T09:50:54Z",
+                "labels": {
+                    "name": "parks"
+                }
+            },
+            "spec": {
+                "ports": [
+                    {
+                        "protocol": "TCP",
+                        "port": 9000,
+                        "targetPort": 9000,
+                        "nodePort": 0
+                    }
+                ],
+                "selector": {
+                    "name": "parks"
+                },
+                "portalIP": "10.245.172.243",
+                "type": "ClusterIP",
+                "sessionAffinity": "None"
+            },
+            "status": {
+                "loadBalancer": {}
+            }
+        }
+    ]
+}
