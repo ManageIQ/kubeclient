@@ -6,7 +6,7 @@
 [![Dependency Status](https://gemnasium.com/abonas/kubeclient.svg)](https://gemnasium.com/abonas/kubeclient)
 
 A Ruby client for Kubernetes REST api.
-The client supports GET, POST, PUT, DELETE on nodes, pods, secrets, services, replication controllers, namespaces, resource quotas, limit ranges and endpoints.
+The client supports GET, POST, PUT, DELETE on nodes, pods, secrets, services, replication controllers, namespaces, resource quotas, limit ranges, endpoints, persistent volumes and persistent volume claims.
 The client currently supports Kubernetes REST api version v1beta3.
 
 ## Installation
@@ -118,7 +118,7 @@ client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1beta3',
 ## Examples:
 
 #### Get all instances of a specific entity type
-Such as: `get_pods`, `get_secrets`, `get_services`, `get_nodes`, `get_replication_controllers`, `get_resource_quotas`, `get_limit_ranges`
+Such as: `get_pods`, `get_secrets`, `get_services`, `get_nodes`, `get_replication_controllers`, `get_resource_quotas`, `get_limit_ranges`, `get_persistent_volumes`, `get_persistent_volume_claims`
 
 ```ruby
 pods = client.get_pods
@@ -134,7 +134,7 @@ pods = client.get_pods(label_selector: 'name=redis-master,app=redis')
 ```
 
 #### Get a specific instance of an entity (by name)
-Such as: `get_service "service name"` , `get_pod "pod name"` , `get_replication_controller "rc name"`, `get_secret "secret name"`, `get_resource_quota "resource quota name"`, `get_limit_range "limit range name"`
+Such as: `get_service "service name"` , `get_pod "pod name"` , `get_replication_controller "rc name"`, `get_secret "secret name"`, `get_resource_quota "resource quota name"`, `get_limit_range "limit range name"` , `get_persistent_volume "persistent volume name"` , `get_persistent_volume_claim "persistent volume claim name"`
 
 The GET request should include the namespace name, except for nodes and namespaces entities.
 
@@ -159,7 +159,7 @@ client.delete_service "redis-service"
 ```
 
 #### Create an entity
-For example: `create_pod pod_object`, `create_replication_controller rc_obj`, `create_secret secret_object`, `create_resource_quota resource_quota_object`, `create_limit_range limit_range_object`
+For example: `create_pod pod_object`, `create_replication_controller rc_obj`, `create_secret secret_object`, `create_resource_quota resource_quota_object`, `create_limit_range limit_range_object`, `create_persistent_volume persistent_volume_object`, `create_persistent_volume_claim persistent_volume_claim_object`
 
 Input parameter - object of type `Service`, `Pod`, `ReplicationController`.
 
@@ -177,7 +177,7 @@ client.create_service service`
 ```
 
 #### Update an entity
-For example: `update_pod`, `update_service`, `update_replication_controller`, `update_secret`, `update_resource_quota`, `update_limit_range`
+For example: `update_pod`, `update_service`, `update_replication_controller`, `update_secret`, `update_resource_quota`, `update_limit_range`, `update_persistent_volume`, `update_persistent_volume_claim`
 
 Input parameter - object of type `Pod`, `Service`, `ReplicationController` etc.
 
@@ -188,7 +188,7 @@ client.update_service service1
 ```
 
 #### Get all entities of all types : all_entities
-Returns a hash with 10 keys (node, secret, service, pod, replication_controller, namespace, resource_quota, limit_range, endpoint and event). Each key points to an EntityList of same type.
+Returns a hash with 12 keys (node, secret, service, pod, replication_controller, namespace, resource_quota, limit_range, endpoint, event, persistent_volume and persistent_volume_claim). Each key points to an EntityList of same type.
 
 This method is a convenience method instead of calling each entity's get method separately.
 
