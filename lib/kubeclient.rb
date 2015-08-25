@@ -10,8 +10,8 @@ require 'kubeclient/common'
 
 module Kubeclient
   # Kubernetes Client
-  class Client < Common::Client
-    attr_reader :api_endpoint
+  class Client
+    include ClientMixin
     # Dynamically creating classes definitions (class Pod, class Service, etc.),
     # The classes are extending RecursiveOpenStruct.
     # This cancels the need to define the classes
@@ -29,6 +29,8 @@ module Kubeclient
       [Kubeclient.const_set(et, clazz), et]
     end
 
+    ClientMixin.define_entity_methods(ENTITY_TYPES)
+
     def initialize(uri,
                    version = 'v1beta3',
                    ssl_options: {
@@ -44,39 +46,11 @@ module Kubeclient
                      bearer_token_file: nil
                    }
                   )
-
-      fail ArgumentError, 'Missing uri' if uri.nil?
-
-      validate_auth_options(auth_options)
-
-      handle_uri(uri, '/api')
-      @api_version = version
-      @headers = {}
-      @ssl_options = ssl_options
-      @auth_options = auth_options
-
-      if auth_options[:bearer_token]
-        bearer_token(auth_options[:bearer_token])
-      elsif auth_options[:bearer_token_file]
-        validate_bearer_token_file(auth_options[:bearer_token_file])
-        bearer_token(File.read(auth_options[:bearer_token_file]))
-      end
+      initialize_client(uri, '/api', version, ssl_options: ssl_options, auth_options: auth_options)
     end
 
     def all_entities
       retrieve_all_entities(ENTITY_TYPES)
-    end
-
-    define_entity_methods(ENTITY_TYPES)
-
-    private
-
-    def validate_bearer_token_file(bearer_token_file)
-      msg = "Token file #{bearer_token_file} does not exist"
-      fail ArgumentError, msg unless File.file?(bearer_token_file)
-
-      msg = "Cannot read token file #{bearer_token_file}"
-      fail ArgumentError, msg unless File.readable?(bearer_token_file)
     end
   end
 end
