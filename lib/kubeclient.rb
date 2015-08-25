@@ -37,7 +37,12 @@ module Kubeclient
                      ca_file: nil,
                      verify_ssl: OpenSSL::SSL::VERIFY_PEER
                    },
-                   auth_options: {}
+                   auth_options: {
+                     username:          nil,
+                     password:          nil,
+                     bearer_token:      nil,
+                     bearer_token_file: nil
+                   }
                   )
 
       fail ArgumentError, 'Missing uri' if uri.nil?
