@@ -76,8 +76,8 @@ module Kubeclient
           verify_ssl: @ssl_options[:verify_ssl],
           ssl_client_cert: @ssl_options[:client_cert],
           ssl_client_key: @ssl_options[:client_key],
-          user: @basic_auth_username,
-          password: @basic_auth_password
+          user: @auth_options[:username],
+          password: @auth_options[:password]
         }
         RestClient::Resource.new(@api_endpoint.merge(path).to_s, options)
       end
@@ -106,8 +106,8 @@ module Kubeclient
           verify_mode: @ssl_options[:verify_ssl],
           cert: @ssl_options[:client_cert],
           key: @ssl_options[:client_key],
-          basic_auth_user: @basic_auth_username,
-          basic_auth_password: @basic_auth_password,
+          basic_auth_user: @auth_options[:username],
+          basic_auth_password: @auth_options[:password],
           headers: @headers
         }
 

@@ -53,11 +53,9 @@ module Kubeclient
       @api_version = version
       @headers = {}
       @ssl_options = ssl_options
+      @auth_options = auth_options
 
-      if auth_options[:username]
-        @basic_auth_username = auth_options[:username]
-        @basic_auth_password = auth_options[:password]
-      elsif auth_options[:bearer_token]
+      if auth_options[:bearer_token]
         bearer_token(auth_options[:bearer_token])
       elsif auth_options[:bearer_token_file]
         validate_bearer_token_file(auth_options[:bearer_token_file])
