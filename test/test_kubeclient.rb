@@ -477,6 +477,20 @@ class KubeClientTest < MiniTest::Test
                  client.proxy_url('nodes', 'srvname', 5001))
   end
 
+  def test_attr_readers
+    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+                                    ssl_options: {
+                                      client_key: 'secret'
+                                    },
+                                    auth_options: {
+                                      bearer_token: 'token'
+                                    }
+    assert_equal '/api', client.api_endpoint.path
+    assert_equal 'secret', client.ssl_options[:client_key]
+    assert_equal 'token', client.auth_options[:bearer_token]
+    assert_equal 'Bearer token', client.headers[:Authorization]
+  end
+
   private
 
   # dup method creates a shallow copy which is not good in this case

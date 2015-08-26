@@ -4,6 +4,10 @@ module Kubeclient
   # Common methods
   module ClientMixin
     attr_reader :api_endpoint
+    attr_reader :ssl_options
+    attr_reader :auth_options
+    attr_reader :headers
+
     def initialize_client(
       uri,
       path,
