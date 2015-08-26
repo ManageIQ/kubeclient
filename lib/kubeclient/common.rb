@@ -242,16 +242,12 @@ module Kubeclient
         # maintain backward compatibility:
         opts[:username] = opts[:user] if opts[:user]
 
-        exclusive_keys = [:bearer_token, :bearer_token_file, :username]
-
-        return if exclusive_keys.none? { |s| opts[s] }
-
-        msg = 'Invalid auth options: specify only one of username/password,' \
-            ' bearer_token or bearer_token_file'
-        fail ArgumentError, msg unless exclusive_keys.one? { |s| opts[s]  }
-
-        msg = 'Basic auth requires both username & password'
-        fail ArgumentError, msg if opts[:username] && !opts[:password]
+        if [:bearer_token, :bearer_token_file, :username].count { |key| opts[key] } > 1
+          fail(ArgumentError, 'Invalid auth options: specify only one of username/password,' \
+               ' bearer_token or bearer_token_file')
+        elsif [:username, :password].count { |key| opts[key] } == 1
+          fail(ArgumentError, 'Basic auth requires both username & password')
+        end
       end
     end
   end
