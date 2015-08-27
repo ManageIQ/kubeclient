@@ -49,8 +49,8 @@ module Kubeclient
       @headers = {}
       @ssl_options = ssl_options
 
-      if auth_options[:user]
-        @basic_auth_user = auth_options[:user]
+      if auth_options[:username]
+        @basic_auth_username = auth_options[:username]
         @basic_auth_password = auth_options[:password]
       elsif auth_options[:bearer_token]
         bearer_token(auth_options[:bearer_token])

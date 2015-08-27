@@ -76,7 +76,7 @@ module Kubeclient
           verify_ssl: @ssl_options[:verify_ssl],
           ssl_client_cert: @ssl_options[:client_cert],
           ssl_client_key: @ssl_options[:client_key],
-          user: @basic_auth_user,
+          user: @basic_auth_username,
           password: @basic_auth_password
         }
         RestClient::Resource.new(@api_endpoint.merge(path).to_s, options)
@@ -106,7 +106,7 @@ module Kubeclient
           verify_mode: @ssl_options[:verify_ssl],
           cert: @ssl_options[:client_cert],
           key: @ssl_options[:client_key],
-          basic_auth_user: @basic_auth_user,
+          basic_auth_user: @basic_auth_username,
           basic_auth_password: @basic_auth_password,
           headers: @headers
         }
@@ -239,16 +239,19 @@ module Kubeclient
       end
 
       def validate_auth_options(opts)
-        exclusive_keys = [:bearer_token, :bearer_token_file, :user]
+        # maintain backward compatibility:
+        opts[:username] = opts[:user] if opts[:user]
+
+        exclusive_keys = [:bearer_token, :bearer_token_file, :username]
 
         return if exclusive_keys.none? { |s| opts.key?(s) }
 
-        msg = 'Invalid auth options: specify only one of user/password,' \
+        msg = 'Invalid auth options: specify only one of username/password,' \
             ' bearer_token or bearer_token_file'
         fail ArgumentError, msg unless exclusive_keys.one? { |s| opts.key?(s)  }
 
-        msg = 'Basic auth requires both user & password'
-        fail ArgumentError, msg if opts.key?(:user) && !opts.key?(:password)
+        msg = 'Basic auth requires both username & password'
+        fail ArgumentError, msg if opts.key?(:username) && !opts.key?(:password)
       end
     end
   end
