@@ -408,15 +408,19 @@ class KubeClientTest < MiniTest::Test
 
   def test_proxy_url
     client = Kubeclient::Client.new 'http://host:8080', 'v1'
-    assert_equal('http://host:8080/api/v1/proxy/namespaces/ns/services/srvname:5001-tcp',
-                 client.proxy_url('service', 'srvname', '5001-tcp', 'ns'))
+    assert_equal('http://host:8080/api/v1/proxy/namespaces/ns/services/srvname:srvportname',
+                 client.proxy_url('service', 'srvname', 'srvportname', 'ns'))
 
-    assert_equal('http://host:8080/api/v1/namespaces/ns/pods/srvname:5001-tcp/proxy',
-                 client.proxy_url('pod', 'srvname', '5001-tcp', 'ns'))
+    assert_equal('http://host:8080/api/v1/namespaces/ns/pods/srvname:srvportname/proxy',
+                 client.proxy_url('pods', 'srvname', 'srvportname', 'ns'))
 
     # Check no namespace provided
+    assert_equal('http://host:8080/api/v1/proxy/nodes/srvname:srvportname',
+                 client.proxy_url('nodes', 'srvname', 'srvportname'))
+
+    # Check integer port
     assert_equal('http://host:8080/api/v1/proxy/nodes/srvname:5001',
-                 client.proxy_url('node', 'srvname', 5001))
+                 client.proxy_url('nodes', 'srvname', 5001))
   end
 
   private

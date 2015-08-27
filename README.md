@@ -216,9 +216,18 @@ watcher.finish
 You can get a complete URL for connecting a kubernetes entity via the proxy.
 
 ```ruby
-client.proxy_url('services', 'srvname', '5001-tcp', 'ns')
- => "https://localhost.localdomain:8443/api/v1/proxy/namespaces/ns/services/srvname:5001-tcp"
+client.proxy_url('service', 'srvname', 'srvportname', 'ns')
+ => "https://localhost.localdomain:8443/api/v1/proxy/namespaces/ns/services/srvname:srvportname"
 ```
+
+Note the third parameter, port, is a port name for services and an integer for pods:
+
+```ruby
+client.proxy_url('pod', 'podname', 5001, 'ns')
+ => "https://localhost.localdomain:8443/api/v1/namespaces/ns/pods/podname:5001/proxy"
+```
+
+
 
 ## Contributing
 
