@@ -204,6 +204,16 @@ module Kubeclient
         end
       end
 
+      def proxy_url(kind, name, port, namespace = '')
+        ns_prefix = build_namespace_prefix(namespace)
+        # TODO: Change this once services supports the new scheme
+        if kind.to_s == 'pods'
+          rest_client["#{ns_prefix}#{kind}/#{name}:#{port}/proxy"].url
+        else
+          rest_client["proxy/#{ns_prefix}#{kind}/#{name}:#{port}"].url
+        end
+      end
+
       def resource_name(entity_type)
         self.class.pluralize_entity entity_type.downcase
       end

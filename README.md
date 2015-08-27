@@ -212,6 +212,14 @@ It is possible to interrupt the watcher from another thread with:
 watcher.finish
 ```
 
+#### Get a proxy URL
+You can get a complete URL for connecting a kubernetes entity via the proxy.
+
+```ruby
+client.proxy_url('services', 'srvname', '5001-tcp', 'ns')
+ => "https://localhost.localdomain:8443/api/v1/proxy/namespaces/ns/services/srvname:5001-tcp"
+```
+
 ## Contributing
 
 1. Fork it ( https://github.com/[my-github-username]/kubeclient/fork )

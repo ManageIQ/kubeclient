@@ -416,6 +416,19 @@ class KubeClientTest < MiniTest::Test
     assert_equal(1, pods.size)
   end
 
+  def test_proxy_url
+    client = Kubeclient::Client.new 'http://host:8080', 'v1'
+    assert_equal('http://host:8080/api/v1/proxy/namespaces/ns/services/srvname:5001-tcp',
+                 client.proxy_url('services', 'srvname', '5001-tcp', 'ns'))
+
+    assert_equal('http://host:8080/api/v1/namespaces/ns/pods/srvname:5001-tcp/proxy',
+                 client.proxy_url('pods', 'srvname', '5001-tcp', 'ns'))
+
+    # Check no namespace provided
+    assert_equal('http://host:8080/api/v1/proxy/nodes/srvname:5001',
+                 client.proxy_url('nodes', 'srvname', 5001))
+  end
+
   private
 
   # dup method creates a shallow copy which is not good in this case
