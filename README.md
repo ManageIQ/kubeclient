@@ -72,7 +72,7 @@ of the following:
 
 ```ruby
 auth_options = {
-  user: 'username',
+  username: 'username',
   password: 'password'
 }
 client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1beta3',

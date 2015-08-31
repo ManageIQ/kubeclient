@@ -317,6 +317,26 @@ class KubeClientTest < MiniTest::Test
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/',
                                     auth_options: {
+                                      username: 'username',
+                                      password: 'password'
+                                    }
+
+    pods = client.get_pods
+
+    assert_equal('Pod', pods.kind)
+    assert_equal(1, pods.size)
+    assert_requested(:get,
+                     'http://username:password@localhost:8080/api/v1beta3/pods',
+                     times: 1)
+  end
+
+  def test_api_basic_auth_back_comp_success
+    stub_request(:get, 'http://username:password@localhost:8080/api/v1beta3/pods')
+      .to_return(body: open_test_json_file('pod_list_b3.json'),
+                 status: 200)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+                                    auth_options: {
                                       user: 'username',
                                       password: 'password'
                                     }
@@ -338,7 +358,7 @@ class KubeClientTest < MiniTest::Test
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/',
                                     auth_options: {
-                                      user: 'username',
+                                      username: 'username',
                                       password: 'password'
                                     }
 
@@ -350,8 +370,19 @@ class KubeClientTest < MiniTest::Test
                      times: 1)
   end
 
+  def test_init_username_no_password
+    expected_msg = 'Basic auth requires both username & password'
+    exception = assert_raises(ArgumentError) do
+      Kubeclient::Client.new 'http://localhost:8080',
+                             auth_options: {
+                               username: 'username'
+                             }
+    end
+    assert_equal expected_msg, exception.message
+  end
+
   def test_init_user_no_password
-    expected_msg = 'Basic auth requires both user & password'
+    expected_msg = 'Basic auth requires both username & password'
     exception = assert_raises(ArgumentError) do
       Kubeclient::Client.new 'http://localhost:8080',
                              auth_options: {
@@ -361,13 +392,26 @@ class KubeClientTest < MiniTest::Test
     assert_equal expected_msg, exception.message
   end
 
-  def test_init_user_and_bearer_token
-    expected_msg = 'Invalid auth options: specify only one of user/password,' \
+  def test_init_username_and_bearer_token
+    expected_msg = 'Invalid auth options: specify only one of username/password,' \
                    ' bearer_token or bearer_token_file'
     exception = assert_raises(ArgumentError) do
       Kubeclient::Client.new 'http://localhost:8080',
                              auth_options: {
-                               user: 'username',
+                               username: 'username',
+                               bearer_token: 'token'
+                             }
+    end
+    assert_equal expected_msg, exception.message
+  end
+
+  def test_init_user_and_bearer_token
+    expected_msg = 'Invalid auth options: specify only one of username/password,' \
+                   ' bearer_token or bearer_token_file'
+    exception = assert_raises(ArgumentError) do
+      Kubeclient::Client.new 'http://localhost:8080',
+                             auth_options: {
+                               username: 'username',
                                bearer_token: 'token'
                              }
     end
@@ -375,7 +419,7 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_bearer_token_and_bearer_token_file
-    expected_msg = 'Invalid auth options: specify only one of user/password,' \
+    expected_msg = 'Invalid auth options: specify only one of username/password,' \
                    ' bearer_token or bearer_token_file'
     exception = assert_raises(ArgumentError) do
       Kubeclient::Client.new 'http://localhost:8080',
@@ -431,6 +475,20 @@ class KubeClientTest < MiniTest::Test
     # Check integer port
     assert_equal('http://host:8080/api/v1/proxy/nodes/srvname:5001',
                  client.proxy_url('nodes', 'srvname', 5001))
+  end
+
+  def test_attr_readers
+    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+                                    ssl_options: {
+                                      client_key: 'secret'
+                                    },
+                                    auth_options: {
+                                      bearer_token: 'token'
+                                    }
+    assert_equal '/api', client.api_endpoint.path
+    assert_equal 'secret', client.ssl_options[:client_key]
+    assert_equal 'token', client.auth_options[:bearer_token]
+    assert_equal 'Bearer token', client.headers[:Authorization]
   end
 
   private
