@@ -491,6 +491,16 @@ class KubeClientTest < MiniTest::Test
     assert_equal 'Bearer token', client.headers[:Authorization]
   end
 
+  def test_nil_items
+    # handle https://github.com/kubernetes/kubernetes/issues/13096
+    stub_request(:get, %r{/persistentvolumeclaims})
+      .to_return(body: open_test_json_file('persistent_volume_claims_nil_items.json'),
+                 status: 200)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client.get_persistent_volume_claims
+  end
+
   private
 
   # dup method creates a shallow copy which is not good in this case

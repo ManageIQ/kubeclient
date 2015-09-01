@@ -172,7 +172,8 @@ module Kubeclient
             result.fetch('metadata', {}).fetch('resourceVersion', nil)
       end
 
-      collection = result['items'].map { |item| new_entity(item, klass) }
+      # result['items'] might be nil due to https://github.com/kubernetes/kubernetes/issues/13096
+      collection = result['items'].to_a.map { |item| new_entity(item, klass) }
 
       Kubeclient::Common::EntityList.new(entity_type, resource_version, collection)
     end
