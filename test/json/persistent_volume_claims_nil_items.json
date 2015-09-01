@@ -1,0 +1,8 @@
+{
+  "kind": "PersistentVolumeClaimList",
+  "apiVersion": "v1beta3",
+  "metadata": {
+    "selfLink": "/api/v1beta3/persistentvolumeclaims",
+    "resourceVersion": "1089012"
+  }
+}
