@@ -7,7 +7,7 @@
 
 A Ruby client for Kubernetes REST api.
 The client supports GET, POST, PUT, DELETE on nodes, pods, secrets, services, replication controllers, namespaces, resource quotas, limit ranges, endpoints, persistent volumes and persistent volume claims.
-The client currently supports Kubernetes REST api version v1beta3.
+The client currently supports Kubernetes REST api version v1.
 
 ## Installation
 
@@ -29,10 +29,10 @@ Or install it yourself as:
 
 Initialize the client:
 ```ruby
-client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1beta3"
+client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1"
 ```
 
-Or without specifying version (it will be set by default to "v1beta3"
+Or without specifying version (it will be set by default to "v1"
 
 ```ruby
 client = Kubeclient::Client.new 'http://localhost:8080/api/'
@@ -54,7 +54,7 @@ ssl_options = {
   ca_file:     '/path/to/ca.crt',
   verify_ssl:  OpenSSL::SSL::VERIFY_PEER
 }
-client = Kubeclient::Client.new 'https://localhost:8443/api/' , "v1beta3",
+client = Kubeclient::Client.new 'https://localhost:8443/api/' , "v1",
                                 ssl_options: ssl_options
 ```
 
@@ -62,7 +62,7 @@ For testing and development purpose you can disable the ssl check with:
 
 ```ruby
 ssl_options = { verify_ssl: OpenSSL::SSL::VERIFY_NONE }
-client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1beta3',
+client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
                                 ssl_options: ssl_options
 ```
 
@@ -75,7 +75,7 @@ auth_options = {
   username: 'username',
   password: 'password'
 }
-client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1beta3',
+client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
                                 auth_options: auth_options
 ```
 
@@ -85,7 +85,7 @@ or
 auth_options = {
   bearer_token: 'MDExMWJkMjItOWY1Ny00OGM5LWJlNDEtMjBiMzgxODkxYzYz'
 }
-client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1beta3',
+client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
                                 auth_options: auth_options
 ```
 
@@ -95,7 +95,7 @@ or
 auth_options = {
   bearer_token_file: '/path/to/token_file'
 }
-client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1beta3',
+client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
                                 auth_options: auth_options
 ```
 
@@ -111,7 +111,7 @@ auth_options = {
   bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token'
 
 }
-client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1beta3',
+client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
                                 auth_options: auth_options
 ```
 
@@ -163,7 +163,7 @@ For example: `create_pod pod_object`, `create_replication_controller rc_obj`, `c
 
 Input parameter - object of type `Service`, `Pod`, `ReplicationController`.
 
-The below example is for v1beta3
+The below example is for v1
 
 ```ruby
 service = Service.new
@@ -181,7 +181,7 @@ For example: `update_pod`, `update_service`, `update_replication_controller`, `u
 
 Input parameter - object of type `Pod`, `Service`, `ReplicationController` etc.
 
-The below example is for v1beta3
+The below example is for v1
 
 ```ruby
 client.update_service service1

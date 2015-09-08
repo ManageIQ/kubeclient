@@ -32,7 +32,7 @@ module Kubeclient
     ClientMixin.define_entity_methods(ENTITY_TYPES)
 
     def initialize(uri,
-                   version = 'v1beta3',
+                   version = 'v1',
                    ssl_options: {
                      client_cert: nil,
                      client_key: nil,

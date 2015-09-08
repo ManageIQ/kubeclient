@@ -10,10 +10,10 @@ class TestWatch < MiniTest::Test
     ]
 
     stub_request(:get, %r{.*\/watch/pods})
-      .to_return(body: open_test_json_file('watch_stream_b3.json'),
+      .to_return(body: open_test_json_file('watch_stream.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
 
     client.watch_pods.to_enum.with_index do |notice, index|
       assert_instance_of(Kubeclient::Common::WatchNotice, notice)
@@ -28,7 +28,7 @@ class TestWatch < MiniTest::Test
   def test_watch_pod_failure
     stub_request(:get, %r{.*\/watch/pods}).to_return(status: 404)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
     assert_raises KubeException do
       client.watch_pods.each do
       end

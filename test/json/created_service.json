@@ -1,10 +1,10 @@
 {
     "kind": "Service",
-    "apiVersion": "v1beta3",
+    "apiVersion": "v1",
     "metadata": {
         "name": "guestbook",
         "namespace": "staging",
-        "selfLink": "/api/v1beta3/namespaces/staging/services/guestbook",
+        "selfLink": "/api/v1/namespaces/staging/services/guestbook",
         "uid": "29885239-df58-11e4-bd42-f8b156af4ae1",
         "resourceVersion": "1908",
         "creationTimestamp": "2015-04-10T08:04:07Z",
@@ -24,7 +24,7 @@
         "selector": {
             "name": "guestbook"
         },
-        "portalIP": "10.0.0.99",
+        "clusterIP": "10.0.0.99",
         "sessionAffinity": "None"
     },
     "status": {}

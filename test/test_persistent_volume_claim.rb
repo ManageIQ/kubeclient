@@ -2,7 +2,7 @@ require 'test_helper'
 
 # PersistentVolumeClaim tests
 class TestPersistentVolumeClaim < MiniTest::Test
-  def test_get_from_json_v3
+  def test_get_from_json_v1
     stub_request(:get, %r{/persistentvolumeclaims})
       .to_return(body: open_test_json_file('persistent_volume_claim.json'),
                  status: 200)

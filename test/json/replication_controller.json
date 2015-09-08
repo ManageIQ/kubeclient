@@ -1,10 +1,10 @@
 {
     "kind": "ReplicationController",
-    "apiVersion": "v1beta3",
+    "apiVersion": "v1",
     "metadata": {
         "name": "guestbook-controller",
         "namespace": "default",
-        "selfLink": "/api/v1beta3/replicationcontrollers/guestbook-controller?namespace=default",
+        "selfLink": "/api/v1/replicationcontrollers/guestbook-controller?namespace=default",
         "uid": "c71aa4c0-a240-11e4-a265-3c970e4a436a",
         "resourceVersion": "8",
         "creationTimestamp": "2015-01-22T16:13:02+02:00",
