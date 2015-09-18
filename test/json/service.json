@@ -1,10 +1,10 @@
 {
     "kind": "Service",
-    "apiVersion": "v1beta3",
+    "apiVersion": "v1",
     "metadata": {
         "name": "redis-slave",
         "namespace": "development",
-        "selfLink": "/api/v1beta3/namespaces/development/services/redis-slave",
+        "selfLink": "/api/v1/namespaces/development/services/redis-slave",
         "uid": "bdb80a8f-db93-11e4-b293-f8b156af4ae1",
         "resourceVersion": "2815",
         "creationTimestamp": "2015-04-05T13:00:31Z",
@@ -26,7 +26,7 @@
             "name": "redis",
             "role": "slave"
         },
-        "portalIP": "10.0.0.140",
+        "clusterIP": "10.0.0.140",
         "sessionAffinity": "None"
     },
     "status": {}

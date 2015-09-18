@@ -2,12 +2,12 @@ require 'test_helper'
 
 # Replication Controller entity tests
 class TestReplicationController < MiniTest::Test
-  def test_get_from_json_v3
+  def test_get_from_json_v1
     stub_request(:get, %r{/replicationcontrollers})
-      .to_return(body: open_test_json_file('replication_controller_b3.json'),
+      .to_return(body: open_test_json_file('replication_controller.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
     rc = client.get_replication_controller 'frontendController', 'default'
 
     assert_instance_of(Kubeclient::ReplicationController, rc)
@@ -18,7 +18,7 @@ class TestReplicationController < MiniTest::Test
     assert_equal('guestbook', rc.spec.selector.name)
 
     assert_requested(:get,
-                     'http://localhost:8080/api/v1beta3/namespaces/default/replicationcontrollers/frontendController',
+                     'http://localhost:8080/api/v1/namespaces/default/replicationcontrollers/frontendController',
                      times: 1)
   end
 end

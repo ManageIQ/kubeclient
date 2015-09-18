@@ -1,8 +1,8 @@
 {
     "kind": "ReplicationControllerList",
-    "apiVersion": "v1beta3",
+    "apiVersion": "v1",
     "metadata": {
-        "selfLink": "/api/v1beta3/namespaces/default/replicationcontrollers",
+        "selfLink": "/api/v1/namespaces/default/replicationcontrollers",
         "resourceVersion": "1636"
     },
     "items": [
@@ -10,7 +10,7 @@
             "metadata": {
                 "name": "redis-master-controller",
                 "namespace": "default",
-                "selfLink": "/api/v1beta3/namespaces/default/replicationcontrollers/redis-master-controller?namespace=default",
+                "selfLink": "/api/v1/namespaces/default/replicationcontrollers/redis-master-controller?namespace=default",
                 "uid": "108eb547-cefa-11e4-ac24-3c970e4a436a",
                 "resourceVersion": "1631",
                 "creationTimestamp": "2015-03-20T14:10:14+02:00",
@@ -46,7 +46,9 @@
                                 "resources": {},
                                 "terminationMessagePath": "/dev/termination-log",
                                 "imagePullPolicy": "IfNotPresent",
-                                "capabilities": {}
+                                "securityContext": {
+                                    "capabilities": {}
+                                }
                             }
                         ],
                         "restartPolicy": {

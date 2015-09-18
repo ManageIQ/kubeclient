@@ -1,8 +1,8 @@
 {
     "kind": "ServiceList",
-    "apiVersion": "v1beta3",
+    "apiVersion": "v1",
     "metadata": {
-        "selfLink": "/api/v1beta3/services",
+        "selfLink": "/api/v1/services",
         "resourceVersion": "59"
     },
     "items": [
@@ -10,7 +10,7 @@
             "metadata": {
                 "name": "kubernetes",
                 "namespace": "default",
-                "selfLink": "/api/v1beta3/services/kubernetes?namespace=default",
+                "selfLink": "/api/v1/services/kubernetes?namespace=default",
                 "uid": "016e9dcd-ce39-11e4-ac24-3c970e4a436a",
                 "resourceVersion": "6",
                 "creationTimestamp": "2015-03-19T15:08:16+02:00",
@@ -23,7 +23,7 @@
                 "port": 443,
                 "protocol": "TCP",
                 "selector": null,
-                "portalIP": "10.0.0.2",
+                "clusterIP": "10.0.0.2",
                 "containerPort": 0,
                 "sessionAffinity": "None"
             },
@@ -33,7 +33,7 @@
             "metadata": {
                 "name": "kubernetes-ro",
                 "namespace": "default",
-                "selfLink": "/api/v1beta3/services/kubernetes-ro?namespace=default",
+                "selfLink": "/api/v1/services/kubernetes-ro?namespace=default",
                 "uid": "015b78bf-ce39-11e4-ac24-3c970e4a436a",
                 "resourceVersion": "5",
                 "creationTimestamp": "2015-03-19T15:08:15+02:00",
@@ -46,7 +46,7 @@
                 "port": 80,
                 "protocol": "TCP",
                 "selector": null,
-                "portalIP": "10.0.0.1",
+                "clusterIP": "10.0.0.1",
                 "containerPort": 0,
                 "sessionAffinity": "None"
             },

@@ -1,8 +1,8 @@
 {
     "kind": "PodList",
-    "apiVersion": "v1beta3",
+    "apiVersion": "v1",
     "metadata": {
-        "selfLink": "/api/v1beta3/pods",
+        "selfLink": "/api/v1/pods",
         "resourceVersion": "1315"
     },
     "items": [
@@ -10,7 +10,7 @@
             "metadata": {
                 "name": "redis-master3",
                 "namespace": "default",
-                "selfLink": "/api/v1beta3/pods/redis-master3?namespace=default",
+                "selfLink": "/api/v1/pods/redis-master3?namespace=default",
                 "uid": "1da148b4-cef5-11e4-ac24-3c970e4a436a",
                 "resourceVersion": "1301",
                 "creationTimestamp": "2015-03-20T13:34:48+02:00",
@@ -39,7 +39,9 @@
                         },
                         "terminationMessagePath": "/dev/termination-log",
                         "imagePullPolicy": "IfNotPresent",
-                        "capabilities": {}
+                        "securityContext": {
+                            "capabilities": {}
+                        }
                     },
                     {
                         "name": "php-redis",
@@ -59,7 +61,9 @@
                         },
                         "terminationMessagePath": "/dev/termination-log",
                         "imagePullPolicy": "IfNotPresent",
-                        "capabilities": {}
+                        "securityContext": {
+                            "capabilities": {}
+                        }
                     }
                 ],
                 "restartPolicy": {

@@ -2,7 +2,7 @@ require 'test_helper'
 
 # LimitRange tests
 class TestLimitRange < MiniTest::Test
-  def test_get_from_json_v3
+  def test_get_from_json_v1
     stub_request(:get, %r{/limitranges})
       .to_return(body: open_test_json_file('limit_range.json'),
                  status: 200)

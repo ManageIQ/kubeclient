@@ -1,7 +1,7 @@
 {
    "status" : {},
    "kind" : "Service",
-   "apiVersion" : "v1beta3",
+   "apiVersion" : "v1",
    "spec" : {
       "ports" : [
          {
@@ -11,7 +11,7 @@
             "protocol" : "TCP"
          }
       ],
-      "portalIP" : "1.2.3.4"
+      "clusterIP" : "1.2.3.4"
    },
    "metadata" : {
       "name" : "my_service",

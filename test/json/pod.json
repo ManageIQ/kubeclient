@@ -1,10 +1,10 @@
 {
     "kind": "Pod",
-    "apiVersion": "v1beta3",
+    "apiVersion": "v1",
     "metadata": {
         "name": "redis-master3",
         "namespace": "default",
-        "selfLink": "/api/v1beta3/pods/redis-master3?namespace=default",
+        "selfLink": "/api/v1/pods/redis-master3?namespace=default",
         "uid": "a344023f-a23c-11e4-a36b-3c970e4a436a",
         "resourceVersion": "9",
         "creationTimestamp": "2015-01-22T15:43:24+02:00",

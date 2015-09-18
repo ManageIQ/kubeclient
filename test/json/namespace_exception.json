@@ -1,6 +1,6 @@
 {
     "kind": "Status",
-    "apiVersion": "v1beta3",
+    "apiVersion": "v1",
     "metadata": {},
     "status": "Failure",
     "message": "converting  to : type names don't match (Pod, Namespace)",

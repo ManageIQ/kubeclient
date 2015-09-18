@@ -24,7 +24,7 @@ class TestService < MiniTest::Test
                  hash[:metadata][:labels][:name]
 
     stub_request(:post, %r{namespaces/staging/services})
-      .to_return(body: open_test_json_file('created_service_b3.json'),
+      .to_return(body: open_test_json_file('created_service.json'),
                  status: 201)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/'
@@ -35,9 +35,9 @@ class TestService < MiniTest::Test
     assert_equal(created.spec.ports.size, our_service.spec.ports.size)
   end
 
-  def test_conversion_from_json_v3
+  def test_conversion_from_json_v1
     stub_request(:get, %r{/services})
-      .to_return(body: open_test_json_file('service_b3.json'),
+      .to_return(body: open_test_json_file('service.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/'
@@ -49,8 +49,8 @@ class TestService < MiniTest::Test
     assert_equal('bdb80a8f-db93-11e4-b293-f8b156af4ae1', service.metadata.uid)
     assert_equal('redis-slave', service.metadata.name)
     assert_equal('2815', service.metadata.resourceVersion)
-    assert_equal('v1beta3', service.apiVersion)
-    assert_equal('10.0.0.140', service.spec.portalIP)
+    assert_equal('v1', service.apiVersion)
+    assert_equal('10.0.0.140', service.spec.clusterIP)
     assert_equal('development', service.metadata.namespace)
 
     assert_equal('TCP', service.spec.ports[0].protocol)
@@ -59,7 +59,7 @@ class TestService < MiniTest::Test
     assert_equal('redis-server', service.spec.ports[0].targetPort)
 
     assert_requested(:get,
-                     'http://localhost:8080/api/v1beta3/namespaces/development/services/redis-slave',
+                     'http://localhost:8080/api/v1/namespaces/development/services/redis-slave',
                      times: 1)
   end
 
@@ -74,11 +74,11 @@ class TestService < MiniTest::Test
     stub_request(:delete, %r{/namespaces/default/services})
       .to_return(status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
     client.delete_service our_service.name, 'default'
 
     assert_requested(:delete,
-                     'http://localhost:8080/api/v1beta3/namespaces/default/services/redis-service',
+                     'http://localhost:8080/api/v1/namespaces/default/services/redis-service',
                      times: 1)
   end
 
@@ -98,7 +98,7 @@ class TestService < MiniTest::Test
 
   def test_get_service
     stub_request(:get, %r{/namespaces/development/services/redis-slave})
-      .to_return(body: open_test_json_file('service_b3.json'),
+      .to_return(body: open_test_json_file('service.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/'
@@ -106,7 +106,7 @@ class TestService < MiniTest::Test
     assert_equal('redis-slave', service.metadata.name)
 
     assert_requested(:get,
-                     'http://localhost:8080/api/v1beta3/namespaces/development/services/redis-slave',
+                     'http://localhost:8080/api/v1/namespaces/development/services/redis-slave',
                      times: 1)
   end
 
@@ -120,16 +120,16 @@ class TestService < MiniTest::Test
 
     stub_request(:put, %r{/services/#{name}})\
       .to_return(
-        body: open_test_json_file('service_update_b3.json'),
+        body: open_test_json_file('service_update.json'),
         status: 200
       )
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1beta3'
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
     client.update_entity entity, object
 
     assert_requested(
       :put,
-      "http://localhost:8080/api/v1beta3/services/#{name}",
+      "http://localhost:8080/api/v1/services/#{name}",
       times: 1
     )
   end
