@@ -4,6 +4,10 @@ def open_test_json_file(name)
   File.new(File.join(File.dirname(__FILE__), 'json', name))
 end
 
+def open_test_text_file(name)
+  File.new(File.join(File.dirname(__FILE__), 'txt', name))
+end
+
 # Kubernetes client entity tests
 class KubeClientTest < MiniTest::Test
   def test_json

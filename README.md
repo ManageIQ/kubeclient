@@ -236,6 +236,30 @@ client.proxy_url('pod', 'podname', 5001, 'ns')
 ```
 
 
+#### Get the logs of a pod
+You can get the logs of a running pod:
+
+```ruby
+client.get_pod_log('pod-name', 'default')
+ => "Running...\nRunning...\nRunning...\n"
+```
+
+If that pod has more than one container, you must specify the container:
+
+```ruby
+client.get_pod_log('pod-name', 'default', container: 'ruby')
+ => "..."
+```
+
+You can also watch the logs of a pod to get a stream of data:
+
+```ruby
+watcher = client.watch_pod_log('pod-name', 'default', container: 'ruby')
+watcher.each do |line|
+  puts line
+end
+```
+
 
 ## Contributing
 

@@ -19,12 +19,13 @@ module Kubeclient
 
         @http.request(request) do |response|
           unless response.is_a? Net::HTTPSuccess
-            fail KubeException.new(response.code, response.message)
+            fail KubeException.new(response.code, response.message, response)
           end
+          is_json = response['Content-Type'] == 'application/json'
           response.read_body do |chunk|
             buffer << chunk
             while (line = buffer.slice!(/.+\n/))
-              yield WatchNotice.new(JSON.parse(line))
+              yield is_json ? WatchNotice.new(JSON.parse(line)) : line.chomp
             end
           end
         end
