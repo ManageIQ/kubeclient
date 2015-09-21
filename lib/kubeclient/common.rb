@@ -135,7 +135,7 @@ module Kubeclient
         uri.query = URI.encode_www_form('resourceVersion' => resource_version)
       end
 
-      Kubeclient::Common::WatchStream.new(uri, net_http_options(uri))
+      Kubeclient::Common::WatchStream.new(uri, net_http_options(uri), format: :json)
     end
 
     def get_entities(entity_type, klass, options = {})
@@ -240,27 +240,27 @@ module Kubeclient
       end
     end
 
-    def get_pod_log(pod_name, namespace = nil, container: nil, previous: false)
+    def get_pod_log(pod_name, namespace, container: nil, previous: false)
       params = { params: {} }
       params[:params][:previous] = true if previous
       params[:params][:container] = container if container
 
-      ns = build_namespace_prefix(namespace || 'default')
+      ns = build_namespace_prefix(namespace)
       handle_exception do
         rest_client[ns + "pods/#{pod_name}/log"]
           .get(params.merge(@headers))
       end
     end
 
-    def watch_pod_log(pod_name, namespace = nil, container: nil)
+    def watch_pod_log(pod_name, namespace, container: nil)
       params = 'follow'
       params += "&container=#{container}" if container
 
-      ns = build_namespace_prefix(namespace || 'default')
+      ns = build_namespace_prefix(namespace)
       uri = @api_endpoint
             .merge("#{@api_endpoint.path}/#{@api_version}/#{ns}/pods/#{pod_name}/log?#{params}")
 
-      Kubeclient::Common::WatchStream.new(uri, net_http_options(uri))
+      Kubeclient::Common::WatchStream.new(uri, net_http_options(uri), format: :text)
     end
 
     def resource_name(entity_type)

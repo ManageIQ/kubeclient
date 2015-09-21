@@ -251,6 +251,14 @@ client.get_pod_log('pod-name', 'default', container: 'ruby')
  => "..."
 ```
 
+If a container in a pod terminates, a new container is started, and you want to
+retrieve the logs of the dead container, you can pass in the `previous` option:
+
+```ruby
+client.get_pod_log('pod-name', 'default', previous: true)
+ => "..."
+```
+
 You can also watch the logs of a pod to get a stream of data:
 
 ```ruby

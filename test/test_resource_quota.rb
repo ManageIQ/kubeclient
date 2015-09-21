@@ -4,7 +4,7 @@ require 'test_helper'
 class TestResourceQuota < MiniTest::Test
   def test_get_from_json_v1
     stub_request(:get, %r{/resourcequotas})
-      .to_return(body: open_test_json_file('resource_quota.json'),
+      .to_return(body: open_test_file('resource_quota.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'

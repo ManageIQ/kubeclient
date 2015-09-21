@@ -4,10 +4,11 @@ module Kubeclient
   module Common
     # HTTP Stream used to watch changes on entities
     class WatchStream
-      def initialize(uri, options)
+      def initialize(uri, http_options, format: :json)
         @uri = uri
         @http = nil
-        @options = options.merge(read_timeout: nil)
+        @options = http_options.merge(read_timeout: nil)
+        @format = format
       end
 
       def each
@@ -21,11 +22,10 @@ module Kubeclient
           unless response.is_a? Net::HTTPSuccess
             fail KubeException.new(response.code, response.message, response)
           end
-          is_json = response['Content-Type'] == 'application/json'
           response.read_body do |chunk|
             buffer << chunk
             while (line = buffer.slice!(/.+\n/))
-              yield is_json ? WatchNotice.new(JSON.parse(line)) : line.chomp
+              yield @format == :json ? WatchNotice.new(JSON.parse(line)) : line.chomp
             end
           end
         end
