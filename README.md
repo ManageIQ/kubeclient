@@ -124,10 +124,18 @@ Such as: `get_pods`, `get_secrets`, `get_services`, `get_nodes`, `get_replicatio
 pods = client.get_pods
 ```
 
+Get all entities of a specific type in a namespace:<br>
+
+```ruby
+services = client.get_services(namespace: 'development')
+```
+
 You can get entities which have specific labels by specifying a parameter named `label_selector` (named `labelSelector` in Kubernetes server):
+
 ```ruby
 pods = client.get_pods(label_selector: 'name=redis-master')
 ```
+
 You can specify multiple labels (that option will return entities which have both labels:
 ```ruby
 pods = client.get_pods(label_selector: 'name=redis-master,app=redis')
