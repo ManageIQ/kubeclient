@@ -4,7 +4,7 @@ require 'test_helper'
 class TestPod < MiniTest::Test
   def test_get_from_json_v1
     stub_request(:get, %r{/pods})
-      .to_return(body: open_test_json_file('pod.json'),
+      .to_return(body: open_test_file('pod.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'

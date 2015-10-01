@@ -50,7 +50,7 @@ module Kubeclient
         json_error_msg = {}
       end
       err_message = json_error_msg['message'] || e.message
-      raise KubeException.new(e.http_code, err_message)
+      raise KubeException.new(e.http_code, err_message, e.response)
     end
 
     def handle_uri(uri, path)
@@ -135,20 +135,7 @@ module Kubeclient
         uri.query = URI.encode_www_form('resourceVersion' => resource_version)
       end
 
-      options = {
-        use_ssl: uri.scheme == 'https',
-        ca_file: @ssl_options[:ca_file],
-        # ruby Net::HTTP uses verify_mode instead of verify_ssl
-        # http://ruby-doc.org/stdlib-1.9.3/libdoc/net/http/rdoc/Net/HTTP.html
-        verify_mode: @ssl_options[:verify_ssl],
-        cert: @ssl_options[:client_cert],
-        key: @ssl_options[:client_key],
-        basic_auth_user: @auth_options[:username],
-        basic_auth_password: @auth_options[:password],
-        headers: @headers
-      }
-
-      Kubeclient::Common::WatchStream.new(uri, options)
+      Kubeclient::Common::WatchStream.new(uri, net_http_options(uri), format: :json)
     end
 
     def get_entities(entity_type, klass, options = {})
@@ -253,6 +240,29 @@ module Kubeclient
       end
     end
 
+    def get_pod_log(pod_name, namespace, container: nil, previous: false)
+      params = { params: {} }
+      params[:params][:previous] = true if previous
+      params[:params][:container] = container if container
+
+      ns = build_namespace_prefix(namespace)
+      handle_exception do
+        rest_client[ns + "pods/#{pod_name}/log"]
+          .get(params.merge(@headers))
+      end
+    end
+
+    def watch_pod_log(pod_name, namespace, container: nil)
+      params = 'follow'
+      params += "&container=#{container}" if container
+
+      ns = build_namespace_prefix(namespace)
+      uri = @api_endpoint
+            .merge("#{@api_endpoint.path}/#{@api_version}/#{ns}/pods/#{pod_name}/log?#{params}")
+
+      Kubeclient::Common::WatchStream.new(uri, net_http_options(uri), format: :text)
+    end
+
     def resource_name(entity_type)
       ClientMixin.pluralize_entity entity_type.downcase
     end
@@ -294,6 +304,28 @@ module Kubeclient
 
       msg = "Cannot read token file #{@auth_options[:bearer_token_file]}"
       fail ArgumentError, msg unless File.readable?(@auth_options[:bearer_token_file])
+    end
+
+    def net_http_options(uri)
+      options = {
+        basic_auth_user: @auth_options[:username],
+        basic_auth_password: @auth_options[:password],
+        headers: @headers
+      }
+
+      if uri.scheme == 'https'
+        options.merge!(
+          use_ssl: true,
+          ca_file: @ssl_options[:ca_file],
+          cert: @ssl_options[:client_cert],
+          key: @ssl_options[:client_key],
+          # ruby Net::HTTP uses verify_mode instead of verify_ssl
+          # http://ruby-doc.org/stdlib-1.9.3/libdoc/net/http/rdoc/Net/HTTP.html
+          verify_mode: @ssl_options[:verify_ssl]
+        )
+      end
+
+      options
     end
   end
 end
