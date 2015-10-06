@@ -7,6 +7,7 @@ require 'kubeclient/kube_exception'
 require 'kubeclient/watch_notice'
 require 'kubeclient/watch_stream'
 require 'kubeclient/common'
+require 'kubeclient/config'
 
 module Kubeclient
   # Kubernetes Client

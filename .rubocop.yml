@@ -8,3 +8,5 @@ Metrics/LineLength:
   Max: 100
 Metrics/ParameterLists:
   Max: 8
+Metrics/CyclomaticComplexity:
+  Max: 8
