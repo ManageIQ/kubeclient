@@ -35,9 +35,10 @@ module Kubeclient
                    version = 'v1',
                    ssl_options: {
                      client_cert: nil,
-                     client_key: nil,
-                     ca_file: nil,
-                     verify_ssl: OpenSSL::SSL::VERIFY_PEER
+                     client_key:  nil,
+                     ca_file:     nil,
+                     cert_store:  nil,
+                     verify_ssl:  OpenSSL::SSL::VERIFY_PEER
                    },
                    auth_options: {
                      username:          nil,
