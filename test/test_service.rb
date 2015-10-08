@@ -24,7 +24,7 @@ class TestService < MiniTest::Test
                  hash[:metadata][:labels][:name]
 
     stub_request(:post, %r{namespaces/staging/services})
-      .to_return(body: open_test_json_file('created_service.json'),
+      .to_return(body: open_test_file('created_service.json'),
                  status: 201)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/'
@@ -37,7 +37,7 @@ class TestService < MiniTest::Test
 
   def test_conversion_from_json_v1
     stub_request(:get, %r{/services})
-      .to_return(body: open_test_json_file('service.json'),
+      .to_return(body: open_test_file('service.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/'
@@ -98,7 +98,7 @@ class TestService < MiniTest::Test
 
   def test_get_service
     stub_request(:get, %r{/namespaces/development/services/redis-slave})
-      .to_return(body: open_test_json_file('service.json'),
+      .to_return(body: open_test_file('service.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/'
@@ -120,7 +120,7 @@ class TestService < MiniTest::Test
 
     stub_request(:put, %r{/services/#{name}})\
       .to_return(
-        body: open_test_json_file('service_update.json'),
+        body: open_test_file('service_update.json'),
         status: 200
       )
 

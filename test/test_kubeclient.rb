@@ -1,9 +1,5 @@
 require 'test_helper'
 
-def open_test_json_file(name)
-  File.new(File.join(File.dirname(__FILE__), 'json', name))
-end
-
 # Kubernetes client entity tests
 class KubeClientTest < MiniTest::Test
   def test_json
@@ -44,7 +40,7 @@ class KubeClientTest < MiniTest::Test
 
   def test_exception
     stub_request(:post, %r{/services})
-      .to_return(body: open_test_json_file('namespace_exception.json'),
+      .to_return(body: open_test_file('namespace_exception.json'),
                  status: 409)
 
     service = Kubeclient::Service.new
@@ -69,7 +65,7 @@ class KubeClientTest < MiniTest::Test
 
   def test_api
     stub_request(:get, 'http://localhost:8080/api')
-      .to_return(status: 200, body: open_test_json_file('versions_list.json'))
+      .to_return(status: 200, body: open_test_file('versions_list.json'))
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
     response = client.api
@@ -90,7 +86,7 @@ class KubeClientTest < MiniTest::Test
 
   def test_api_valid
     stub_request(:get, 'http://localhost:8080/api')
-      .to_return(status: 200, body: open_test_json_file('versions_list.json'))
+      .to_return(status: 200, body: open_test_file('versions_list.json'))
 
     args = ['http://localhost:8080/api/']
 
@@ -102,7 +98,7 @@ class KubeClientTest < MiniTest::Test
 
   def test_api_valid_with_invalid_version
     stub_request(:get, 'http://localhost:8080/api')
-      .to_return(status: 200, body: open_test_json_file('versions_list.json'))
+      .to_return(status: 200, body: open_test_file('versions_list.json'))
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'foobar1'
     refute client.api_valid?
@@ -142,7 +138,7 @@ class KubeClientTest < MiniTest::Test
 
   def test_nonjson_exception
     stub_request(:get, %r{/servic})
-      .to_return(body: open_test_json_file('service_illegal_json_404.json'),
+      .to_return(body: open_test_file('service_illegal_json_404.json'),
                  status: 404)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
@@ -158,7 +154,7 @@ class KubeClientTest < MiniTest::Test
 
   def test_entity_list
     stub_request(:get, %r{/services})
-      .to_return(body: open_test_json_file('entity_list.json'),
+      .to_return(body: open_test_file('entity_list.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
@@ -178,7 +174,7 @@ class KubeClientTest < MiniTest::Test
 
   def test_empty_list
     stub_request(:get, %r{/pods})
-      .to_return(body: open_test_json_file('empty_pod_list.json'),
+      .to_return(body: open_test_file('empty_pod_list.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
@@ -189,49 +185,49 @@ class KubeClientTest < MiniTest::Test
 
   def test_get_all
     stub_request(:get, %r{/services})
-      .to_return(body: open_test_json_file('service_list.json'),
+      .to_return(body: open_test_file('service_list.json'),
                  status: 200)
 
     stub_request(:get, %r{/pods})
-      .to_return(body: open_test_json_file('pod_list.json'),
+      .to_return(body: open_test_file('pod_list.json'),
                  status: 200)
 
     stub_request(:get, %r{/nodes})
-      .to_return(body: open_test_json_file('node_list.json'),
+      .to_return(body: open_test_file('node_list.json'),
                  status: 200)
 
     stub_request(:get, %r{/replicationcontrollers})
-      .to_return(body: open_test_json_file('replication_controller_list.json'), status: 200)
+      .to_return(body: open_test_file('replication_controller_list.json'), status: 200)
 
     stub_request(:get, %r{/events})
-      .to_return(body: open_test_json_file('event_list.json'), status: 200)
+      .to_return(body: open_test_file('event_list.json'), status: 200)
 
     stub_request(:get, %r{/endpoints})
-      .to_return(body: open_test_json_file('endpoint_list.json'),
+      .to_return(body: open_test_file('endpoint_list.json'),
                  status: 200)
 
     stub_request(:get, %r{/namespaces})
-      .to_return(body: open_test_json_file('namespace_list.json'),
+      .to_return(body: open_test_file('namespace_list.json'),
                  status: 200)
 
     stub_request(:get, %r{/secrets})
-      .to_return(body: open_test_json_file('secret_list.json'),
+      .to_return(body: open_test_file('secret_list.json'),
                  status: 200)
 
     stub_request(:get, %r{/resourcequotas})
-      .to_return(body: open_test_json_file('resource_quota_list.json'),
+      .to_return(body: open_test_file('resource_quota_list.json'),
                  status: 200)
 
     stub_request(:get, %r{/limitranges})
-      .to_return(body: open_test_json_file('limit_range_list.json'),
+      .to_return(body: open_test_file('limit_range_list.json'),
                  status: 200)
 
     stub_request(:get, %r{/persistentvolumes})
-      .to_return(body: open_test_json_file('persistent_volume_list.json'),
+      .to_return(body: open_test_file('persistent_volume_list.json'),
                  status: 200)
 
     stub_request(:get, %r{/persistentvolumeclaims})
-      .to_return(body: open_test_json_file('persistent_volume_claim_list.json'),
+      .to_return(body: open_test_file('persistent_volume_claim_list.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
@@ -260,7 +256,7 @@ class KubeClientTest < MiniTest::Test
   def test_api_bearer_token_with_params_success
     stub_request(:get, 'http://localhost:8080/api/v1/pods?labelSelector=name=redis-master')
       .with(headers: { Authorization: 'Bearer valid_token' })
-      .to_return(body: open_test_json_file('pod_list.json'),
+      .to_return(body: open_test_file('pod_list.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/',
@@ -277,7 +273,7 @@ class KubeClientTest < MiniTest::Test
   def test_api_bearer_token_success
     stub_request(:get, 'http://localhost:8080/api/v1/pods')
       .with(headers: { Authorization: 'Bearer valid_token' })
-      .to_return(body: open_test_json_file('pod_list.json'),
+      .to_return(body: open_test_file('pod_list.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/',
@@ -311,7 +307,7 @@ class KubeClientTest < MiniTest::Test
 
   def test_api_basic_auth_success
     stub_request(:get, 'http://username:password@localhost:8080/api/v1/pods')
-      .to_return(body: open_test_json_file('pod_list.json'),
+      .to_return(body: open_test_file('pod_list.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/',
@@ -331,7 +327,7 @@ class KubeClientTest < MiniTest::Test
 
   def test_api_basic_auth_back_comp_success
     stub_request(:get, 'http://username:password@localhost:8080/api/v1/pods')
-      .to_return(body: open_test_json_file('pod_list.json'),
+      .to_return(body: open_test_file('pod_list.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/',
@@ -444,7 +440,7 @@ class KubeClientTest < MiniTest::Test
   def test_api_bearer_token_file_success
     stub_request(:get, 'http://localhost:8080/api/v1/pods')
       .with(headers: { Authorization: 'Bearer valid_token' })
-      .to_return(body: open_test_json_file('pod_list.json'),
+      .to_return(body: open_test_file('pod_list.json'),
                  status: 200)
 
     file = File.join(File.dirname(__FILE__), 'valid_token_file')
@@ -493,7 +489,7 @@ class KubeClientTest < MiniTest::Test
   def test_nil_items
     # handle https://github.com/kubernetes/kubernetes/issues/13096
     stub_request(:get, %r{/persistentvolumeclaims})
-      .to_return(body: open_test_json_file('persistent_volume_claims_nil_items.json'),
+      .to_return(body: open_test_file('persistent_volume_claims_nil_items.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'

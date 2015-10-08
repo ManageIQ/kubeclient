@@ -4,7 +4,7 @@ require 'test_helper'
 class TestSecret < MiniTest::Test
   def test_get_secret_v1
     stub_request(:get, %r{/secrets})
-      .to_return(body: open_test_json_file('created_secret.json'),
+      .to_return(body: open_test_file('created_secret.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
@@ -35,7 +35,7 @@ class TestSecret < MiniTest::Test
 
   def test_create_secret_v1
     stub_request(:post, %r{/secrets})
-      .to_return(body: open_test_json_file('created_secret.json'),
+      .to_return(body: open_test_file('created_secret.json'),
                  status: 201)
 
     secret = Kubeclient::Secret.new
