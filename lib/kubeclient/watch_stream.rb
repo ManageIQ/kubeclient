@@ -19,7 +19,7 @@ module Kubeclient
 
         @http.request(request) do |response|
           unless response.is_a? Net::HTTPSuccess
-            fail KubeException.new(response.code, response.message)
+            fail KubeException.new(response.code, response.message, response)
           end
           response.read_body do |chunk|
             buffer << chunk
