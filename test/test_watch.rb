@@ -34,4 +34,20 @@ class TestWatch < MiniTest::Test
       end
     end
   end
+
+  # Ensure that WatchStream respects a format that's not JSON
+  def test_watch_stream_text
+    url = 'http://www.example.com/foobar'
+    expected_lines = open_test_file('pod_log.txt').read.split("\n")
+
+    stub_request(:get, url)
+      .to_return(body: open_test_file('pod_log.txt'),
+                 status: 200)
+
+    stream = Kubeclient::Common::WatchStream.new(URI.parse(url), {}, format: :txt)
+    stream.to_enum.with_index do |line, index|
+      assert_instance_of(String, line)
+      assert_equal(expected_lines[index], line)
+    end
+  end
 end
