@@ -4,7 +4,7 @@ require 'test_helper'
 class TestNamespace < MiniTest::Test
   def test_get_namespace_v1
     stub_request(:get, %r{/namespaces})
-      .to_return(body: open_test_json_file('namespace.json'),
+      .to_return(body: open_test_file('namespace.json'),
                  status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
@@ -38,7 +38,7 @@ class TestNamespace < MiniTest::Test
 
   def test_create_namespace
     stub_request(:post, %r{/namespaces})
-      .to_return(body: open_test_json_file('created_namespace.json'),
+      .to_return(body: open_test_file('created_namespace.json'),
                  status: 201)
 
     namespace = Kubeclient::Namespace.new
