@@ -175,12 +175,19 @@ The below example is for v1
 
 ```ruby
 service = Service.new
+service.metadata = {}
 service.metadata.name = "redis-master"
-service.spec.port = 6379
-service.spec.containerPort  = "redis-server"
+service.metadata.namespace = 'staging'
+service.spec = {}
+service.spec.ports = [{ 'port' => 6379,
+                                'targetPort' => 'redis-server'
+                              }]
 service.spec.selector = {}
 service.spec.selector.name = "redis"
 service.spec.selector.role = "master"
+service.metadata.labels = {}
+service.metadata.labels.app = 'redis'
+service.metadata.labels.role = 'slave'
 client.create_service service`
 ```
 
