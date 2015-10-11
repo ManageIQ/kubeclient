@@ -50,7 +50,7 @@ module Kubeclient
         json_error_msg = {}
       end
       err_message = json_error_msg['message'] || e.message
-      raise KubeException.new(e.http_code, err_message)
+      raise KubeException.new(e.http_code, err_message, e.response)
     end
 
     def handle_uri(uri, path)

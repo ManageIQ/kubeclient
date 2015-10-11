@@ -290,10 +290,11 @@ class KubeClientTest < MiniTest::Test
   def test_api_bearer_token_failure
     error_message = '"/api/v1/pods" is forbidden because ' \
                     'system:anonymous cannot list on pods in'
+    response = OpenStruct.new(code: 401, message: error_message)
 
     stub_request(:get, 'http://localhost:8080/api/v1/pods')
       .with(headers: { Authorization: 'Bearer invalid_token' })
-      .to_raise(KubeException.new(403, error_message))
+      .to_raise(KubeException.new(403, error_message, response))
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/',
                                     auth_options: {
@@ -303,6 +304,7 @@ class KubeClientTest < MiniTest::Test
     exception = assert_raises(KubeException) { client.get_pods }
     assert_equal(403, exception.error_code)
     assert_equal(error_message, exception.message)
+    assert_equal(response, exception.response)
   end
 
   def test_api_basic_auth_success
@@ -347,9 +349,10 @@ class KubeClientTest < MiniTest::Test
 
   def test_api_basic_auth_failure
     error_message = 'HTTP status code 401, 401 Unauthorized'
+    response = OpenStruct.new(code: 401, message: '401 Unauthorized')
 
     stub_request(:get, 'http://username:password@localhost:8080/api/v1/pods')
-      .to_raise(KubeException.new(401, error_message))
+      .to_raise(KubeException.new(401, error_message, response))
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/',
                                     auth_options: {
@@ -360,6 +363,7 @@ class KubeClientTest < MiniTest::Test
     exception = assert_raises(KubeException) { client.get_pods }
     assert_equal(401, exception.error_code)
     assert_equal(error_message, exception.message)
+    assert_equal(response, exception.response)
     assert_requested(:get,
                      'http://username:password@localhost:8080/api/v1/pods',
                      times: 1)
