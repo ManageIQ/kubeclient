@@ -4,15 +4,16 @@ module Kubeclient
   module Common
     # HTTP Stream used to watch changes on entities
     class WatchStream
-      def initialize(uri, options)
+      def initialize(uri, http_options, format: :json)
         @uri = uri
         @http = nil
-        @options = options.merge(read_timeout: nil)
+        @http_options = http_options.merge(read_timeout: nil)
+        @format = format
       end
 
       def each
         @finished = false
-        @http = Net::HTTP.start(@uri.host, @uri.port, @options)
+        @http = Net::HTTP.start(@uri.host, @uri.port, @http_options)
 
         buffer = ''
         request = generate_request
@@ -24,7 +25,7 @@ module Kubeclient
           response.read_body do |chunk|
             buffer << chunk
             while (line = buffer.slice!(/.+\n/))
-              yield WatchNotice.new(JSON.parse(line))
+              yield @format == :json ? WatchNotice.new(JSON.parse(line)) : line.chomp
             end
           end
         end
@@ -34,12 +35,12 @@ module Kubeclient
 
       def generate_request
         request = Net::HTTP::Get.new(@uri)
-        if @options[:basic_auth_user] && @options[:basic_auth_password]
-          request.basic_auth @options[:basic_auth_user],
-                             @options[:basic_auth_password]
+        if @http_options[:basic_auth_user] && @http_options[:basic_auth_password]
+          request.basic_auth @http_options[:basic_auth_user],
+                             @http_options[:basic_auth_password]
         end
 
-        @options[:headers].each do |header, value|
+        @http_options.fetch(:headers, {}).each do |header, value|
           request[header.to_s] = value
         end
         request
