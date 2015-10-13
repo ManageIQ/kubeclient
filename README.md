@@ -242,6 +242,38 @@ client.proxy_url('pod', 'podname', 5001, 'ns')
  => "https://localhost.localdomain:8443/api/v1/namespaces/ns/pods/podname:5001/proxy"
 ```
 
+#### Get the logs of a pod
+You can get the logs of a running pod, specifying the name of the pod and the
+namespace where the pod is running:
+
+```ruby
+client.get_pod_log('pod-name', 'default')
+ => "Running...\nRunning...\nRunning...\n"
+```
+
+If that pod has more than one container, you must specify the container:
+
+```ruby
+client.get_pod_log('pod-name', 'default', container: 'ruby')
+ => "..."
+```
+
+If a container in a pod terminates, a new container is started, and you want to
+retrieve the logs of the dead container, you can pass in the `:previous` option:
+
+```ruby
+client.get_pod_log('pod-name', 'default', previous: true)
+ => "..."
+```
+
+You can also watch the logs of a pod to get a stream of data:
+
+```ruby
+watcher = client.watch_pod_log('pod-name', 'default', container: 'ruby')
+watcher.each do |line|
+  puts line
+end
+```
 
 
 ## Contributing
