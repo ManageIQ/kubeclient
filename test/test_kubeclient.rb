@@ -230,9 +230,14 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_file('persistent_volume_claim_list.json'),
                  status: 200)
 
+    stub_request(:get, %r{/componentstatuses})
+      .to_return(body: open_test_json_file('component_status_list.json'),
+                 status: 200)
+
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
     result = client.all_entities
-    assert_equal(12, result.keys.size)
+    assert_equal(13, result.keys.size)
+
     assert_instance_of(Kubeclient::Common::EntityList, result['node'])
     assert_instance_of(Kubeclient::Common::EntityList, result['service'])
     assert_instance_of(Kubeclient::Common::EntityList,
@@ -251,6 +256,7 @@ class KubeClientTest < MiniTest::Test
     assert_instance_of(Kubeclient::LimitRange, result['limit_range'][0])
     assert_instance_of(Kubeclient::PersistentVolume, result['persistent_volume'][0])
     assert_instance_of(Kubeclient::PersistentVolumeClaim, result['persistent_volume_claim'][0])
+    assert_instance_of(Kubeclient::ComponentStatus, result['component_status'][0])
   end
 
   def test_api_bearer_token_with_params_success

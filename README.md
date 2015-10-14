@@ -6,7 +6,7 @@
 [![Dependency Status](https://gemnasium.com/abonas/kubeclient.svg)](https://gemnasium.com/abonas/kubeclient)
 
 A Ruby client for Kubernetes REST api.
-The client supports GET, POST, PUT, DELETE on nodes, pods, secrets, services, replication controllers, namespaces, resource quotas, limit ranges, endpoints, persistent volumes and persistent volume claims.
+The client supports GET, POST, PUT, DELETE on nodes, pods, secrets, services, replication controllers, namespaces, resource quotas, limit ranges, endpoints, persistent volumes, persistent volume claims and component statuses.
 The client currently supports Kubernetes REST api version v1.
 
 ## Installation
@@ -118,7 +118,7 @@ client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
 ## Examples:
 
 #### Get all instances of a specific entity type
-Such as: `get_pods`, `get_secrets`, `get_services`, `get_nodes`, `get_replication_controllers`, `get_resource_quotas`, `get_limit_ranges`, `get_persistent_volumes`, `get_persistent_volume_claims`
+Such as: `get_pods`, `get_secrets`, `get_services`, `get_nodes`, `get_replication_controllers`, `get_resource_quotas`, `get_limit_ranges`, `get_persistent_volumes`, `get_persistent_volume_claims`, `get_component_statuses`
 
 ```ruby
 pods = client.get_pods
@@ -142,7 +142,7 @@ pods = client.get_pods(label_selector: 'name=redis-master,app=redis')
 ```
 
 #### Get a specific instance of an entity (by name)
-Such as: `get_service "service name"` , `get_pod "pod name"` , `get_replication_controller "rc name"`, `get_secret "secret name"`, `get_resource_quota "resource quota name"`, `get_limit_range "limit range name"` , `get_persistent_volume "persistent volume name"` , `get_persistent_volume_claim "persistent volume claim name"`
+Such as: `get_service "service name"` , `get_pod "pod name"` , `get_replication_controller "rc name"`, `get_secret "secret name"`, `get_resource_quota "resource quota name"`, `get_limit_range "limit range name"` , `get_persistent_volume "persistent volume name"` , `get_persistent_volume_claim "persistent volume claim name"`, `get_component_status "component name"`
 
 The GET request should include the namespace name, except for nodes and namespaces entities.
 
@@ -203,7 +203,7 @@ client.update_service service1
 ```
 
 #### Get all entities of all types : all_entities
-Returns a hash with 12 keys (node, secret, service, pod, replication_controller, namespace, resource_quota, limit_range, endpoint, event, persistent_volume and persistent_volume_claim). Each key points to an EntityList of same type.
+Returns a hash with 13 keys (node, secret, service, pod, replication_controller, namespace, resource_quota, limit_range, endpoint, event, persistent_volume, persistent_volume_claim and component_status). Each key points to an EntityList of same type.
 
 This method is a convenience method instead of calling each entity's get method separately.
 
