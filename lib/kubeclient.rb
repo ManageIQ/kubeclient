@@ -19,7 +19,7 @@ module Kubeclient
     # and especially since currently the class body is empty
     ENTITY_TYPES = %w(Pod Service ReplicationController Node Event Endpoint
                       Namespace Secret ResourceQuota LimitRange PersistentVolume
-                      PersistentVolumeClaim).map do |et|
+                      PersistentVolumeClaim ComponentStatus).map do |et|
       clazz = Class.new(RecursiveOpenStruct) do
         def initialize(hash = nil, args = {})
           args.merge!(recurse_over_arrays: true)
