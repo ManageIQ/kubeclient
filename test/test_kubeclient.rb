@@ -148,7 +148,7 @@ class KubeClientTest < MiniTest::Test
     end
 
     assert_instance_of(KubeException, exception)
-    assert_equal('404 Resource Not Found', exception.message)
+    assert(exception.message.include?('Not Found'))
     assert_equal(404, exception.error_code)
   end
 
