@@ -50,4 +50,55 @@ class TestWatch < MiniTest::Test
       assert_equal(expected_lines[index], line)
     end
   end
+
+  def test_watch_with_resource_version
+    api_host = 'http://localhost:8080/api'
+    version = '1995'
+
+    stub_request(:get, %r{.*\/watch/events})
+      .to_return(body: open_test_file('watch_stream.json'),
+                 status: 200)
+
+    client = Kubeclient::Client.new api_host, 'v1'
+    results = client.watch_events(version).to_enum
+
+    assert_equal(3, results.count)
+    assert_requested(:get,
+                     "#{api_host}/v1/watch/events?resourceVersion=#{version}",
+                     times: 1)
+  end
+
+  def test_watch_with_label_selector
+    api_host = 'http://localhost:8080/api'
+    selector = 'name=redis-master'
+
+    stub_request(:get, %r{.*\/watch/events})
+      .to_return(body: open_test_file('watch_stream.json'),
+                 status: 200)
+
+    client = Kubeclient::Client.new api_host, 'v1'
+    results = client.watch_events(label_selector: selector).to_enum
+
+    assert_equal(3, results.count)
+    assert_requested(:get,
+                     "#{api_host}/v1/watch/events?labelSelector=#{selector}",
+                     times: 1)
+  end
+
+  def test_watch_with_field_selector
+    api_host = 'http://localhost:8080/api'
+    selector = 'involvedObject.kind=Pod'
+
+    stub_request(:get, %r{.*\/watch/events})
+      .to_return(body: open_test_file('watch_stream.json'),
+                 status: 200)
+
+    client = Kubeclient::Client.new api_host, 'v1'
+    results = client.watch_events(field_selector: selector).to_enum
+
+    assert_equal(3, results.count)
+    assert_requested(:get,
+                     "#{api_host}/v1/watch/events?fieldSelector=#{selector}",
+                     times: 1)
+  end
 end
