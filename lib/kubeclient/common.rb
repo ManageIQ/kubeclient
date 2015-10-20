@@ -16,6 +16,7 @@ module Kubeclient
         client_cert: nil,
         client_key: nil,
         ca_file: nil,
+        cert_store: nil,
         verify_ssl: OpenSSL::SSL::VERIFY_PEER
       },
       auth_options: {
@@ -111,6 +112,7 @@ module Kubeclient
       path ||= @api_endpoint.path
       options = {
         ssl_ca_file: @ssl_options[:ca_file],
+        ssl_cert_store: @ssl_options[:cert_store],
         verify_ssl: @ssl_options[:verify_ssl],
         ssl_client_cert: @ssl_options[:client_cert],
         ssl_client_key: @ssl_options[:client_key],
@@ -295,6 +297,7 @@ module Kubeclient
           use_ssl: true,
           ca_file: @ssl_options[:ca_file],
           cert: @ssl_options[:client_cert],
+          cert_store: @ssl_options[:cert_store],
           key: @ssl_options[:client_key],
           # ruby Net::HTTP uses verify_mode instead of verify_ssl
           # http://ruby-doc.org/stdlib-1.9.3/libdoc/net/http/rdoc/Net/HTTP.html

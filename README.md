@@ -58,6 +58,19 @@ client = Kubeclient::Client.new 'https://localhost:8443/api/' , "v1",
                                 ssl_options: ssl_options
 ```
 
+As an alternative to the `ca_file` it's possible to use the `cert_store`:
+
+```ruby
+cert_store = OpenSSL::X509::Store.new
+cert_store.add_cert(OpenSSL::X509::Certificate.new(ca_cert_data))
+ssl_options = {
+  cert_store: cert_store
+  verify_ssl: OpenSSL::SSL::VERIFY_PEER
+}
+client = Kubeclient::Client.new 'https://localhost:8443/api/' , "v1",
+                                ssl_options: ssl_options
+```
+
 For testing and development purpose you can disable the ssl check with:
 
 ```ruby
