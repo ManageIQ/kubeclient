@@ -80,8 +80,12 @@ module Kubeclient
 
         # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
         define_method("watch_#{entity_name_plural}") \
-        do |resource_version = nil|
-          watch_entities(entity_type, resource_version)
+        do |options = {}|
+          # This method used to take resource_version as a param, so
+          # this conversion is to keep backwards compatibility
+          options = { resource_version: options } unless options.is_a?(Hash)
+
+          watch_entities(entity_type, options)
         end
 
         # get a single entity of a specific type by name
@@ -128,28 +132,41 @@ module Kubeclient
       end
     end
 
-    def watch_entities(entity_type, resource_version = nil)
-      resource = resource_name(entity_type.to_s)
-      uri = @api_endpoint
-            .merge("#{@api_endpoint.path}/#{@api_version}/watch/#{resource}")
+    # Accepts the following string options:
+    #   :namespace - the namespace of the entity.
+    #   :name - the name of the entity to watch.
+    #   :label_selector - a selector to restrict the list of returned objects by their labels.
+    #   :field_selector - a selector to restrict the list of returned objects by their fields.
+    #   :resource_version - shows changes that occur after that particular version of a resource.
+    def watch_entities(entity_type, options = {})
+      ns = build_namespace_prefix(options[:namespace])
 
-      unless resource_version.nil?
-        uri.query = URI.encode_www_form('resourceVersion' => resource_version)
+      path = "watch/#{ns}#{resource_name(entity_type.to_s)}"
+      path += "/#{options[:name]}" if options[:name]
+      uri = @api_endpoint.merge("#{@api_endpoint.path}/#{@api_version}/#{path}")
+
+      params = options.slice(:label_selector, :field_selector, :resource_version)
+      if params.any?
+        uri.query = URI.encode_www_form(params.map { |k, v| [k.to_s.camelize(:lower), v] })
       end
 
       Kubeclient::Common::WatchStream.new(uri, net_http_options(uri))
     end
 
+    # Accepts the following string options:
+    #   :namespace - the namespace of the entity.
+    #   :label_selector - a selector to restrict the list of returned objects by their labels.
+    #   :field_selector - a selector to restrict the list of returned objects by their fields.
     def get_entities(entity_type, klass, options = {})
       params = {}
-      if options[:label_selector]
-        params['params'] = { labelSelector: options[:label_selector] }
+      [:label_selector, :field_selector].each do |p|
+        params[p.to_s.camelize(:lower)] = options[p] if options[p]
       end
 
       ns_prefix = build_namespace_prefix(options[:namespace])
       response = handle_exception do
         rest_client[ns_prefix + resource_name(entity_type)]
-        .get(params.merge(@headers))
+        .get({ 'params' => params }.merge(@headers))
       end
 
       result = JSON.parse(response)

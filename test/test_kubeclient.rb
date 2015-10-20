@@ -172,6 +172,38 @@ class KubeClientTest < MiniTest::Test
                      times: 1)
   end
 
+  def test_entities_with_label_selector
+    selector = 'component=apiserver'
+
+    stub_request(:get, %r{/services})
+      .to_return(body: open_test_file('entity_list.json'),
+                 status: 200)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    services = client.get_services(label_selector: selector)
+
+    assert_instance_of(Kubeclient::Common::EntityList, services)
+    assert_requested(:get,
+                     "http://localhost:8080/api/v1/services?labelSelector=#{selector}",
+                     times: 1)
+  end
+
+  def test_entities_with_field_selector
+    selector = 'involvedObject.name=redis-master'
+
+    stub_request(:get, %r{/services})
+      .to_return(body: open_test_file('entity_list.json'),
+                 status: 200)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    services = client.get_services(field_selector: selector)
+
+    assert_instance_of(Kubeclient::Common::EntityList, services)
+    assert_requested(:get,
+                     "http://localhost:8080/api/v1/services?fieldSelector=#{selector}",
+                     times: 1)
+  end
+
   def test_empty_list
     stub_request(:get, %r{/pods})
       .to_return(body: open_test_file('empty_pod_list.json'),

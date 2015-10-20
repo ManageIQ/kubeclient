@@ -239,6 +239,16 @@ It is possible to interrupt the watcher from another thread with:
 watcher.finish
 ```
 
+#### Watch events for a particular object
+You can use the `field_selector` option as part of the watch methods.
+
+```ruby
+watcher = client.watch_events(namespace: 'development', field_selector: 'involvedObject.name=redis-master')
+watcher.each do |notice|
+  # process notice date
+end
+```
+
 #### Get a proxy URL
 You can get a complete URL for connecting a kubernetes entity via the proxy.
 
