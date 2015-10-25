@@ -248,6 +248,33 @@ module Kubeclient
       end
     end
 
+    def get_pod_log(pod_name, namespace, container: nil, previous: false)
+      params = {}
+      params[:previous] = true if previous
+      params[:container] = container if container
+
+      ns = build_namespace_prefix(namespace)
+      handle_exception do
+        rest_client[ns + "pods/#{pod_name}/log"]
+          .get({ 'params' => params }.merge(@headers))
+      end
+    end
+
+    def watch_pod_log(pod_name, namespace, container: nil)
+      # Adding the "follow=true" query param tells the Kubernetes API to keep
+      # the connection open and stream updates to the log.
+      params = { follow: true }
+      params[:container] = container if container
+
+      ns = build_namespace_prefix(namespace)
+
+      uri = @api_endpoint.dup
+      uri.path += "/#{@api_version}/#{ns}pods/#{pod_name}/log"
+      uri.query = URI.encode_www_form(params)
+
+      Kubeclient::Common::WatchStream.new(uri, net_http_options(uri), format: :text)
+    end
+
     def proxy_url(kind, name, port, namespace = '')
       entity_name_plural = ClientMixin.pluralize_entity(kind.to_s)
       ns_prefix = build_namespace_prefix(namespace)
