@@ -32,7 +32,7 @@ Initialize the client:
 client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1"
 ```
 
-Or without specifying version (it will be set by default to "v1"
+Or without specifying version (it will be set by default to "v1")
 
 ```ruby
 client = Kubeclient::Client.new 'http://localhost:8080/api/'
@@ -216,7 +216,7 @@ client.update_service service1
 ```
 
 #### Get all entities of all types : all_entities
-Returns a hash with 14 keys (node, secret, service, pod, replication_controller, namespace, resource_quota, limit_range, endpoint, event, persistent_volume, persistent_volume_claim, component_status and service_account). Each key points to an EntityList of same type.
+Returns a hash with the following keys (node, secret, service, pod, replication_controller, namespace, resource_quota, limit_range, endpoint, event, persistent_volume, persistent_volume_claim, component_status and service_account). Each key points to an EntityList of same type.
 This method is a convenience method instead of calling each entity's get method separately.
 
 ```ruby
@@ -310,7 +310,7 @@ end
 
 ## Tests
 
-This client is tested with Minitest.
+This client is tested with Minitest and also uses VCR recordings in some tests.
 Please run all tests before submitting a Pull Request, and add new tests for new functionality.
 
 Running tests:
