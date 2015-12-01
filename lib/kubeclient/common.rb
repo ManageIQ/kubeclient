@@ -24,6 +24,10 @@ module Kubeclient
         password: nil,
         bearer_token: nil,
         bearer_token_file: nil
+      },
+      socket_options: {
+        socket_class: nil,
+        ssl_socket_class: nil
       }
     )
       validate_auth_options(auth_options)
@@ -33,12 +37,13 @@ module Kubeclient
       @headers = {}
       @ssl_options = ssl_options
       @auth_options = auth_options
+      @socket_options = socket_options
 
       if auth_options[:bearer_token]
-        @headers[:Authorization] = "Bearer #{@auth_options[:bearer_token]}"
+        bearer_token(@auth_options[:bearer_token])
       elsif auth_options[:bearer_token_file]
         validate_bearer_token_file
-        @headers[:Authorization] = "Bearer #{File.read(@auth_options[:bearer_token_file])}"
+        bearer_token(File.read(@auth_options[:bearer_token_file]))
       end
     end
 
@@ -150,7 +155,7 @@ module Kubeclient
         uri.query = URI.encode_www_form(params.map { |k, v| [k.to_s.camelize(:lower), v] })
       end
 
-      Kubeclient::Common::WatchStream.new(uri, net_http_options(uri))
+      Kubeclient::Common::WatchStream.new(uri, http_options(uri))
     end
 
     # Accepts the following string options:
@@ -272,7 +277,7 @@ module Kubeclient
       uri.path += "/#{@api_version}/#{ns}pods/#{pod_name}/log"
       uri.query = URI.encode_www_form(params)
 
-      Kubeclient::Common::WatchStream.new(uri, net_http_options(uri), format: :text)
+      Kubeclient::Common::WatchStream.new(uri, http_options(uri), format: :text)
     end
 
     def proxy_url(kind, name, port, namespace = '')
@@ -329,7 +334,7 @@ module Kubeclient
       fail ArgumentError, msg unless File.readable?(@auth_options[:bearer_token_file])
     end
 
-    def net_http_options(uri)
+    def http_options(uri)
       options = {
         basic_auth_user: @auth_options[:username],
         basic_auth_password: @auth_options[:password],
@@ -337,19 +342,18 @@ module Kubeclient
       }
 
       if uri.scheme == 'https'
-        options.merge!(
-          use_ssl: true,
+        options[:ssl] = {
           ca_file: @ssl_options[:ca_file],
           cert: @ssl_options[:client_cert],
           cert_store: @ssl_options[:cert_store],
           key: @ssl_options[:client_key],
-          # ruby Net::HTTP uses verify_mode instead of verify_ssl
-          # http://ruby-doc.org/stdlib-1.9.3/libdoc/net/http/rdoc/Net/HTTP.html
+          # ruby HTTP uses verify_mode instead of verify_ssl
+          # http://ruby-doc.org/stdlib-1.9.3/libdoc/openssl/rdoc/OpenSSL/SSL/SSLContext.html
           verify_mode: @ssl_options[:verify_ssl]
-        )
+        }
       end
 
-      options
+      options.merge(@socket_options)
     end
   end
 end
