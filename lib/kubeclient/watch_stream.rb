@@ -11,14 +11,22 @@ module Kubeclient
         @format = format
       end
 
-      def each(&block)
+      def each
         @finished = false
+
         @http_client = build_client
         response = @http_client.request(:get, @uri, build_client_options)
         unless response.code < 300
           fail KubeException.new(response.code, response.reason, response)
         end
-        read_stream(response.body, &block)
+
+        buffer = ''
+        response.body.each do |chunk|
+          buffer << chunk
+          while (line = buffer.slice!(/.+\n/))
+            yield @format == :json ? WatchNotice.new(JSON.parse(line)) : line.chomp
+          end
+        end
       rescue IOError
         raise unless @finished
       end
@@ -50,16 +58,6 @@ module Kubeclient
               @http_options[:socket_class] if @http_options[:socket_class]
         end
         client_options
-      end
-
-      def read_stream(response_body)
-        buffer = ''
-        response_body.each do |chunk|
-          buffer << chunk
-          while (line = buffer.slice!(/.+\n/))
-            yield @format == :json ? WatchNotice.new(JSON.parse(line)) : line.chomp
-          end
-        end
       end
     end
   end

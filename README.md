@@ -122,10 +122,22 @@ for more details). For example:
 ```ruby
 auth_options = {
   bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token'
-
 }
 client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
                                 auth_options: auth_options
+```
+
+You can also use kubeclient with non-blocking sockets such as Celluloid::IO, see [here](https://github.com/httprb/http/wiki/Parallel-requests-with-Celluloid%3A%3AIO) 
+for details. For example:
+
+```ruby
+require 'celluloid/io'
+socket_options = {
+  socket_class: Celluloid::IO::TCPSocket,
+  ssl_socket_class: Celluloid::IO::SSLSocket
+}
+client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
+                                socket_options: socket_options
 ```
 
 ## Examples:
