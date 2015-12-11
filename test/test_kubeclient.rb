@@ -270,9 +270,12 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_file('service_account_list.json'),
                  status: 200)
 
+    stub_request(:get, %r{/deployments})
+      .to_return(body: open_test_file('deployment_list.json'), status: 200)
+
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
     result = client.all_entities
-    assert_equal(14, result.keys.size)
+    assert_equal(15, result.keys.size)
     assert_instance_of(Kubeclient::Common::EntityList, result['node'])
     assert_instance_of(Kubeclient::Common::EntityList, result['service'])
     assert_instance_of(Kubeclient::Common::EntityList,

@@ -1,0 +1,61 @@
+{
+  "kind": "Deployment",
+  "apiVersion": "extensions/v1beta1",
+  "metadata": {
+    "name": "nginx-deployment",
+    "namespace": "default",
+    "selfLink": "/apis/extensions/v1beta1/namespaces/default/deployments/nginx-deployment",
+    "uid": "7ec56cb1-9f94-11e5-ab34-42010af00002",
+    "resourceVersion": "119317",
+    "creationTimestamp": "2015-12-10T23:19:43Z",
+    "labels": {
+      "app": "nginx"
+    }
+  },
+  "spec": {
+    "replicas": 3,
+    "selector": {
+      "app": "nginx"
+    },
+    "template": {
+      "metadata": {
+        "creationTimestamp": null,
+        "labels": {
+          "app": "nginx"
+        }
+      },
+      "spec": {
+        "containers": [
+          {
+            "name": "nginx",
+            "image": "nginx:1.7.9",
+            "ports": [
+              {
+                "containerPort": 80,
+                "protocol": "TCP"
+              }
+            ],
+            "resources": {},
+            "terminationMessagePath": "/dev/termination-log",
+            "imagePullPolicy": "IfNotPresent"
+          }
+        ],
+        "restartPolicy": "Always",
+        "terminationGracePeriodSeconds": 30,
+        "dnsPolicy": "ClusterFirst"
+      }
+    },
+    "strategy": {
+      "type": "RollingUpdate",
+      "rollingUpdate": {
+        "maxUnavailable": 1,
+        "maxSurge": 1
+      }
+    },
+    "uniqueLabelKey": "deployment.kubernetes.io/podTemplateHash"
+  },
+  "status": {
+    "replicas": 3,
+    "updatedReplicas": 3
+  }
+}

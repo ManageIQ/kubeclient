@@ -204,6 +204,41 @@ service.metadata.labels.role = 'slave'
 client.create_service service`
 ```
 
+Below example is for the extension API
+```
+deployment = Kubeclient::Deployment.new(
+  {
+    apiVersion: 'extensions/v1beta1',
+    kind: 'Deployment',
+    metadata: {
+      name: 'testdep',
+      namespace: 'default'
+    },
+    spec: {
+      replicas: 1,
+      template: {
+        metadata: {
+          labels: {
+            app: 'nginx'
+          }
+        },
+        spec: {
+          containers: [
+            {
+              name: 'nginx',
+              image: 'nginx:1.7.9',
+              ports: [ { containerPort: 80} ]
+            }
+          ]
+        }
+      }
+    }
+  })
+
+client = Kubeclient::Client.new('http://localhost:8080/apis', 'extensions/v1beta1')
+client.create_deployment(deployment)
+```
+
 #### Update an entity
 For example: `update_pod`, `update_service`, `update_replication_controller`, `update_secret`, `update_resource_quota`, `update_limit_range`, `update_persistent_volume`, `update_persistent_volume_claim`, `update_service_account`
 
