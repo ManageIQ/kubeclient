@@ -207,17 +207,17 @@ module Kubeclient
     end
 
     def create_entity(entity_type, entity_config, klass)
-      # to_hash should be called because of issue #9 in recursive open
-      # struct
+      # Duplicate the entity_config to a hash so that when we assign
+      # kind and apiVersion, this does not mutate original entity_config obj.
       hash = entity_config.to_hash
 
-      ns_prefix = build_namespace_prefix(entity_config.metadata['table'][:namespace])
+      ns_prefix = build_namespace_prefix(hash[:metadata][:namespace])
 
       # TODO: temporary solution to add "kind" and apiVersion to request
       # until this issue is solved
       # https://github.com/GoogleCloudPlatform/kubernetes/issues/6439
-      hash['kind'] = entity_type
-      hash['apiVersion'] = @api_version
+      hash[:kind]       = entity_type
+      hash[:apiVersion] = @api_version
       response = handle_exception do
         rest_client[ns_prefix + resource_name(entity_type)]
         .post(hash.to_json, @headers)
@@ -227,14 +227,11 @@ module Kubeclient
     end
 
     def update_entity(entity_type, entity_config)
-      name = entity_config.metadata.name
-      # to_hash should be called because of issue #9 in recursive open
-      # struct
-      hash = entity_config.to_hash
-      ns_prefix = build_namespace_prefix(entity_config.metadata['table'][:namespace])
+      name      = entity_config[:metadata][:name]
+      ns_prefix = build_namespace_prefix(entity_config[:metadata][:namespace])
       handle_exception do
         rest_client[ns_prefix + resource_name(entity_type) + "/#{name}"]
-          .put(hash.to_json, @headers)
+          .put(entity_config.to_h.to_json, @headers)
       end
     end
 
