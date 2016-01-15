@@ -6,3 +6,5 @@ Metrics/AbcSize:
   Enabled: false
 Metrics/LineLength:
   Max: 100
+Metrics/ParameterLists:
+  Max: 8
