@@ -23,9 +23,9 @@ class TestService < MiniTest::Test
     assert_equal our_service.metadata.labels.name,
                  hash[:metadata][:labels][:name]
 
-    stub_request(:post, %r{namespaces/staging/services})
-      .to_return(body: open_test_file('created_service.json'),
-                 status: 201)
+    expected_url = 'http://localhost:8080/api/v1/namespaces/staging/services'
+    stub_request(:post, expected_url)
+      .to_return(body: open_test_file('created_service.json'), status: 201)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/'
     created = client.create_service our_service
@@ -33,6 +33,81 @@ class TestService < MiniTest::Test
     assert_instance_of(Kubeclient::Service, created)
     assert_equal(created.metadata.name, our_service.metadata.name)
     assert_equal(created.spec.ports.size, our_service.spec.ports.size)
+
+    # Check that original entity_config is not modified by kind/apiVersion patches:
+    assert_equal(our_service.kind, nil)
+
+    assert_requested(:post, expected_url, times: 1) do |req|
+      data = JSON.parse(req.body)
+      data['kind'] == 'Service' &&
+        data['apiVersion'] == 'v1' &&
+        data['metadata']['name'] == 'guestbook' &&
+        data['metadata']['namespace'] == 'staging'
+    end
+  end
+
+  def test_construct_service_from_symbol_keys
+    service = Kubeclient::Service.new
+    service.metadata = {
+      labels: { tier: 'frontend' },
+      name: 'test-service',
+      namespace: 'staging'
+    }
+    service.spec = {
+      ports: [{
+        port: 3000,
+        targetPort: 'http-server',
+        protocol: 'TCP'
+      }]
+    }
+
+    expected_url = 'http://localhost:8080/api/v1/namespaces/staging/services'
+    stub_request(:post, expected_url)
+      .to_return(body: open_test_file('created_service.json'), status: 201)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+    client.create_service service
+
+    assert_requested(:post, expected_url, times: 1) do |req|
+      data = JSON.parse(req.body)
+      data['kind'] == 'Service' &&
+        data['apiVersion'] == 'v1' &&
+        data['metadata']['name'] == 'test-service' &&
+        data['metadata']['labels']['tier'] == 'frontend' &&
+        data['metadata']['namespace'] == 'staging'
+    end
+  end
+
+  def test_construct_service_from_string_keys
+    service = Kubeclient::Service.new
+    service.metadata = {
+      'labels' => { 'tier' => 'frontend' },
+      'name' => 'test-service',
+      'namespace' => 'staging'
+    }
+    service.spec = {
+      'ports' => [{
+        'port' => 3000,
+        'targetPort' => 'http-server',
+        'protocol' => 'TCP'
+      }]
+    }
+
+    expected_url = 'http://localhost:8080/api/v1/namespaces/staging/services'
+    stub_request(:post, %r{namespaces/staging/services})
+      .to_return(body: open_test_file('created_service.json'), status: 201)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+    client.create_service service
+
+    assert_requested(:post, expected_url, times: 1) do |req|
+      data = JSON.parse(req.body)
+      data['kind'] == 'Service' &&
+        data['apiVersion'] == 'v1' &&
+        data['metadata']['name'] == 'test-service' &&
+        data['metadata']['labels']['tier'] == 'frontend' &&
+        data['metadata']['namespace'] == 'staging'
+    end
   end
 
   def test_conversion_from_json_v1
@@ -111,26 +186,49 @@ class TestService < MiniTest::Test
   end
 
   def test_update_service
-    entity = 'service'
-    object = Kubeclient::Service.new
+    entity  = 'service'
+    service = Kubeclient::Service.new
     name = 'my_service'
-    object.metadata = {
-      'name' => name
-    }
 
-    stub_request(:put, %r{/services/#{name}})\
-      .to_return(
-        body: open_test_file('service_update.json'),
-        status: 200
-      )
+    service.metadata = {}
+    service.metadata.name      = name
+    service.metadata.namespace = 'development'
+
+    expected_url = "http://localhost:8080/api/v1/namespaces/development/services/#{name}"
+    stub_request(:put, expected_url)
+      .to_return(body: open_test_file('service_update.json'), status: 201)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    client.update_entity entity, object
+    client.update_entity entity, service
 
-    assert_requested(
-      :put,
-      "http://localhost:8080/api/v1/services/#{name}",
-      times: 1
-    )
+    assert_requested(:put, expected_url, times: 1) do |req|
+      data = JSON.parse(req.body)
+      data['metadata']['name'] == name &&
+        data['metadata']['namespace'] == 'development'
+    end
+  end
+
+  def test_update_service_with_string_keys
+    entity  = 'service'
+    service = Kubeclient::Service.new
+    name = 'my_service'
+
+    service.metadata = {
+      'name' => name,
+      'namespace' => 'development'
+    }
+
+    expected_url = "http://localhost:8080/api/v1/namespaces/development/services/#{name}"
+    stub_request(:put, expected_url)
+      .to_return(body: open_test_file('service_update.json'), status: 201)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client.update_entity entity, service
+
+    assert_requested(:put, expected_url, times: 1) do |req|
+      data = JSON.parse(req.body)
+      data['metadata']['name'] == name &&
+        data['metadata']['namespace'] == 'development'
+    end
   end
 end
