@@ -186,7 +186,6 @@ class TestService < MiniTest::Test
   end
 
   def test_update_service
-    entity  = 'service'
     service = Kubeclient::Service.new
     name = 'my_service'
 
@@ -199,7 +198,7 @@ class TestService < MiniTest::Test
       .to_return(body: open_test_file('service_update.json'), status: 201)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    client.update_entity entity, service
+    client.update_service service
 
     assert_requested(:put, expected_url, times: 1) do |req|
       data = JSON.parse(req.body)
@@ -209,7 +208,6 @@ class TestService < MiniTest::Test
   end
 
   def test_update_service_with_string_keys
-    entity  = 'service'
     service = Kubeclient::Service.new
     name = 'my_service'
 
@@ -223,7 +221,7 @@ class TestService < MiniTest::Test
       .to_return(body: open_test_file('service_update.json'), status: 201)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    client.update_entity entity, service
+    client.update_service service
 
     assert_requested(:put, expected_url, times: 1) do |req|
       data = JSON.parse(req.body)
