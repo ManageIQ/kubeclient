@@ -224,6 +224,7 @@ module Kubeclient
         hash[:kind] = entity_type
       end
       hash[:apiVersion] = @api_version
+      @headers['Content-Type'] = 'application/json'
       response = handle_exception do
         rest_client[ns_prefix + resource_name(entity_type)]
         .post(hash.to_json, @headers)
@@ -235,6 +236,7 @@ module Kubeclient
     def update_entity(entity_type, entity_config)
       name      = entity_config[:metadata][:name]
       ns_prefix = build_namespace_prefix(entity_config[:metadata][:namespace])
+      @headers['Content-Type'] = 'application/json'
       handle_exception do
         rest_client[ns_prefix + resource_name(entity_type) + "/#{name}"]
           .put(entity_config.to_h.to_json, @headers)
