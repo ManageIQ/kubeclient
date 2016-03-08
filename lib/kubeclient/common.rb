@@ -194,6 +194,7 @@ module Kubeclient
       # https://github.com/GoogleCloudPlatform/kubernetes/issues/6439
       hash['kind'] = entity_type
       hash['apiVersion'] = @api_version
+      @headers['Content-Type'] = 'application/json'
       response = handle_exception do
         rest_client[ns_prefix + resource_name(entity_type)]
         .post(hash.to_json, @headers)
@@ -208,6 +209,7 @@ module Kubeclient
       # struct
       hash = entity_config.to_hash
       ns_prefix = build_namespace_prefix(entity_config.metadata['table'][:namespace])
+      @headers['Content-Type'] = 'application/json'
       handle_exception do
         rest_client[ns_prefix + resource_name(entity_type) + "/#{name}"]
           .put(hash.to_json, @headers)
