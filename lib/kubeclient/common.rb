@@ -34,7 +34,7 @@ module Kubeclient
       handle_uri(uri, path)
 
       @api_version = version
-      @headers = {}
+      @headers = {:content_type => :json, :accept => :json}
       @ssl_options = ssl_options
       @auth_options = auth_options
       @socket_options = socket_options
