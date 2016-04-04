@@ -229,4 +229,33 @@ class TestService < MiniTest::Test
         data['metadata']['namespace'] == 'development'
     end
   end
+
+  def test_patch_service
+    service = Kubeclient::Service.new
+    name = 'my_service'
+
+    service.metadata = {}
+    service.metadata.name      = name
+    service.metadata.namespace = 'development'
+
+    expected_url = "http://localhost:8080/api/v1/namespaces/development/services/#{name}"
+    stub_request(:patch, expected_url)
+      .to_return(body: open_test_file('service_patch.json'), status: 200)
+
+    patch = {
+      metadata: {
+        annotations: {
+          key: 'value'
+        }
+      }
+    }
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client.patch_service name, patch, 'development'
+
+    assert_requested(:patch, expected_url, times: 1) do |req|
+      data = JSON.parse(req.body)
+      data['metadata']['annotations']['key'] == 'value'
+    end
+  end
 end

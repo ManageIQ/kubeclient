@@ -109,6 +109,10 @@ module Kubeclient
         define_method("update_#{entity_name}") do |entity_config|
           update_entity(entity_type, entity_config)
         end
+
+        define_method("patch_#{entity_name}") do |name, patch, namespace = nil|
+          patch_entity(entity_type, name, patch, namespace)
+        end
       end
     end
 
@@ -240,6 +244,15 @@ module Kubeclient
       handle_exception do
         rest_client[ns_prefix + resource_name(entity_type) + "/#{name}"]
           .put(entity_config.to_h.to_json, @headers)
+      end
+    end
+
+    def patch_entity(entity_type, name, patch, namespace = nil)
+      ns_prefix = build_namespace_prefix(namespace)
+      @headers['Content-Type'] = 'application/strategic-merge-patch+json'
+      handle_exception do
+        rest_client[ns_prefix + resource_name(entity_type) + "/#{name}"]
+          .patch(patch.to_json, @headers)
       end
     end
 

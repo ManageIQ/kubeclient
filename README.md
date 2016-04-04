@@ -227,6 +227,19 @@ The below example is for v1
 client.update_service service1
 ```
 
+#### Patch an entity (by name)
+For example: `patch_pod`, `patch_service`, `patch_secret`, `patch_resource_quota`, `patch_persistent_volume`
+
+Input parameters - name (string) specifying the entity name, patch (hash) to be applied to the resource, optional: namespace name (string)
+
+The PATCH request should include the namespace name, except for nodes and namespaces entities.
+
+The below example is for v1
+
+```ruby
+client.patch_pod "docker-registry", {:metadata => {:annotations => {:key => 'value'}}}, "default"
+```
+
 #### Get all entities of all types : all_entities
 Returns a hash with the following keys (node, secret, service, pod, replication_controller, namespace, resource_quota, limit_range, endpoint, event, persistent_volume, persistent_volume_claim, component_status and service_account). Each key points to an EntityList of same type.
 This method is a convenience method instead of calling each entity's get method separately.
