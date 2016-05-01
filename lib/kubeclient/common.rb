@@ -2,7 +2,28 @@ require 'json'
 require 'rest-client'
 module Kubeclient
   # Common methods
+  # this is mixed in by other gems
   module ClientMixin
+    DEFAULT_SSL_OPTIONS = {
+      client_cert: nil,
+      client_key:  nil,
+      ca_file:     nil,
+      cert_store:  nil,
+      verify_ssl:  OpenSSL::SSL::VERIFY_PEER
+    }.freeze
+
+    DEFAULT_AUTH_OPTIONS = {
+      username:          nil,
+      password:          nil,
+      bearer_token:      nil,
+      bearer_token_file: nil
+    }.freeze
+
+    DEFAULT_SOCKET_OPTIONS = {
+      socket_class:     nil,
+      ssl_socket_class: nil
+    }.freeze
+
     attr_reader :api_endpoint
     attr_reader :ssl_options
     attr_reader :auth_options
@@ -11,24 +32,10 @@ module Kubeclient
     def initialize_client(
       uri,
       path,
-      version = nil,
-      ssl_options: {
-        client_cert: nil,
-        client_key: nil,
-        ca_file: nil,
-        cert_store: nil,
-        verify_ssl: OpenSSL::SSL::VERIFY_PEER
-      },
-      auth_options: {
-        username: nil,
-        password: nil,
-        bearer_token: nil,
-        bearer_token_file: nil
-      },
-      socket_options: {
-        socket_class: nil,
-        ssl_socket_class: nil
-      }
+      version,
+      ssl_options: DEFAULT_SSL_OPTIONS,
+      auth_options: DEFAULT_AUTH_OPTIONS,
+      socket_options: DEFAULT_SOCKET_OPTIONS
     )
       validate_auth_options(auth_options)
       handle_uri(uri, path)
@@ -50,21 +57,20 @@ module Kubeclient
     def handle_exception
       yield
     rescue RestClient::Exception => e
-      begin
-        json_error_msg = JSON.parse(e.response || '') || {}
+      json_error_msg = begin
+        JSON.parse(e.response || '') || {}
       rescue JSON::ParserError
-        json_error_msg = {}
+        {}
       end
       err_message = json_error_msg['message'] || e.message
       raise KubeException.new(e.http_code, err_message, e.response)
     end
 
     def handle_uri(uri, path)
-      fail ArgumentError, 'Missing uri' if uri.nil?
-      @api_endpoint = (uri.is_a? URI) ? uri : URI.parse(uri)
+      fail ArgumentError, 'Missing uri' unless uri
+      @api_endpoint = (uri.is_a?(URI) ? uri : URI.parse(uri))
       @api_endpoint.path = path if @api_endpoint.path.empty?
-      @api_endpoint.path = @api_endpoint.path.chop \
-                         if @api_endpoint.path.end_with? '/'
+      @api_endpoint.path = @api_endpoint.path.chop if @api_endpoint.path.end_with? '/'
     end
 
     def build_namespace_prefix(namespace)
@@ -84,8 +90,7 @@ module Kubeclient
         end
 
         # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
-        define_method("watch_#{entity_name_plural}") \
-        do |options = {}|
+        define_method("watch_#{entity_name_plural}") do |options = {}|
           # This method used to take resource_version as a param, so
           # this conversion is to keep backwards compatibility
           options = { resource_version: options } unless options.is_a?(Hash)
