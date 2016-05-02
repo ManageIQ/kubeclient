@@ -140,6 +140,14 @@ client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
                                 socket_options: socket_options
 ```
 
+You can also use kubeclient with an http proxy server such as tinyproxy. It can be entered as a string or a URI object
+For example:
+```ruby
+proxy_uri = URI::HTTP.build(host: "myproxyhost", port: 8443)
+client = Kubeclient::Client.new('https://localhost:8443/api/',
+                                :http_proxy_uri => proxy_uri)
+```
+
 ## Examples:
 
 #### Get all instances of a specific entity type
