@@ -6,3 +6,7 @@ rvm:
   - "2.3.0"
 sudo: false
 cache: bundler
+script: bundle exec rake $TASK
+env:
+ - TASK=test
+ - TASK=rubocop
