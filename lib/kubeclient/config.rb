@@ -79,9 +79,7 @@ module Kubeclient
 
       user = @kcfg['users'].detect do |x|
         break x['user'] if x['name'] == context['user']
-      end
-
-      fail "Unknown user #{context['user']}" unless cluster
+      end || {}
 
       [cluster, user]
     end
