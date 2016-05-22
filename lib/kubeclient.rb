@@ -31,28 +31,17 @@ module Kubeclient
 
     ClientMixin.define_entity_methods(ENTITY_TYPES)
 
-    def initialize(uri,
-                   version = 'v1',
-                   ssl_options: {
-                     client_cert: nil,
-                     client_key:  nil,
-                     ca_file:     nil,
-                     cert_store:  nil,
-                     verify_ssl:  OpenSSL::SSL::VERIFY_PEER
-                   },
-                   auth_options: {
-                     username:          nil,
-                     password:          nil,
-                     bearer_token:      nil,
-                     bearer_token_file: nil
-                   },
-                   socket_options: {
-                     socket_class:     nil,
-                     ssl_socket_class: nil
-                   }
-                  )
-      initialize_client(uri, '/api', version, ssl_options: ssl_options, auth_options: auth_options,
-                                              socket_options: socket_options)
+    def initialize(
+      uri,
+      version = 'v1',
+      **options
+    )
+      initialize_client(
+        uri,
+        '/api',
+        version,
+        options
+      )
     end
 
     def all_entities
