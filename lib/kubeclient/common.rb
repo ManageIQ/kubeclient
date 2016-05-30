@@ -24,9 +24,12 @@ module Kubeclient
       ssl_socket_class: nil
     }.freeze
 
+    DEFAULT_HTTP_PROXY_URI = nil
+
     attr_reader :api_endpoint
     attr_reader :ssl_options
     attr_reader :auth_options
+    attr_reader :http_proxy_uri
     attr_reader :headers
 
     def initialize_client(
@@ -35,7 +38,8 @@ module Kubeclient
       version,
       ssl_options: DEFAULT_SSL_OPTIONS,
       auth_options: DEFAULT_AUTH_OPTIONS,
-      socket_options: DEFAULT_SOCKET_OPTIONS
+      socket_options: DEFAULT_SOCKET_OPTIONS,
+      http_proxy_uri: DEFAULT_HTTP_PROXY_URI
     )
       validate_auth_options(auth_options)
       handle_uri(uri, path)
@@ -45,6 +49,7 @@ module Kubeclient
       @ssl_options = ssl_options
       @auth_options = auth_options
       @socket_options = socket_options
+      @http_proxy_uri = http_proxy_uri.to_s if http_proxy_uri
 
       if auth_options[:bearer_token]
         bearer_token(@auth_options[:bearer_token])
@@ -134,6 +139,7 @@ module Kubeclient
         verify_ssl: @ssl_options[:verify_ssl],
         ssl_client_cert: @ssl_options[:client_cert],
         ssl_client_key: @ssl_options[:client_key],
+        proxy: @http_proxy_uri,
         user: @auth_options[:username],
         password: @auth_options[:password]
       }
@@ -361,7 +367,8 @@ module Kubeclient
       options = {
         basic_auth_user: @auth_options[:username],
         basic_auth_password: @auth_options[:password],
-        headers: @headers
+        headers: @headers,
+        http_proxy_uri: @http_proxy_uri
       }
 
       if uri.scheme == 'https'

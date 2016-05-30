@@ -38,6 +38,18 @@ class KubeClientTest < MiniTest::Test
     assert_equal 'http://localhost:8080/api/v1', rest_client.url.to_s
   end
 
+  def test_pass_proxy
+    uri = URI::HTTP.build(host: 'localhost', port: 8080)
+    proxy_uri = URI::HTTP.build(host: 'myproxyhost', port: 8888)
+    client = Kubeclient::Client.new(uri, http_proxy_uri: proxy_uri)
+    rest_client = client.rest_client
+    assert_equal proxy_uri.to_s, rest_client.options[:proxy]
+
+    watch_client = client.watch_pods
+    assert_equal(watch_client.send(:build_client_options)[:proxy][:proxy_address], proxy_uri.host)
+    assert_equal(watch_client.send(:build_client_options)[:proxy][:proxy_port], proxy_uri.port)
+  end
+
   def test_exception
     stub_request(:post, %r{/services})
       .to_return(body: open_test_file('namespace_exception.json'),

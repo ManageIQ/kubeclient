@@ -47,8 +47,23 @@ module Kubeclient
         end
       end
 
+      def using_proxy
+        proxy = @http_options[:http_proxy_uri]
+        return nil unless proxy
+        p_uri = URI.parse(proxy)
+        {
+          proxy_address: p_uri.hostname,
+          proxy_port: p_uri.port,
+          proxy_username: p_uri.user,
+          proxy_password: p_uri.password
+        }
+      end
+
       def build_client_options
-        client_options = { headers: @http_options[:headers] }
+        client_options = {
+          headers: @http_options[:headers],
+          proxy: using_proxy
+        }
         if @http_options[:ssl]
           client_options[:ssl] = @http_options[:ssl]
           client_options[:ssl_socket_class] =
