@@ -6,12 +6,13 @@ module Kubeclient
   class Config
     # Kubernetes client configuration context class
     class Context
-      attr_reader :api_endpoint, :api_version, :ssl_options
+      attr_reader :api_endpoint, :api_version, :ssl_options, :auth_options
 
-      def initialize(api_endpoint, api_version, ssl_options)
+      def initialize(api_endpoint, api_version, ssl_options, auth_options)
         @api_endpoint = api_endpoint
         @api_version = api_version
         @ssl_options = ssl_options
+        @auth_options = auth_options
       end
     end
 
@@ -35,6 +36,7 @@ module Kubeclient
       ca_cert_data     = fetch_cluster_ca_data(cluster)
       client_cert_data = fetch_user_cert_data(user)
       client_key_data  = fetch_user_key_data(user)
+      auth_options     = fetch_user_auth_options(user)
 
       ssl_options = {}
 
@@ -55,7 +57,7 @@ module Kubeclient
         ssl_options[:client_key] = OpenSSL::PKey.read(client_key_data)
       end
 
-      Context.new(cluster['server'], @kcfg['apiVersion'], ssl_options)
+      Context.new(cluster['server'], @kcfg['apiVersion'], ssl_options, auth_options)
     end
 
     private
@@ -106,6 +108,18 @@ module Kubeclient
       elsif user.key?('client-key-data')
         return Base64.decode64(user['client-key-data'])
       end
+    end
+
+    def fetch_user_auth_options(user)
+      options = {}
+      if user.key?('token')
+        options[:bearer_token] = user['token']
+      else
+        %w(username password).each do |attr|
+          options[attr.to_sym] = user[attr] if user.key?(attr)
+        end
+      end
+      options
     end
   end
 end
