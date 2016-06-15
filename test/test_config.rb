@@ -26,7 +26,8 @@ class KubeClientConfigTest < MiniTest::Test
 
   def test_user_token
     config = Kubeclient::Config.read(test_config_file('userauth.kubeconfig'))
-    assert_equal(['localhost/system:admin:token', 'localhost/system:admin:userpass'], config.contexts)
+    assert_equal(['localhost/system:admin:token', 'localhost/system:admin:userpass'],
+                 config.contexts)
     context = config.context('localhost/system:admin:token')
     check_context(context, ssl: false)
     assert_equal('0123456789ABCDEF0123456789ABCDEF', context.auth_options[:bearer_token])
@@ -34,7 +35,8 @@ class KubeClientConfigTest < MiniTest::Test
 
   def test_user_password
     config = Kubeclient::Config.read(test_config_file('userauth.kubeconfig'))
-    assert_equal(['localhost/system:admin:token', 'localhost/system:admin:userpass'], config.contexts)
+    assert_equal(['localhost/system:admin:token', 'localhost/system:admin:userpass'],
+                 config.contexts)
     context = config.context('localhost/system:admin:userpass')
     check_context(context, ssl: false)
     assert_equal('admin', context.auth_options[:username])
