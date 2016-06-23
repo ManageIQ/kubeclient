@@ -148,6 +148,32 @@ client = Kubeclient::Client.new('https://localhost:8443/api/',
                                 :http_proxy_uri => proxy_uri)
 ```
 
+### Kubeclient::Config
+
+If you've been using `kubectl` and have a `.kube/config` file, you can auto-populate a config object using `Kubeclient::Config`:
+```ruby
+config = Kubeclient::Config.read('/path/to/.kube/config')
+```
+
+...and then pass that object to `Kubeclient::Client`:
+
+```
+Kubeclient::Client.new(
+	config.context.api_endpoint,
+    config.context.api_version,
+    {
+    	ssl_options: config.context.ssl_options,
+    	auth_options: config.context.auth_options
+    }
+)
+```
+
+You can also load your JSONified config in from an ENV variable (e.g. `KUBE_CONFIG`) like so:
+
+```
+Kubeclient::Config.new(JSON.parse(ENV['KUBE_CONFIG']), nil)
+```
+
 ## Examples:
 
 #### Get all instances of a specific entity type
