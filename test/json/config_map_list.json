@@ -1,0 +1,24 @@
+{
+  "kind": "ConfigMapList",
+  "apiVersion": "v1",
+  "metadata": {
+    "selfLink": "/api/v1/configmaps",
+    "resourceVersion": "2288"
+  },
+  "items": [
+    {
+      "metadata": {
+        "name": "game-config",
+        "namespace": "default",
+        "selfLink": "/api/v1/namespaces/default/configmaps/game-config",
+        "uid": "fda44c63-5332-11e6-9ca7-68f7284a153b",
+        "resourceVersion": "482",
+        "creationTimestamp": "2016-07-26T13:15:15Z"
+      },
+      "data": {
+        "game.properties": "enemies=aliens\nlives=3\nenemies.cheat=true\nenemies.cheat.level=noGoodRotten\nsecret.code.passphrase=UUDDLRLRBABAS\nsecret.code.allowed=true\nsecret.code.lives=30",
+        "ui.properties": "color.good=purple\ncolor.bad=yellow\nallow.textmode=true\nhow.nice.to.look=fairlyNice\n"
+      }
+    }
+  ]
+}
