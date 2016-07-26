@@ -13,24 +13,6 @@ module Kubeclient
   # Kubernetes Client
   class Client
     include ClientMixin
-    # Dynamically creating classes definitions (class Pod, class Service, etc.),
-    # The classes are extending RecursiveOpenStruct.
-    # This cancels the need to define the classes
-    # manually on every new entity addition,
-    # and especially since currently the class body is empty
-    ENTITY_TYPES = %w(Pod Service ReplicationController Node Event Endpoint
-                      Namespace Secret ResourceQuota LimitRange PersistentVolume
-                      PersistentVolumeClaim ComponentStatus ServiceAccount).map do |et|
-      clazz = Class.new(RecursiveOpenStruct) do
-        def initialize(hash = nil, args = {})
-          args.merge!(recurse_over_arrays: true)
-          super(hash, args)
-        end
-      end
-      [Kubeclient.const_set(et, clazz), et]
-    end
-
-    ClientMixin.define_entity_methods(ENTITY_TYPES)
 
     def initialize(
       uri,
