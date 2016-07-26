@@ -282,9 +282,13 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_file('service_account_list.json'),
                  status: 200)
 
+    stub_request(:get, %r{/configmaps})
+        .to_return(body: open_test_file('config_map_list.json'),
+                   status: 200)
+
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
     result = client.all_entities
-    assert_equal(14, result.keys.size)
+    assert_equal(15, result.keys.size)
     assert_instance_of(Kubeclient::Common::EntityList, result['node'])
     assert_instance_of(Kubeclient::Common::EntityList, result['service'])
     assert_instance_of(Kubeclient::Common::EntityList,
@@ -305,6 +309,7 @@ class KubeClientTest < MiniTest::Test
     assert_instance_of(Kubeclient::PersistentVolumeClaim, result['persistent_volume_claim'][0])
     assert_instance_of(Kubeclient::ComponentStatus, result['component_status'][0])
     assert_instance_of(Kubeclient::ServiceAccount, result['service_account'][0])
+    assert_instance_of(Kubeclient::ConfigMap, result['config_map'][0])
   end
 
   def test_api_bearer_token_with_params_success
