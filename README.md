@@ -381,6 +381,16 @@ watcher.each do |line|
 end
 ```
 
+#### Process a template
+Returns a processed template containing a list of objects to create.
+Input parameter - template (hash)
+Besides its metadata, the template should include a list of objects to be processed and a list of parameters
+to be substituted. Note that for a required parameter that does not provide a generated value, you must supply a value.
+
+```ruby
+client.process_template template
+```
+
 ## Upgrading
 
 #### past version 1.2.0
