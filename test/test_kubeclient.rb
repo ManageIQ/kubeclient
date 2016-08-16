@@ -518,6 +518,12 @@ class KubeClientTest < MiniTest::Test
     assert_equal('http://host:8080/api/v1/proxy/namespaces/ns/services/srvname:srvportname',
                  client.proxy_url('service', 'srvname', 'srvportname', 'ns'))
 
+    assert_equal('http://host:8080/api/v1/proxy/namespaces/ns/services/srvname:srvportname',
+                 client.proxy_url('services', 'srvname', 'srvportname', 'ns'))
+
+    assert_equal('http://host:8080/api/v1/namespaces/ns/pods/srvname:srvportname/proxy',
+                 client.proxy_url('pod', 'srvname', 'srvportname', 'ns'))
+
     assert_equal('http://host:8080/api/v1/namespaces/ns/pods/srvname:srvportname/proxy',
                  client.proxy_url('pods', 'srvname', 'srvportname', 'ns'))
 
@@ -525,9 +531,15 @@ class KubeClientTest < MiniTest::Test
     assert_equal('http://host:8080/api/v1/proxy/nodes/srvname:srvportname',
                  client.proxy_url('nodes', 'srvname', 'srvportname'))
 
+    assert_equal('http://host:8080/api/v1/proxy/nodes/srvname:srvportname',
+                 client.proxy_url('node', 'srvname', 'srvportname'))
+
     # Check integer port
     assert_equal('http://host:8080/api/v1/proxy/nodes/srvname:5001',
                  client.proxy_url('nodes', 'srvname', 5001))
+
+    assert_equal('http://host:8080/api/v1/proxy/nodes/srvname:5001',
+                 client.proxy_url('node', 'srvname', 5001))
   end
 
   def test_attr_readers

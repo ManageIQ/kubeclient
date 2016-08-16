@@ -26,6 +26,13 @@ module Kubeclient
 
     DEFAULT_HTTP_PROXY_URI = nil
 
+    SEARCH_ARGUMENTS = {
+      'labelSelector' => :label_selector,
+      'fieldSelector' => :field_selector
+    }.freeze
+
+    WATCH_ARGUMENTS = { 'resourceVersion' => :resource_version }.merge!(SEARCH_ARGUMENTS).freeze
+
     attr_reader :api_endpoint
     attr_reader :ssl_options
     attr_reader :auth_options
@@ -86,7 +93,7 @@ module Kubeclient
 
     def self.define_entity_methods(entity_types)
       entity_types.each do |klass, entity_type|
-        entity_name = entity_type.underscore
+        entity_name = underscore_entity(entity_type)
         entity_name_plural = pluralize_entity(entity_name)
 
         # get all entities of a type e.g. get_nodes, get_pods, etc.
@@ -127,8 +134,11 @@ module Kubeclient
     end
 
     def self.pluralize_entity(entity_name)
-      return entity_name + 's' if entity_name.end_with? 'quota'
-      entity_name.pluralize
+      "#{entity_name}#{entity_name.end_with?('s') ? 'es' : 's'}"
+    end
+
+    def self.underscore_entity(entity_name)
+      entity_name.gsub(/([a-z])([A-Z])/, '\1_\2').downcase
     end
 
     def create_rest_client(path = nil)
@@ -165,10 +175,9 @@ module Kubeclient
       path += "/#{options[:name]}" if options[:name]
       uri = @api_endpoint.merge("#{@api_endpoint.path}/#{@api_version}/#{path}")
 
-      params = options.slice(:label_selector, :field_selector, :resource_version)
-      if params.any?
-        uri.query = URI.encode_www_form(params.map { |k, v| [k.to_s.camelize(:lower), v] })
-      end
+      params = {}
+      WATCH_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
+      uri.query = URI.encode_www_form(params) if params.any?
 
       Kubeclient::Common::WatchStream.new(uri, http_options(uri))
     end
@@ -179,9 +188,7 @@ module Kubeclient
     #   :field_selector - a selector to restrict the list of returned objects by their fields.
     def get_entities(entity_type, klass, options = {})
       params = {}
-      [:label_selector, :field_selector].each do |p|
-        params[p.to_s.camelize(:lower)] = options[p] if options[p]
-      end
+      SEARCH_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
 
       ns_prefix = build_namespace_prefix(options[:namespace])
       response = handle_exception do
@@ -275,9 +282,9 @@ module Kubeclient
       entity_types.each_with_object({}) do |(_, entity_type), result_hash|
         # method call for get each entities
         # build hash of entity name to array of the entities
-        entity_name = ClientMixin.pluralize_entity entity_type.underscore
+        entity_name = ClientMixin.pluralize_entity(ClientMixin.underscore_entity(entity_type))
         method_name = "get_#{entity_name}"
-        key_name = entity_type.underscore
+        key_name = ClientMixin.underscore_entity(entity_type)
         result_hash[key_name] = send(method_name)
       end
     end
@@ -310,7 +317,11 @@ module Kubeclient
     end
 
     def proxy_url(kind, name, port, namespace = '')
-      entity_name_plural = ClientMixin.pluralize_entity(kind.to_s)
+      entity_name_plural = if %w(services pods nodes).include?(kind.to_s)
+                             kind.to_s
+                           else
+                             ClientMixin.pluralize_entity(kind.to_s)
+                           end
       ns_prefix = build_namespace_prefix(namespace)
       # TODO: Change this once services supports the new scheme
       if entity_name_plural == 'pods'
