@@ -143,6 +143,8 @@ module Kubeclient
       @api_endpoint = (uri.is_a?(URI) ? uri : URI.parse(uri))
       @api_endpoint.path = path if @api_endpoint.path.empty?
       @api_endpoint.path = @api_endpoint.path.chop if @api_endpoint.path.end_with? '/'
+      components = @api_endpoint.path.to_s.split('/') # ["", "api"] or ["", "apis", batch]
+      @api_group = components.length > 2 ? components[2] + '/' : ''
     end
 
     def build_namespace_prefix(namespace)
@@ -313,7 +315,7 @@ module Kubeclient
       else
         hash[:kind] = entity_type
       end
-      hash[:apiVersion] = @api_version
+      hash[:apiVersion] = @api_group + @api_version
       @headers['Content-Type'] = 'application/json'
       response = handle_exception do
         rest_client[ns_prefix + resource_name]
@@ -405,7 +407,9 @@ module Kubeclient
 
     def api_valid?
       result = api
-      result.is_a?(Hash) && (result['versions'] || []).include?(@api_version)
+      result.is_a?(Hash) && (result['versions'] || []).any? do |group|
+        @api_group.empty? ? group.include?(@api_version) : group['version'] == (@api_version)
+      end
     end
 
     def api

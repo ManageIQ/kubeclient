@@ -38,6 +38,12 @@ Or without specifying version (it will be set by default to "v1")
 client = Kubeclient::Client.new 'http://localhost:8080/api/'
 ```
 
+For A Group Api:
+
+```ruby
+client = Kubeclient::Client.new('http://localhost:8080/apis/batch', 'v1')
+```
+
 Another option is to initialize the client with URI object:
 
 ```ruby
