@@ -13,7 +13,7 @@ class CreateGuestbookGo < MiniTest::Test
     VCR.use_cassette('kubernetes_guestbook') do # , record: :new_episodes) do
       client = Kubeclient::Client.new 'http://10.35.0.23:8080/api/', 'v1'
 
-      testing_ns = Kubeclient::Namespace.new
+      testing_ns = Kubeclient::Resource.new
       testing_ns.metadata = {}
       testing_ns.metadata.name = 'kubeclient-ns'
 

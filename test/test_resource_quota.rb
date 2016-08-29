@@ -3,6 +3,9 @@ require 'test_helper'
 # ResourceQuota tests
 class TestResourceQuota < MiniTest::Test
   def test_get_from_json_v1
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:get, %r{/resourcequotas})
       .to_return(body: open_test_file('resource_quota.json'),
                  status: 200)

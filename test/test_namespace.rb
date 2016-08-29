@@ -3,6 +3,9 @@ require 'test_helper'
 # Namespace entity tests
 class TestNamespace < MiniTest::Test
   def test_get_namespace_v1
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:get, %r{/namespaces})
       .to_return(body: open_test_file('namespace.json'),
                  status: 200)
@@ -22,10 +25,13 @@ class TestNamespace < MiniTest::Test
   end
 
   def test_delete_namespace_v1
-    our_namespace = Kubeclient::Namespace.new
+    our_namespace = Kubeclient::Resource.new
     our_namespace.metadata = {}
     our_namespace.metadata.name = 'staging'
 
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:delete, %r{/namespaces})
       .to_return(status: 200)
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
@@ -37,11 +43,14 @@ class TestNamespace < MiniTest::Test
   end
 
   def test_create_namespace
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:post, %r{/namespaces})
       .to_return(body: open_test_file('created_namespace.json'),
                  status: 201)
 
-    namespace = Kubeclient::Namespace.new
+    namespace = Kubeclient::Resource.new
     namespace.metadata = {}
     namespace.metadata.name = 'development'
 

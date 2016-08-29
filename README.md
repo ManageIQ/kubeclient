@@ -148,6 +148,23 @@ client = Kubeclient::Client.new('https://localhost:8443/api/',
                                 :http_proxy_uri => proxy_uri)
 ```
 
+### Discovery
+
+Discovery from the kube-apiserver is done lazily on method calls so it would not change behavior.
+
+It can also  be done explicitly:
+```
+client = Kubeclient::Client.new('http://localhost:8080/api', 'v1')
+client.discover
+```
+
+It is possible to check the status of discovery
+```
+unless client.discovered
+  client.discover
+end
+```
+
 ### Kubeclient::Config
 
 If you've been using `kubectl` and have a `.kube/config` file, you can auto-populate a config object using `Kubeclient::Config`:
@@ -356,6 +373,18 @@ watcher.each do |line|
 end
 ```
 
+## Upgrading
+
+#### past version 1.2.0
+Replace Specific Entity class references:
+```ruby
+Kubeclient::Service
+```
+with the generic
+```ruby
+Kubeclient::Resource.new
+```
+Where ever possible.
 
 ## Contributing
 

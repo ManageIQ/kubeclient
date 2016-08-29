@@ -3,7 +3,7 @@ require 'test_helper'
 # Kubernetes client entity tests
 class KubeClientTest < MiniTest::Test
   def test_json
-    our_object = Kubeclient::Service.new
+    our_object = Kubeclient::Resource.new
     our_object.foo = 'bar'
     our_object.nested = {}
     our_object.nested.again = {}
@@ -41,6 +41,10 @@ class KubeClientTest < MiniTest::Test
   def test_pass_proxy
     uri = URI::HTTP.build(host: 'localhost', port: 8080)
     proxy_uri = URI::HTTP.build(host: 'myproxyhost', port: 8888)
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
+
     client = Kubeclient::Client.new(uri, http_proxy_uri: proxy_uri)
     rest_client = client.rest_client
     assert_equal proxy_uri.to_s, rest_client.options[:proxy]
@@ -51,11 +55,14 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_exception
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:post, %r{/services})
       .to_return(body: open_test_file('namespace_exception.json'),
                  status: 409)
 
-    service = Kubeclient::Service.new
+    service = Kubeclient::Resource.new
     service.metadata = {}
     service.metadata.name = 'redisslave'
     service.metadata.namespace = 'default'
@@ -149,6 +156,9 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_nonjson_exception
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:get, %r{/servic})
       .to_return(body: open_test_file('service_illegal_json_404.json'),
                  status: 404)
@@ -165,6 +175,9 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_entity_list
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:get, %r{/services})
       .to_return(body: open_test_file('entity_list.json'),
                  status: 200)
@@ -187,6 +200,9 @@ class KubeClientTest < MiniTest::Test
   def test_entities_with_label_selector
     selector = 'component=apiserver'
 
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:get, %r{/services})
       .to_return(body: open_test_file('entity_list.json'),
                  status: 200)
@@ -203,6 +219,9 @@ class KubeClientTest < MiniTest::Test
   def test_entities_with_field_selector
     selector = 'involvedObject.name=redis-master'
 
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:get, %r{/services})
       .to_return(body: open_test_file('entity_list.json'),
                  status: 200)
@@ -217,6 +236,9 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_empty_list
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:get, %r{/pods})
       .to_return(body: open_test_file('empty_pod_list.json'),
                  status: 200)
@@ -228,6 +250,22 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_get_all
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
+
+    stub_request(:get, %r{/bindings})
+      .to_return(body: open_test_file('bindings_list.json'),
+                 status: 404)
+
+    stub_request(:get, %r{/configmaps})
+      .to_return(body: open_test_file('config_map_list.json'),
+                 status: 200)
+
+    stub_request(:get, %r{/podtemplates})
+      .to_return(body: open_test_file('pod_template_list.json'),
+                 status: 200)
+
     stub_request(:get, %r{/services})
       .to_return(body: open_test_file('service_list.json'),
                  status: 200)
@@ -284,7 +322,7 @@ class KubeClientTest < MiniTest::Test
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
     result = client.all_entities
-    assert_equal(14, result.keys.size)
+    assert_equal(16, result.keys.size)
     assert_instance_of(Kubeclient::Common::EntityList, result['node'])
     assert_instance_of(Kubeclient::Common::EntityList, result['service'])
     assert_instance_of(Kubeclient::Common::EntityList,
@@ -312,6 +350,10 @@ class KubeClientTest < MiniTest::Test
       .with(headers: { Authorization: 'Bearer valid_token' })
       .to_return(body: open_test_file('pod_list.json'),
                  status: 200)
+    stub_request(:get, %r{/api/v1$})
+      .with(headers: { Authorization: 'Bearer valid_token' })
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/',
                                     auth_options: {
@@ -325,6 +367,9 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_api_bearer_token_success
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:get, 'http://localhost:8080/api/v1/pods')
       .with(headers: { Authorization: 'Bearer valid_token' })
       .to_return(body: open_test_file('pod_list.json'),
@@ -342,11 +387,11 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_api_bearer_token_failure
-    error_message = '"/api/v1/pods" is forbidden because ' \
+    error_message = '"/api/v1" is forbidden because ' \
                     'system:anonymous cannot list on pods in'
     response = OpenStruct.new(code: 401, message: error_message)
 
-    stub_request(:get, 'http://localhost:8080/api/v1/pods')
+    stub_request(:get, 'http://localhost:8080/api/v1')
       .with(headers: { Authorization: 'Bearer invalid_token' })
       .to_raise(KubeException.new(403, error_message, response))
 
@@ -362,6 +407,9 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_api_basic_auth_success
+    stub_request(:get, 'http://username:password@localhost:8080/api/v1')
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:get, 'http://username:password@localhost:8080/api/v1/pods')
       .to_return(body: open_test_file('pod_list.json'),
                  status: 200)
@@ -382,6 +430,9 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_api_basic_auth_back_comp_success
+    stub_request(:get, 'http://username:password@localhost:8080/api/v1')
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:get, 'http://username:password@localhost:8080/api/v1/pods')
       .to_return(body: open_test_file('pod_list.json'),
                  status: 200)
@@ -405,7 +456,7 @@ class KubeClientTest < MiniTest::Test
     error_message = 'HTTP status code 401, 401 Unauthorized'
     response = OpenStruct.new(code: 401, message: '401 Unauthorized')
 
-    stub_request(:get, 'http://username:password@localhost:8080/api/v1/pods')
+    stub_request(:get, 'http://username:password@localhost:8080/api/v1')
       .to_raise(KubeException.new(401, error_message, response))
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/',
@@ -419,7 +470,7 @@ class KubeClientTest < MiniTest::Test
     assert_equal(error_message, exception.message)
     assert_equal(response, exception.response)
     assert_requested(:get,
-                     'http://username:password@localhost:8080/api/v1/pods',
+                     'http://username:password@localhost:8080/api/v1',
                      times: 1)
   end
 
@@ -496,6 +547,9 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_api_bearer_token_file_success
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:get, 'http://localhost:8080/api/v1/pods')
       .with(headers: { Authorization: 'Bearer valid_token' })
       .to_return(body: open_test_file('pod_list.json'),
@@ -514,6 +568,10 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_proxy_url
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
+
     client = Kubeclient::Client.new 'http://host:8080', 'v1'
     assert_equal('http://host:8080/api/v1/proxy/namespaces/ns/services/srvname:srvportname',
                  client.proxy_url('service', 'srvname', 'srvportname', 'ns'))
@@ -558,6 +616,9 @@ class KubeClientTest < MiniTest::Test
 
   def test_nil_items
     # handle https://github.com/kubernetes/kubernetes/issues/13096
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:get, %r{/persistentvolumeclaims})
       .to_return(body: open_test_file('persistent_volume_claims_nil_items.json'),
                  status: 200)
