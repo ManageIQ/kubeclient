@@ -341,9 +341,7 @@ module Kubeclient
     end
 
     def api
-      response = handle_exception do
-        create_rest_client.get(@headers)
-      end
+      response = handle_exception { create_rest_client.get(@headers) }
       JSON.parse(response)
     end
 
