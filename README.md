@@ -127,6 +127,8 @@ client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
                                 auth_options: auth_options
 ```
 
+You can find information about token in [this guide](http://kubernetes.io/docs/user-guide/accessing-the-cluster/) and in [this reference](http://kubernetes.io/docs/admin/authentication/).
+
 You can also use kubeclient with non-blocking sockets such as Celluloid::IO, see [here](https://github.com/httprb/http/wiki/Parallel-requests-with-Celluloid%3A%3AIO) 
 for details. For example:
 
