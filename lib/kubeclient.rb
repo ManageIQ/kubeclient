@@ -17,7 +17,7 @@ module Kubeclient
     # This cancels the need to define the classes
     # manually on every new entity addition,
     # and especially since currently the class body is empty
-    ENTITY_TYPES = %w(Pod Service ReplicationController Node Event Endpoint
+    ENTITY_TYPES = %w(Pod Service ReplicationController Deployment Node Event Endpoint
                       Namespace Secret ResourceQuota LimitRange PersistentVolume
                       PersistentVolumeClaim ComponentStatus ServiceAccount).map do |et|
       clazz = Class.new(RecursiveOpenStruct) do

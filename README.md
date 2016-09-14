@@ -6,8 +6,8 @@
 [![Dependency Status](https://gemnasium.com/abonas/kubeclient.svg)](https://gemnasium.com/abonas/kubeclient)
 
 A Ruby client for Kubernetes REST api.
-The client supports GET, POST, PUT, DELETE on nodes, pods, secrets, services, replication controllers, namespaces, resource quotas, limit ranges, endpoints, persistent volumes, persistent volume claims, component statuses and service accounts.
-The client currently supports Kubernetes REST api version v1.
+The client supports GET, POST, PUT, DELETE on nodes, pods, secrets, services, replication controllers, deployments, namespaces, resource quotas, limit ranges, endpoints, persistent volumes, persistent volume claims, component statuses and service accounts.
+The client currently supports Kubernetes REST api version v1 (and limited selection of extension APIs).
 
 ## Installation
 
@@ -36,6 +36,11 @@ Or without specifying version (it will be set by default to "v1")
 
 ```ruby
 client = Kubeclient::Client.new 'http://localhost:8080/api/'
+```
+
+Or to access the extension api groups
+```ruby
+client = Kubeclient::Client.new 'http://localhost:8080/apis', 'extensions/v1beta1'
 ```
 
 Another option is to initialize the client with URI object:
@@ -179,7 +184,7 @@ Kubeclient::Config.new(JSON.parse(ENV['KUBE_CONFIG']), nil)
 ## Examples:
 
 #### Get all instances of a specific entity type
-Such as: `get_pods`, `get_secrets`, `get_services`, `get_nodes`, `get_replication_controllers`, `get_resource_quotas`, `get_limit_ranges`, `get_persistent_volumes`, `get_persistent_volume_claims`, `get_component_statuses`, `get_service_accounts`
+Such as: `get_pods`, `get_secrets`, `get_services`, `get_nodes`, `get_replication_controllers`, `get_deployments`, `get_resource_quotas`, `get_limit_ranges`, `get_persistent_volumes`, `get_persistent_volume_claims`, `get_component_statuses`, `get_service_accounts`
 
 ```ruby
 pods = client.get_pods
@@ -203,7 +208,7 @@ pods = client.get_pods(label_selector: 'name=redis-master,app=redis')
 ```
 
 #### Get a specific instance of an entity (by name)
-Such as: `get_service "service name"` , `get_pod "pod name"` , `get_replication_controller "rc name"`, `get_secret "secret name"`, `get_resource_quota "resource quota name"`, `get_limit_range "limit range name"` , `get_persistent_volume "persistent volume name"` , `get_persistent_volume_claim "persistent volume claim name"`, `get_component_status "component name"`, `get_service_account "service account name"`
+Such as: `get_service "service name"` , `get_pod "pod name"` , `get_replication_controller "rc name"`, `get_deployment "deployment name"`, `get_secret "secret name"`, `get_resource_quota "resource quota name"`, `get_limit_range "limit range name"` , `get_persistent_volume "persistent volume name"` , `get_persistent_volume_claim "persistent volume claim name"`, `get_component_status "component name"`, `get_service_account "service account name"`
 
 The GET request should include the namespace name, except for nodes and namespaces entities.
 
@@ -250,6 +255,41 @@ service.metadata.labels = {}
 service.metadata.labels.app = 'redis'
 service.metadata.labels.role = 'slave'
 client.create_service service`
+```
+
+Below example is for the extension API
+```
+deployment = Kubeclient::Deployment.new(
+  {
+    apiVersion: 'extensions/v1beta1',
+    kind: 'Deployment',
+    metadata: {
+      name: 'testdep',
+      namespace: 'default'
+    },
+    spec: {
+      replicas: 1,
+      template: {
+        metadata: {
+          labels: {
+            app: 'nginx'
+          }
+        },
+        spec: {
+          containers: [
+            {
+              name: 'nginx',
+              image: 'nginx:1.7.9',
+              ports: [ { containerPort: 80} ]
+            }
+          ]
+        }
+      }
+    }
+  })
+
+client = Kubeclient::Client.new('http://localhost:8080/apis', 'extensions/v1beta1')
+client.create_deployment(deployment)
 ```
 
 #### Update an entity
