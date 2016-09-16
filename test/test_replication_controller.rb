@@ -3,6 +3,9 @@ require 'test_helper'
 # Replication Controller entity tests
 class TestReplicationController < MiniTest::Test
   def test_get_from_json_v1
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:get, %r{/replicationcontrollers})
       .to_return(body: open_test_file('replication_controller.json'),
                  status: 200)

@@ -3,7 +3,7 @@ require 'test_helper'
 # Service entity tests
 class TestService < MiniTest::Test
   def test_construct_our_own_service
-    our_service = Kubeclient::Service.new
+    our_service = Kubeclient::Resource.new
     our_service.metadata = {}
     our_service.metadata.name = 'guestbook'
     our_service.metadata.namespace = 'staging'
@@ -24,6 +24,10 @@ class TestService < MiniTest::Test
                  hash[:metadata][:labels][:name]
 
     expected_url = 'http://localhost:8080/api/v1/namespaces/staging/services'
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
+
     stub_request(:post, expected_url)
       .to_return(body: open_test_file('created_service.json'), status: 201)
 
@@ -47,7 +51,7 @@ class TestService < MiniTest::Test
   end
 
   def test_construct_service_from_symbol_keys
-    service = Kubeclient::Service.new
+    service = Kubeclient::Resource.new
     service.metadata = {
       labels: { tier: 'frontend' },
       name: 'test-service',
@@ -62,6 +66,9 @@ class TestService < MiniTest::Test
     }
 
     expected_url = 'http://localhost:8080/api/v1/namespaces/staging/services'
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:post, expected_url)
       .to_return(body: open_test_file('created_service.json'), status: 201)
 
@@ -79,7 +86,7 @@ class TestService < MiniTest::Test
   end
 
   def test_construct_service_from_string_keys
-    service = Kubeclient::Service.new
+    service = Kubeclient::Resource.new
     service.metadata = {
       'labels' => { 'tier' => 'frontend' },
       'name' => 'test-service',
@@ -93,6 +100,9 @@ class TestService < MiniTest::Test
       }]
     }
 
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     expected_url = 'http://localhost:8080/api/v1/namespaces/staging/services'
     stub_request(:post, %r{namespaces/staging/services})
       .to_return(body: open_test_file('created_service.json'), status: 201)
@@ -111,6 +121,9 @@ class TestService < MiniTest::Test
   end
 
   def test_conversion_from_json_v1
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:get, %r{/services})
       .to_return(body: open_test_file('service.json'),
                  status: 200)
@@ -139,13 +152,16 @@ class TestService < MiniTest::Test
   end
 
   def test_delete_service
-    our_service = Kubeclient::Service.new
+    our_service = Kubeclient::Resource.new
     our_service.name = 'redis-service'
     # TODO, new ports assignment to be added
     our_service.labels = {}
     our_service.labels.component = 'apiserver'
     our_service.labels.provider = 'kubernetes'
 
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:delete, %r{/namespaces/default/services})
       .to_return(status: 200)
 
@@ -158,6 +174,9 @@ class TestService < MiniTest::Test
   end
 
   def test_get_service_no_ns
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     # when not specifying namespace for entities which
     # are not node or namespace, the request will fail
     stub_request(:get, %r{/services/redis-slave})
@@ -172,6 +191,9 @@ class TestService < MiniTest::Test
   end
 
   def test_get_service
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     stub_request(:get, %r{/namespaces/development/services/redis-slave})
       .to_return(body: open_test_file('service.json'),
                  status: 200)
@@ -186,13 +208,16 @@ class TestService < MiniTest::Test
   end
 
   def test_update_service
-    service = Kubeclient::Service.new
+    service = Kubeclient::Resource.new
     name = 'my_service'
 
     service.metadata = {}
     service.metadata.name      = name
     service.metadata.namespace = 'development'
 
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     expected_url = "http://localhost:8080/api/v1/namespaces/development/services/#{name}"
     stub_request(:put, expected_url)
       .to_return(body: open_test_file('service_update.json'), status: 201)
@@ -208,7 +233,7 @@ class TestService < MiniTest::Test
   end
 
   def test_update_service_with_string_keys
-    service = Kubeclient::Service.new
+    service = Kubeclient::Resource.new
     name = 'my_service'
 
     service.metadata = {
@@ -216,6 +241,9 @@ class TestService < MiniTest::Test
       'namespace' => 'development'
     }
 
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     expected_url = "http://localhost:8080/api/v1/namespaces/development/services/#{name}"
     stub_request(:put, expected_url)
       .to_return(body: open_test_file('service_update.json'), status: 201)
@@ -231,13 +259,16 @@ class TestService < MiniTest::Test
   end
 
   def test_patch_service
-    service = Kubeclient::Service.new
+    service = Kubeclient::Resource.new
     name = 'my_service'
 
     service.metadata = {}
     service.metadata.name      = name
     service.metadata.namespace = 'development'
 
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
     expected_url = "http://localhost:8080/api/v1/namespaces/development/services/#{name}"
     stub_request(:patch, expected_url)
       .to_return(body: open_test_file('service_patch.json'), status: 200)

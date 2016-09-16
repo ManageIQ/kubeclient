@@ -38,6 +38,12 @@ Or without specifying version (it will be set by default to "v1")
 client = Kubeclient::Client.new 'http://localhost:8080/api/'
 ```
 
+For A Group Api:
+
+```ruby
+client = Kubeclient::Client.new('http://localhost:8080/apis/batch', 'v1')
+```
+
 Another option is to initialize the client with URI object:
 
 ```ruby
@@ -148,6 +154,23 @@ For example:
 proxy_uri = URI::HTTP.build(host: "myproxyhost", port: 8443)
 client = Kubeclient::Client.new('https://localhost:8443/api/',
                                 :http_proxy_uri => proxy_uri)
+```
+
+### Discovery
+
+Discovery from the kube-apiserver is done lazily on method calls so it would not change behavior.
+
+It can also  be done explicitly:
+```
+client = Kubeclient::Client.new('http://localhost:8080/api', 'v1')
+client.discover
+```
+
+It is possible to check the status of discovery
+```
+unless client.discovered
+  client.discover
+end
 ```
 
 ### Kubeclient::Config
@@ -358,6 +381,18 @@ watcher.each do |line|
 end
 ```
 
+## Upgrading
+
+#### past version 1.2.0
+Replace Specific Entity class references:
+```ruby
+Kubeclient::Service
+```
+with the generic
+```ruby
+Kubeclient::Resource.new
+```
+Where ever possible.
 
 ## Contributing
 

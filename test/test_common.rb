@@ -2,34 +2,6 @@ require 'test_helper'
 
 # Unit tests for the common module
 class CommonTest < MiniTest::Test
-  def test_pluralize_entity
-    %w(
-      Pod Pods
-      Service Services
-      ReplicationController ReplicationControllers
-      Node Nodes
-      Event Events
-      Endpoint Endpoints
-      Namespace Namespaces
-      Secret Secrets
-      ResourceQuota ResourceQuotas
-      LimitRange LimitRanges
-      PersistentVolume PersistentVolumes
-      PersistentVolumeClaim PersistentVolumeClaims
-      ComponentStatus ComponentStatuses
-      ServiceAccount ServiceAccounts
-      Project Projects
-      Route Routes
-      ClusterRoleBinding ClusterRoleBindings
-      Build Builds
-      BuildConfig BuildConfigs
-      Image Images
-      ImageStream ImageStreams
-    ).each_slice(2) do |singular, plural|
-      assert_equal(Kubeclient::ClientMixin.pluralize_entity(singular), plural)
-    end
-  end
-
   def test_underscore_entity
     %w(
       Pod pod

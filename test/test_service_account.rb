@@ -6,6 +6,9 @@ class TestServiceAccount < MiniTest::Test
     stub_request(:get, %r{/serviceaccounts})
       .to_return(body: open_test_file('service_account.json'),
                  status: 200)
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
     account = client.get_service_account 'default'
@@ -17,6 +20,9 @@ class TestServiceAccount < MiniTest::Test
 
     assert_requested(:get,
                      'http://localhost:8080/api/v1/serviceaccounts/default',
+                     times: 1)
+    assert_requested(:get,
+                     'http://localhost:8080/api/v1',
                      times: 1)
   end
 end

@@ -843,4 +843,37 @@ http_interactions:
       string: '{"kind":"Namespace","apiVersion":"v1","metadata":{"name":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns","uid":"f41e6b27-3e7d-11e5-a75a-18037327aaeb","resourceVersion":"584","creationTimestamp":"2015-08-09T10:03:59Z","deletionTimestamp":"2015-08-09T10:03:59Z"},"spec":{"finalizers":["kubernetes"]},"status":{"phase":"Terminating"}}'
     http_version: 
   recorded_at: Sun, 09 Aug 2015 10:00:02 GMT
-recorded_with: VCR 2.9.3
+- request:
+    method: get
+    uri: http://10.35.0.23:8080/api/v1
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.0 (linux-gnu x86_64) ruby/2.3.0p0
+      Host:
+      - localhost:8080
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Mon, 29 Aug 2016 15:51:30 GMT
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: '{"kind":"APIResourceList","groupVersion":"v1","resources":[{"name":"bindings","namespaced":true,"kind":"Binding"},{"name":"componentstatuses","namespaced":false,"kind":"ComponentStatus"},{"name":"configmaps","namespaced":true,"kind":"ConfigMap"},{"name":"endpoints","namespaced":true,"kind":"Endpoints"},{"name":"events","namespaced":true,"kind":"Event"},{"name":"limitranges","namespaced":true,"kind":"LimitRange"},{"name":"namespaces","namespaced":false,"kind":"Namespace"},{"name":"namespaces/finalize","namespaced":false,"kind":"Namespace"},{"name":"namespaces/status","namespaced":false,"kind":"Namespace"},{"name":"nodes","namespaced":false,"kind":"Node"},{"name":"nodes/proxy","namespaced":false,"kind":"Node"},{"name":"nodes/status","namespaced":false,"kind":"Node"},{"name":"persistentvolumeclaims","namespaced":true,"kind":"PersistentVolumeClaim"},{"name":"persistentvolumeclaims/status","namespaced":true,"kind":"PersistentVolumeClaim"},{"name":"persistentvolumes","namespaced":false,"kind":"PersistentVolume"},{"name":"persistentvolumes/status","namespaced":false,"kind":"PersistentVolume"},{"name":"pods","namespaced":true,"kind":"Pod"},{"name":"pods/attach","namespaced":true,"kind":"Pod"},{"name":"pods/binding","namespaced":true,"kind":"Binding"},{"name":"pods/exec","namespaced":true,"kind":"Pod"},{"name":"pods/log","namespaced":true,"kind":"Pod"},{"name":"pods/portforward","namespaced":true,"kind":"Pod"},{"name":"pods/proxy","namespaced":true,"kind":"Pod"},{"name":"pods/status","namespaced":true,"kind":"Pod"},{"name":"podtemplates","namespaced":true,"kind":"PodTemplate"},{"name":"replicationcontrollers","namespaced":true,"kind":"ReplicationController"},{"name":"replicationcontrollers/scale","namespaced":true,"kind":"Scale"},{"name":"replicationcontrollers/status","namespaced":true,"kind":"ReplicationController"},{"name":"resourcequotas","namespaced":true,"kind":"ResourceQuota"},{"name":"resourcequotas/status","namespaced":true,"kind":"ResourceQuota"},{"name":"secrets","namespaced":true,"kind":"Secret"},{"name":"serviceaccounts","namespaced":true,"kind":"ServiceAccount"},{"name":"services","namespaced":true,"kind":"Service"},{"name":"services/proxy","namespaced":true,"kind":"Service"},{"name":"services/status","namespaced":true,"kind":"Service"}]}
+
+'
+    http_version: 
+  recorded_at: Mon, 29 Aug 2016 15:51:30 GMT
+recorded_with: VCR 3.0.3

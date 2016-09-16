@@ -3,6 +3,10 @@ require 'test_helper'
 # Namespace entity tests
 class TestSecret < MiniTest::Test
   def test_get_secret_v1
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
+
     stub_request(:get, %r{/secrets})
       .to_return(body: open_test_file('created_secret.json'),
                  status: 200)
@@ -22,6 +26,10 @@ class TestSecret < MiniTest::Test
   end
 
   def test_delete_secret_v1
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
+
     stub_request(:delete, %r{/secrets})
       .to_return(status: 200)
 
@@ -34,11 +42,15 @@ class TestSecret < MiniTest::Test
   end
 
   def test_create_secret_v1
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
+
     stub_request(:post, %r{/secrets})
       .to_return(body: open_test_file('created_secret.json'),
                  status: 201)
 
-    secret = Kubeclient::Secret.new
+    secret = Kubeclient::Resource.new
     secret.metadata = {}
     secret.metadata.name = 'test-secret'
     secret.metadata.namespace = 'dev'
