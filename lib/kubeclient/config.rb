@@ -1,5 +1,6 @@
 require 'yaml'
 require 'base64'
+require 'pathname'
 
 module Kubeclient
   # Kubernetes client configuration class
@@ -63,7 +64,7 @@ module Kubeclient
     private
 
     def ext_file_path(path)
-      File.join(@kcfg_path, path)
+      Pathname(path).absolute? ? path : File.join(@kcfg_path, path)
     end
 
     def fetch_context(context_name)
