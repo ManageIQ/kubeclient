@@ -316,10 +316,9 @@ module Kubeclient
         hash[:kind] = entity_type
       end
       hash[:apiVersion] = @api_group + @api_version
-      @headers['Content-Type'] = 'application/json'
       response = handle_exception do
         rest_client[ns_prefix + resource_name]
-        .post(hash.to_json, @headers)
+        .post(hash.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
       end
       result = JSON.parse(response)
       new_entity(result, klass)
@@ -328,19 +327,20 @@ module Kubeclient
     def update_entity(resource_name, entity_config)
       name      = entity_config[:metadata][:name]
       ns_prefix = build_namespace_prefix(entity_config[:metadata][:namespace])
-      @headers['Content-Type'] = 'application/json'
       handle_exception do
         rest_client[ns_prefix + resource_name + "/#{name}"]
-          .put(entity_config.to_h.to_json, @headers)
+          .put(entity_config.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
       end
     end
 
     def patch_entity(resource_name, name, patch, namespace = nil)
       ns_prefix = build_namespace_prefix(namespace)
-      @headers['Content-Type'] = 'application/strategic-merge-patch+json'
       handle_exception do
         rest_client[ns_prefix + resource_name + "/#{name}"]
-          .patch(patch.to_json, @headers)
+          .patch(
+            patch.to_json,
+            { 'Content-Type' => 'application/strategic-merge-patch+json' }.merge(@headers)
+          )
       end
     end
 
