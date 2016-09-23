@@ -405,6 +405,15 @@ module Kubeclient
       end
     end
 
+    def process_template(template)
+      ns_prefix = build_namespace_prefix(template[:metadata][:namespace])
+      response = handle_exception do
+        rest_client[ns_prefix + 'processedtemplates']
+        .post(template.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
+      end
+      JSON.parse(response)
+    end
+
     def api_valid?
       result = api
       result.is_a?(Hash) && (result['versions'] || []).any? do |group|
