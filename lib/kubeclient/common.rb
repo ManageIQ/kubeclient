@@ -154,17 +154,19 @@ module Kubeclient
     public
 
     def self.resource_class(class_owner, entity_type)
-      class_owner.const_get(entity_type, false)
-    rescue NameError
-      class_owner.const_set(
-        entity_type,
-        Class.new(RecursiveOpenStruct) do
-          def initialize(hash = nil, args = {})
-            args[:recurse_over_arrays] = true
-            super(hash, args)
+      if class_owner.const_defined?(entity_type, false)
+        class_owner.const_get(entity_type, false)
+      else
+        class_owner.const_set(
+          entity_type,
+          Class.new(RecursiveOpenStruct) do
+            def initialize(hash = nil, args = {})
+              args[:recurse_over_arrays] = true
+              super(hash, args)
+            end
           end
-        end
-      )
+        )
+      end
     end
 
     def define_entity_methods
