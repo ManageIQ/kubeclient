@@ -185,7 +185,7 @@ class TestService < MiniTest::Test
 
     client = Kubeclient::Client.new('http://localhost:8080/api/')
 
-    exception = assert_raises(KubeException) do
+    exception = assert_raises(Kubeclient::HttpError) do
       client.get_service('redis-slave')
     end
     assert_equal(404, exception.error_code)
