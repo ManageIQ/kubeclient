@@ -1,0 +1,262 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: http://10.35.0.23:8080/api/v1/pods
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - '*/*; q=0.5, application/xml'
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 14 Jul 2015 16:39:07 GMT
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: '{"kind":"PodList","apiVersion":"v1","metadata":{"selfLink":"/api/v1/pods","resourceVersion":"838"},"items":[{"metadata":{"name":"guestbook-6rtyr","generateName":"guestbook-","namespace":"development","selfLink":"/api/v1/namespaces/development/pods/guestbook-6rtyr","uid":"be3abe03-2a46-11e5-9103-18037327aaeb","resourceVersion":"804","creationTimestamp":"2015-07-14T16:38:23Z","labels":{"app":"guestbook"},"annotations":{"kubernetes.io/created-by":"{\"kind\":\"SerializedReference\",\"apiVersion\":\"v1\",\"reference\":{\"kind\":\"ReplicationController\",\"namespace\":\"development\",\"name\":\"guestbook\",\"uid\":\"be39f670-2a46-11e5-9103-18037327aaeb\",\"apiVersion\":\"v1\",\"resourceVersion\":\"763\"}}"}},"spec":{"volumes":[{"name":"default-token-ofe0c","secret":{"secretName":"default-token-ofe0c"}}],"containers":[{"name":"guestbook","image":"kubernetes/guestbook:v2","ports":[{"name":"http-server","containerPort":3000,"protocol":"TCP"}],"resources":{},"volumeMounts":[{"name":"default-token-ofe0c","readOnly":true,"mountPath":"/var/run/secrets/kubernetes.io/serviceaccount"}],"terminationMessagePath":"/dev/termination-log","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","dnsPolicy":"ClusterFirst","serviceAccountName":"default","nodeName":"127.0.0.1"},"status":{"phase":"Running","conditions":[{"type":"Ready","status":"True"}],"hostIP":"127.0.0.1","podIP":"172.17.0.7","startTime":"2015-07-14T16:38:23Z","containerStatuses":[{"name":"guestbook","state":{"running":{"startedAt":"2015-07-14T16:38:28Z"}},"lastState":{},"ready":true,"restartCount":0,"image":"kubernetes/guestbook:v2","imageID":"docker://6525c07bfd08eac8e77751b55f09ce88f90cf352c37b8a6e04ff4e360e5703a1","containerID":"docker://2e310cb3907d9abadd8438e43c130b18c8a6a37ad564358ce1100ff325cfafa8"}]}},{"metadata":{"name":"guestbook-6u3q0","generateName":"guestbook-","namespace":"development","selfLink":"/api/v1/namespaces/development/pods/guestbook-6u3q0","uid":"be3abb7c-2a46-11e5-9103-18037327aaeb","resourceVersion":"801","creationTimestamp":"2015-07-14T16:38:23Z","labels":{"app":"guestbook"},"annotations":{"kubernetes.io/created-by":"{\"kind\":\"SerializedReference\",\"apiVersion\":\"v1\",\"reference\":{\"kind\":\"ReplicationController\",\"namespace\":\"development\",\"name\":\"guestbook\",\"uid\":\"be39f670-2a46-11e5-9103-18037327aaeb\",\"apiVersion\":\"v1\",\"resourceVersion\":\"763\"}}"}},"spec":{"volumes":[{"name":"default-token-ofe0c","secret":{"secretName":"default-token-ofe0c"}}],"containers":[{"name":"guestbook","image":"kubernetes/guestbook:v2","ports":[{"name":"http-server","containerPort":3000,"protocol":"TCP"}],"resources":{},"volumeMounts":[{"name":"default-token-ofe0c","readOnly":true,"mountPath":"/var/run/secrets/kubernetes.io/serviceaccount"}],"terminationMessagePath":"/dev/termination-log","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","dnsPolicy":"ClusterFirst","serviceAccountName":"default","nodeName":"127.0.0.1"},"status":{"phase":"Running","conditions":[{"type":"Ready","status":"True"}],"hostIP":"127.0.0.1","podIP":"172.17.0.9","startTime":"2015-07-14T16:38:23Z","containerStatuses":[{"name":"guestbook","state":{"running":{"startedAt":"2015-07-14T16:38:29Z"}},"lastState":{},"ready":true,"restartCount":0,"image":"kubernetes/guestbook:v2","imageID":"docker://6525c07bfd08eac8e77751b55f09ce88f90cf352c37b8a6e04ff4e360e5703a1","containerID":"docker://cebd89dcf6355fb6ec9493bce41c870e244a55018c3f7de30f6a590361b52b85"}]}},{"metadata":{"name":"guestbook-7tnqb","generateName":"guestbook-","namespace":"development","selfLink":"/api/v1/namespaces/development/pods/guestbook-7tnqb","uid":"be3ac7e1-2a46-11e5-9103-18037327aaeb","resourceVersion":"799","creationTimestamp":"2015-07-14T16:38:23Z","labels":{"app":"guestbook"},"annotations":{"kubernetes.io/created-by":"{\"kind\":\"SerializedReference\",\"apiVersion\":\"v1\",\"reference\":{\"kind\":\"ReplicationController\",\"namespace\":\"development\",\"name\":\"guestbook\",\"uid\":\"be39f670-2a46-11e5-9103-18037327aaeb\",\"apiVersion\":\"v1\",\"resourceVersion\":\"763\"}}"}},"spec":{"volumes":[{"name":"default-token-ofe0c","secret":{"secretName":"default-token-ofe0c"}}],"containers":[{"name":"guestbook","image":"kubernetes/guestbook:v2","ports":[{"name":"http-server","containerPort":3000,"protocol":"TCP"}],"resources":{},"volumeMounts":[{"name":"default-token-ofe0c","readOnly":true,"mountPath":"/var/run/secrets/kubernetes.io/serviceaccount"}],"terminationMessagePath":"/dev/termination-log","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","dnsPolicy":"ClusterFirst","serviceAccountName":"default","nodeName":"127.0.0.1"},"status":{"phase":"Running","conditions":[{"type":"Ready","status":"True"}],"hostIP":"127.0.0.1","podIP":"172.17.0.8","startTime":"2015-07-14T16:38:23Z","containerStatuses":[{"name":"guestbook","state":{"running":{"startedAt":"2015-07-14T16:38:28Z"}},"lastState":{},"ready":true,"restartCount":0,"image":"kubernetes/guestbook:v2","imageID":"docker://6525c07bfd08eac8e77751b55f09ce88f90cf352c37b8a6e04ff4e360e5703a1","containerID":"docker://11e4132a7dba025564a2f036a4fd3ba5b75c8e39e5488b446ccd0bcf5d3b1387"}]}},{"metadata":{"name":"redis-master-g2fwd","generateName":"redis-master-","namespace":"development","selfLink":"/api/v1/namespaces/development/pods/redis-master-g2fwd","uid":"ca938e49-2a46-11e5-9103-18037327aaeb","resourceVersion":"814","creationTimestamp":"2015-07-14T16:38:43Z","labels":{"app":"redis","role":"master"},"annotations":{"kubernetes.io/created-by":"{\"kind\":\"SerializedReference\",\"apiVersion\":\"v1\",\"reference\":{\"kind\":\"ReplicationController\",\"namespace\":\"development\",\"name\":\"redis-master\",\"uid\":\"ca92fd0e-2a46-11e5-9103-18037327aaeb\",\"apiVersion\":\"v1\",\"resourceVersion\":\"807\"}}"}},"spec":{"volumes":[{"name":"default-token-ofe0c","secret":{"secretName":"default-token-ofe0c"}}],"containers":[{"name":"redis-master","image":"redis","ports":[{"name":"redis-server","containerPort":6379,"protocol":"TCP"}],"resources":{},"volumeMounts":[{"name":"default-token-ofe0c","readOnly":true,"mountPath":"/var/run/secrets/kubernetes.io/serviceaccount"}],"terminationMessagePath":"/dev/termination-log","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","dnsPolicy":"ClusterFirst","serviceAccountName":"default","nodeName":"127.0.0.1"},"status":{"phase":"Pending","startTime":"2015-07-14T16:38:43Z"}},{"metadata":{"name":"redis-slave-crgtx","generateName":"redis-slave-","namespace":"development","selfLink":"/api/v1/namespaces/development/pods/redis-slave-crgtx","uid":"d2290427-2a46-11e5-9103-18037327aaeb","resourceVersion":"831","creationTimestamp":"2015-07-14T16:38:56Z","labels":{"app":"redis","role":"slave"},"annotations":{"kubernetes.io/created-by":"{\"kind\":\"SerializedReference\",\"apiVersion\":\"v1\",\"reference\":{\"kind\":\"ReplicationController\",\"namespace\":\"development\",\"name\":\"redis-slave\",\"uid\":\"d2286f84-2a46-11e5-9103-18037327aaeb\",\"apiVersion\":\"v1\",\"resourceVersion\":\"819\"}}"}},"spec":{"volumes":[{"name":"default-token-ofe0c","secret":{"secretName":"default-token-ofe0c"}}],"containers":[{"name":"redis-slave","image":"kubernetes/redis-slave:v2","ports":[{"name":"redis-server","containerPort":6379,"protocol":"TCP"}],"resources":{},"volumeMounts":[{"name":"default-token-ofe0c","readOnly":true,"mountPath":"/var/run/secrets/kubernetes.io/serviceaccount"}],"terminationMessagePath":"/dev/termination-log","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","dnsPolicy":"ClusterFirst","serviceAccountName":"default","nodeName":"127.0.0.1"},"status":{"phase":"Pending","startTime":"2015-07-14T16:38:56Z"}},{"metadata":{"name":"redis-slave-ebde7","generateName":"redis-slave-","namespace":"development","selfLink":"/api/v1/namespaces/development/pods/redis-slave-ebde7","uid":"d22902d6-2a46-11e5-9103-18037327aaeb","resourceVersion":"830","creationTimestamp":"2015-07-14T16:38:56Z","labels":{"app":"redis","role":"slave"},"annotations":{"kubernetes.io/created-by":"{\"kind\":\"SerializedReference\",\"apiVersion\":\"v1\",\"reference\":{\"kind\":\"ReplicationController\",\"namespace\":\"development\",\"name\":\"redis-slave\",\"uid\":\"d2286f84-2a46-11e5-9103-18037327aaeb\",\"apiVersion\":\"v1\",\"resourceVersion\":\"819\"}}"}},"spec":{"volumes":[{"name":"default-token-ofe0c","secret":{"secretName":"default-token-ofe0c"}}],"containers":[{"name":"redis-slave","image":"kubernetes/redis-slave:v2","ports":[{"name":"redis-server","containerPort":6379,"protocol":"TCP"}],"resources":{},"volumeMounts":[{"name":"default-token-ofe0c","readOnly":true,"mountPath":"/var/run/secrets/kubernetes.io/serviceaccount"}],"terminationMessagePath":"/dev/termination-log","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","dnsPolicy":"ClusterFirst","serviceAccountName":"default","nodeName":"127.0.0.1"},"status":{"phase":"Pending","startTime":"2015-07-14T16:38:56Z"}}]}'
+    http_version: 
+  recorded_at: Tue, 14 Jul 2015 16:38:13 GMT
+- request:
+    method: get
+    uri: http://10.35.0.23:8080/api/v1/services
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - '*/*; q=0.5, application/xml'
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 14 Jul 2015 16:39:07 GMT
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: '{"kind":"ServiceList","apiVersion":"v1","metadata":{"selfLink":"/api/v1/services","resourceVersion":"838"},"items":[{"metadata":{"name":"kubernetes","namespace":"default","selfLink":"/api/v1/namespaces/default/services/kubernetes","uid":"6e1528b2-2a37-11e5-9103-18037327aaeb","resourceVersion":"7","creationTimestamp":"2015-07-14T14:48:46Z","labels":{"component":"apiserver","provider":"kubernetes"}},"spec":{"ports":[{"protocol":"TCP","port":443,"targetPort":443,"nodePort":0}],"clusterIP":"10.0.0.1","type":"ClusterIP","sessionAffinity":"None"},"status":{"loadBalancer":{}}},{"metadata":{"name":"guestbook","namespace":"development","selfLink":"/api/v1/namespaces/development/services/guestbook","uid":"930d4b11-2a46-11e5-9103-18037327aaeb","resourceVersion":"747","creationTimestamp":"2015-07-14T16:37:10Z","labels":{"app":"guestbook"}},"spec":{"ports":[{"protocol":"TCP","port":3000,"targetPort":"http-server","nodePort":32554}],"selector":{"app":"guestbook"},"clusterIP":"10.0.0.77","type":"LoadBalancer","sessionAffinity":"None"},"status":{"loadBalancer":{}}},{"metadata":{"name":"redis-master","namespace":"development","selfLink":"/api/v1/namespaces/development/services/redis-master","uid":"9fe598ce-2a46-11e5-9103-18037327aaeb","resourceVersion":"752","creationTimestamp":"2015-07-14T16:37:32Z","labels":{"app":"redis","role":"master"}},"spec":{"ports":[{"protocol":"TCP","port":6379,"targetPort":"redis-server","nodePort":0}],"selector":{"app":"redis","role":"master"},"clusterIP":"10.0.0.141","type":"ClusterIP","sessionAffinity":"None"},"status":{"loadBalancer":{}}},{"metadata":{"name":"redis-slave","namespace":"development","selfLink":"/api/v1/namespaces/development/services/redis-slave","uid":"a7d210f0-2a46-11e5-9103-18037327aaeb","resourceVersion":"757","creationTimestamp":"2015-07-14T16:37:45Z","labels":{"app":"redis","role":"slave"}},"spec":{"ports":[{"protocol":"TCP","port":6379,"targetPort":"redis-server","nodePort":0}],"selector":{"app":"redis","role":"slave"},"clusterIP":"10.0.0.34","type":"ClusterIP","sessionAffinity":"None"},"status":{"loadBalancer":{}}}]}'
+    http_version: 
+  recorded_at: Tue, 14 Jul 2015 16:38:13 GMT
+- request:
+    method: get
+    uri: http://10.35.0.23:8080/api/v1/replicationcontrollers
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - '*/*; q=0.5, application/xml'
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 14 Jul 2015 16:39:07 GMT
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: '{"kind":"ReplicationControllerList","apiVersion":"v1","metadata":{"selfLink":"/api/v1/replicationcontrollers","resourceVersion":"838"},"items":[{"metadata":{"name":"guestbook","namespace":"development","selfLink":"/api/v1/namespaces/development/replicationcontrollers/guestbook","uid":"be39f670-2a46-11e5-9103-18037327aaeb","resourceVersion":"774","generation":1,"creationTimestamp":"2015-07-14T16:38:23Z","labels":{"app":"guestbook"}},"spec":{"replicas":3,"selector":{"app":"guestbook"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"guestbook"}},"spec":{"containers":[{"name":"guestbook","image":"kubernetes/guestbook:v2","ports":[{"name":"http-server","containerPort":3000,"protocol":"TCP"}],"resources":{},"terminationMessagePath":"/dev/termination-log","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","dnsPolicy":"ClusterFirst"}}},"status":{"replicas":3,"observedGeneration":1}},{"metadata":{"name":"redis-master","namespace":"development","selfLink":"/api/v1/namespaces/development/replicationcontrollers/redis-master","uid":"ca92fd0e-2a46-11e5-9103-18037327aaeb","resourceVersion":"813","generation":1,"creationTimestamp":"2015-07-14T16:38:43Z","labels":{"app":"redis","role":"master"}},"spec":{"replicas":1,"selector":{"app":"redis","role":"master"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"redis","role":"master"}},"spec":{"containers":[{"name":"redis-master","image":"redis","ports":[{"name":"redis-server","containerPort":6379,"protocol":"TCP"}],"resources":{},"terminationMessagePath":"/dev/termination-log","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","dnsPolicy":"ClusterFirst"}}},"status":{"replicas":1,"observedGeneration":1}},{"metadata":{"name":"redis-slave","namespace":"development","selfLink":"/api/v1/namespaces/development/replicationcontrollers/redis-slave","uid":"d2286f84-2a46-11e5-9103-18037327aaeb","resourceVersion":"829","generation":1,"creationTimestamp":"2015-07-14T16:38:56Z","labels":{"app":"redis","role":"slave"}},"spec":{"replicas":2,"selector":{"app":"redis","role":"slave"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"redis","role":"slave"}},"spec":{"containers":[{"name":"redis-slave","image":"kubernetes/redis-slave:v2","ports":[{"name":"redis-server","containerPort":6379,"protocol":"TCP"}],"resources":{},"terminationMessagePath":"/dev/termination-log","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","dnsPolicy":"ClusterFirst"}}},"status":{"replicas":2,"observedGeneration":1}}]}'
+    http_version: 
+  recorded_at: Tue, 14 Jul 2015 16:38:13 GMT
+- request:
+    method: get
+    uri: http://10.35.0.23:8080/api/v1/nodes
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - '*/*; q=0.5, application/xml'
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 14 Jul 2015 16:39:07 GMT
+      Content-Length:
+      - '1066'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"NodeList","apiVersion":"v1","metadata":{"selfLink":"/api/v1/nodes","resourceVersion":"838"},"items":[{"metadata":{"name":"127.0.0.1","selfLink":"/api/v1/nodes/127.0.0.1","uid":"6f11842e-2a37-11e5-9103-18037327aaeb","resourceVersion":"838","creationTimestamp":"2015-07-14T14:48:47Z","labels":{"kubernetes.io/hostname":"127.0.0.1"}},"spec":{"externalID":"127.0.0.1"},"status":{"capacity":{"cpu":"8","memory":"16313792Ki","pods":"40"},"conditions":[{"type":"Ready","status":"True","lastHeartbeatTime":"2015-07-14T16:39:02Z","lastTransitionTime":"2015-07-14T14:48:47Z","reason":"kubelet
+        is posting ready status"}],"addresses":[{"type":"LegacyHostIP","address":"127.0.0.1"}],"nodeInfo":{"machineID":"5ca8042f9ee0492caf6b30bb806b9d41","systemUUID":"44454C4C-4800-1039-8046-B4C04F46354A","bootID":"230d0096-34de-4cec-a7a0-429c2936d21b","kernelVersion":"3.19.3-100.fc20.x86_64","osImage":"Fedora
+        20 (Heisenbug)","containerRuntimeVersion":"docker://1.5.0","kubeletVersion":"v1.0.0-127-gc6161824db3784-dirty","kubeProxyVersion":"v1.0.0-127-gc6161824db3784-dirty"}}}]}'
+    http_version: 
+  recorded_at: Tue, 14 Jul 2015 16:38:13 GMT
+- request:
+    method: get
+    uri: http://10.35.0.23:8080/api/v1/events
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - '*/*; q=0.5, application/xml'
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 14 Jul 2015 16:39:07 GMT
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: '{"kind":"EventList","apiVersion":"v1","metadata":{"selfLink":"/api/v1/events","resourceVersion":"838"},"items":[{"metadata":{"name":"guestbook-6rtyr.13f0dd92b1aa2b1e","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-6rtyr.13f0dd92b1aa2b1e","uid":"be3e7aa5-2a46-11e5-9103-18037327aaeb","resourceVersion":"777","creationTimestamp":"2015-07-14T16:38:23Z","deletionTimestamp":"2015-07-14T17:38:23Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-6rtyr","uid":"be3abe03-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"766"},"reason":"scheduled","message":"Successfully
+        assigned guestbook-6rtyr to 127.0.0.1","source":{"component":"scheduler"},"firstTimestamp":"2015-07-14T16:38:23Z","lastTimestamp":"2015-07-14T16:38:23Z","count":1},{"metadata":{"name":"guestbook-6rtyr.13f0dd92bd9d3ecf","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-6rtyr.13f0dd92bd9d3ecf","uid":"be5cf7a7-2a46-11e5-9103-18037327aaeb","resourceVersion":"782","creationTimestamp":"2015-07-14T16:38:23Z","deletionTimestamp":"2015-07-14T17:38:23Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-6rtyr","uid":"be3abe03-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"776","fieldPath":"implicitly
+        required container POD"},"reason":"pulled","message":"Pod container image
+        \"gcr.io/google_containers/pause:0.8.0\" already present on machine","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:23Z","lastTimestamp":"2015-07-14T16:38:23Z","count":1},{"metadata":{"name":"guestbook-6rtyr.13f0dd931713a068","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-6rtyr.13f0dd931713a068","uid":"bf4196c3-2a46-11e5-9103-18037327aaeb","resourceVersion":"784","creationTimestamp":"2015-07-14T16:38:24Z","deletionTimestamp":"2015-07-14T17:38:24Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-6rtyr","uid":"be3abe03-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"776","fieldPath":"implicitly
+        required container POD"},"reason":"created","message":"Created with docker
+        id 3015e4284f9f","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:24Z","lastTimestamp":"2015-07-14T16:38:24Z","count":1},{"metadata":{"name":"guestbook-6rtyr.13f0dd9352050c0c","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-6rtyr.13f0dd9352050c0c","uid":"bfd87633-2a46-11e5-9103-18037327aaeb","resourceVersion":"786","creationTimestamp":"2015-07-14T16:38:25Z","deletionTimestamp":"2015-07-14T17:38:25Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-6rtyr","uid":"be3abe03-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"776","fieldPath":"implicitly
+        required container POD"},"reason":"started","message":"Started with docker
+        id 3015e4284f9f","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:25Z","lastTimestamp":"2015-07-14T16:38:25Z","count":1},{"metadata":{"name":"guestbook-6rtyr.13f0dd93dd0c3b1a","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-6rtyr.13f0dd93dd0c3b1a","uid":"c13c619c-2a46-11e5-9103-18037327aaeb","resourceVersion":"791","creationTimestamp":"2015-07-14T16:38:28Z","deletionTimestamp":"2015-07-14T17:38:28Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-6rtyr","uid":"be3abe03-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"776","fieldPath":"spec.containers{guestbook}"},"reason":"created","message":"Created
+        with docker id 2e310cb3907d","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:28Z","lastTimestamp":"2015-07-14T16:38:28Z","count":1},{"metadata":{"name":"guestbook-6rtyr.13f0dd94073057b1","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-6rtyr.13f0dd94073057b1","uid":"c1a89218-2a46-11e5-9103-18037327aaeb","resourceVersion":"794","creationTimestamp":"2015-07-14T16:38:28Z","deletionTimestamp":"2015-07-14T17:38:28Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-6rtyr","uid":"be3abe03-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"776","fieldPath":"spec.containers{guestbook}"},"reason":"started","message":"Started
+        with docker id 2e310cb3907d","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:28Z","lastTimestamp":"2015-07-14T16:38:28Z","count":1},{"metadata":{"name":"guestbook-6u3q0.13f0dd92b10f69cf","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-6u3q0.13f0dd92b10f69cf","uid":"be3c8096-2a46-11e5-9103-18037327aaeb","resourceVersion":"771","creationTimestamp":"2015-07-14T16:38:23Z","deletionTimestamp":"2015-07-14T17:38:23Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-6u3q0","uid":"be3abb7c-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"764"},"reason":"scheduled","message":"Successfully
+        assigned guestbook-6u3q0 to 127.0.0.1","source":{"component":"scheduler"},"firstTimestamp":"2015-07-14T16:38:23Z","lastTimestamp":"2015-07-14T16:38:23Z","count":1},{"metadata":{"name":"guestbook-6u3q0.13f0dd92bdcb24bf","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-6u3q0.13f0dd92bdcb24bf","uid":"be6e8d7d-2a46-11e5-9103-18037327aaeb","resourceVersion":"783","creationTimestamp":"2015-07-14T16:38:23Z","deletionTimestamp":"2015-07-14T17:38:23Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-6u3q0","uid":"be3abb7c-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"768","fieldPath":"implicitly
+        required container POD"},"reason":"pulled","message":"Pod container image
+        \"gcr.io/google_containers/pause:0.8.0\" already present on machine","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:23Z","lastTimestamp":"2015-07-14T16:38:23Z","count":1},{"metadata":{"name":"guestbook-6u3q0.13f0dd933e7c9ad2","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-6u3q0.13f0dd933e7c9ad2","uid":"bfa68d25-2a46-11e5-9103-18037327aaeb","resourceVersion":"785","creationTimestamp":"2015-07-14T16:38:25Z","deletionTimestamp":"2015-07-14T17:38:25Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-6u3q0","uid":"be3abb7c-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"768","fieldPath":"implicitly
+        required container POD"},"reason":"created","message":"Created with docker
+        id d2524dc36e53","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:25Z","lastTimestamp":"2015-07-14T16:38:25Z","count":1},{"metadata":{"name":"guestbook-6u3q0.13f0dd938ef5fe19","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-6u3q0.13f0dd938ef5fe19","uid":"c07475ce-2a46-11e5-9103-18037327aaeb","resourceVersion":"789","creationTimestamp":"2015-07-14T16:38:26Z","deletionTimestamp":"2015-07-14T17:38:26Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-6u3q0","uid":"be3abb7c-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"768","fieldPath":"implicitly
+        required container POD"},"reason":"started","message":"Started with docker
+        id d2524dc36e53","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:26Z","lastTimestamp":"2015-07-14T16:38:26Z","count":1},{"metadata":{"name":"guestbook-6u3q0.13f0dd9406554171","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-6u3q0.13f0dd9406554171","uid":"c1a61a4e-2a46-11e5-9103-18037327aaeb","resourceVersion":"792","creationTimestamp":"2015-07-14T16:38:28Z","deletionTimestamp":"2015-07-14T17:38:28Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-6u3q0","uid":"be3abb7c-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"768","fieldPath":"spec.containers{guestbook}"},"reason":"created","message":"Created
+        with docker id cebd89dcf635","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:28Z","lastTimestamp":"2015-07-14T16:38:28Z","count":1},{"metadata":{"name":"guestbook-6u3q0.13f0dd94133baf0c","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-6u3q0.13f0dd94133baf0c","uid":"c1c71a70-2a46-11e5-9103-18037327aaeb","resourceVersion":"795","creationTimestamp":"2015-07-14T16:38:29Z","deletionTimestamp":"2015-07-14T17:38:29Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-6u3q0","uid":"be3abb7c-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"768","fieldPath":"spec.containers{guestbook}"},"reason":"started","message":"Started
+        with docker id cebd89dcf635","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:29Z","lastTimestamp":"2015-07-14T16:38:29Z","count":1},{"metadata":{"name":"guestbook-7tnqb.13f0dd92b15ab5f2","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-7tnqb.13f0dd92b15ab5f2","uid":"be3d3b54-2a46-11e5-9103-18037327aaeb","resourceVersion":"775","creationTimestamp":"2015-07-14T16:38:23Z","deletionTimestamp":"2015-07-14T17:38:23Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-7tnqb","uid":"be3ac7e1-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"765"},"reason":"scheduled","message":"Successfully
+        assigned guestbook-7tnqb to 127.0.0.1","source":{"component":"scheduler"},"firstTimestamp":"2015-07-14T16:38:23Z","lastTimestamp":"2015-07-14T16:38:23Z","count":1},{"metadata":{"name":"guestbook-7tnqb.13f0dd92bd7ee3b6","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-7tnqb.13f0dd92bd7ee3b6","uid":"be5c4b65-2a46-11e5-9103-18037327aaeb","resourceVersion":"781","creationTimestamp":"2015-07-14T16:38:23Z","deletionTimestamp":"2015-07-14T17:38:23Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-7tnqb","uid":"be3ac7e1-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"772","fieldPath":"implicitly
+        required container POD"},"reason":"pulled","message":"Pod container image
+        \"gcr.io/google_containers/pause:0.8.0\" already present on machine","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:23Z","lastTimestamp":"2015-07-14T16:38:23Z","count":1},{"metadata":{"name":"guestbook-7tnqb.13f0dd936da03579","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-7tnqb.13f0dd936da03579","uid":"c01f25c6-2a46-11e5-9103-18037327aaeb","resourceVersion":"787","creationTimestamp":"2015-07-14T16:38:26Z","deletionTimestamp":"2015-07-14T17:38:26Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-7tnqb","uid":"be3ac7e1-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"772","fieldPath":"implicitly
+        required container POD"},"reason":"created","message":"Created with docker
+        id 37351d1adf8c","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:26Z","lastTimestamp":"2015-07-14T16:38:26Z","count":1},{"metadata":{"name":"guestbook-7tnqb.13f0dd93818b1e8e","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-7tnqb.13f0dd93818b1e8e","uid":"c052208c-2a46-11e5-9103-18037327aaeb","resourceVersion":"788","creationTimestamp":"2015-07-14T16:38:26Z","deletionTimestamp":"2015-07-14T17:38:26Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-7tnqb","uid":"be3ac7e1-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"772","fieldPath":"implicitly
+        required container POD"},"reason":"started","message":"Started with docker
+        id 37351d1adf8c","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:26Z","lastTimestamp":"2015-07-14T16:38:26Z","count":1},{"metadata":{"name":"guestbook-7tnqb.13f0dd93d8634d7e","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-7tnqb.13f0dd93d8634d7e","uid":"c1307d81-2a46-11e5-9103-18037327aaeb","resourceVersion":"790","creationTimestamp":"2015-07-14T16:38:28Z","deletionTimestamp":"2015-07-14T17:38:28Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-7tnqb","uid":"be3ac7e1-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"772","fieldPath":"spec.containers{guestbook}"},"reason":"created","message":"Created
+        with docker id 11e4132a7dba","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:28Z","lastTimestamp":"2015-07-14T16:38:28Z","count":1},{"metadata":{"name":"guestbook-7tnqb.13f0dd9407249a5e","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook-7tnqb.13f0dd9407249a5e","uid":"c1a8218e-2a46-11e5-9103-18037327aaeb","resourceVersion":"793","creationTimestamp":"2015-07-14T16:38:28Z","deletionTimestamp":"2015-07-14T17:38:28Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"guestbook-7tnqb","uid":"be3ac7e1-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"772","fieldPath":"spec.containers{guestbook}"},"reason":"started","message":"Started
+        with docker id 11e4132a7dba","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:28Z","lastTimestamp":"2015-07-14T16:38:28Z","count":1},{"metadata":{"name":"guestbook.13f0dd92b0a67596","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook.13f0dd92b0a67596","uid":"be3b741c-2a46-11e5-9103-18037327aaeb","resourceVersion":"767","creationTimestamp":"2015-07-14T16:38:23Z","deletionTimestamp":"2015-07-14T17:38:23Z"},"involvedObject":{"kind":"ReplicationController","namespace":"development","name":"guestbook","uid":"be39f670-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"763"},"reason":"successfulCreate","message":"Created
+        pod: guestbook-6u3q0","source":{"component":"replication-controller"},"firstTimestamp":"2015-07-14T16:38:23Z","lastTimestamp":"2015-07-14T16:38:23Z","count":1},{"metadata":{"name":"guestbook.13f0dd92b0cba179","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook.13f0dd92b0cba179","uid":"be3c087c-2a46-11e5-9103-18037327aaeb","resourceVersion":"769","creationTimestamp":"2015-07-14T16:38:23Z","deletionTimestamp":"2015-07-14T17:38:23Z"},"involvedObject":{"kind":"ReplicationController","namespace":"development","name":"guestbook","uid":"be39f670-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"763"},"reason":"successfulCreate","message":"Created
+        pod: guestbook-6rtyr","source":{"component":"replication-controller"},"firstTimestamp":"2015-07-14T16:38:23Z","lastTimestamp":"2015-07-14T16:38:23Z","count":1},{"metadata":{"name":"guestbook.13f0dd92b0d277d4","namespace":"development","selfLink":"/api/v1/namespaces/development/events/guestbook.13f0dd92b0d277d4","uid":"be3cae33-2a46-11e5-9103-18037327aaeb","resourceVersion":"773","creationTimestamp":"2015-07-14T16:38:23Z","deletionTimestamp":"2015-07-14T17:38:23Z"},"involvedObject":{"kind":"ReplicationController","namespace":"development","name":"guestbook","uid":"be39f670-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"763"},"reason":"successfulCreate","message":"Created
+        pod: guestbook-7tnqb","source":{"component":"replication-controller"},"firstTimestamp":"2015-07-14T16:38:23Z","lastTimestamp":"2015-07-14T16:38:23Z","count":1},{"metadata":{"name":"redis-master-g2fwd.13f0dd9783a1c0e8","namespace":"development","selfLink":"/api/v1/namespaces/development/events/redis-master-g2fwd.13f0dd9783a1c0e8","uid":"ca94ea78-2a46-11e5-9103-18037327aaeb","resourceVersion":"812","creationTimestamp":"2015-07-14T16:38:43Z","deletionTimestamp":"2015-07-14T17:38:43Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"redis-master-g2fwd","uid":"ca938e49-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"808"},"reason":"scheduled","message":"Successfully
+        assigned redis-master-g2fwd to 127.0.0.1","source":{"component":"scheduler"},"firstTimestamp":"2015-07-14T16:38:43Z","lastTimestamp":"2015-07-14T16:38:43Z","count":1},{"metadata":{"name":"redis-master-g2fwd.13f0dd9786106aa6","namespace":"development","selfLink":"/api/v1/namespaces/development/events/redis-master-g2fwd.13f0dd9786106aa6","uid":"ca9b2958-2a46-11e5-9103-18037327aaeb","resourceVersion":"815","creationTimestamp":"2015-07-14T16:38:43Z","deletionTimestamp":"2015-07-14T17:38:43Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"redis-master-g2fwd","uid":"ca938e49-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"810","fieldPath":"implicitly
+        required container POD"},"reason":"pulled","message":"Pod container image
+        \"gcr.io/google_containers/pause:0.8.0\" already present on machine","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:43Z","lastTimestamp":"2015-07-14T16:38:43Z","count":1},{"metadata":{"name":"redis-master-g2fwd.13f0dd97c06cb87f","namespace":"development","selfLink":"/api/v1/namespaces/development/events/redis-master-g2fwd.13f0dd97c06cb87f","uid":"cb309262-2a46-11e5-9103-18037327aaeb","resourceVersion":"816","creationTimestamp":"2015-07-14T16:38:44Z","deletionTimestamp":"2015-07-14T17:38:44Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"redis-master-g2fwd","uid":"ca938e49-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"810","fieldPath":"implicitly
+        required container POD"},"reason":"created","message":"Created with docker
+        id c3d446e501fd","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:44Z","lastTimestamp":"2015-07-14T16:38:44Z","count":1},{"metadata":{"name":"redis-master-g2fwd.13f0dd97c57c1e94","namespace":"development","selfLink":"/api/v1/namespaces/development/events/redis-master-g2fwd.13f0dd97c57c1e94","uid":"cb3d8766-2a46-11e5-9103-18037327aaeb","resourceVersion":"817","creationTimestamp":"2015-07-14T16:38:45Z","deletionTimestamp":"2015-07-14T17:38:45Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"redis-master-g2fwd","uid":"ca938e49-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"810","fieldPath":"implicitly
+        required container POD"},"reason":"started","message":"Started with docker
+        id c3d446e501fd","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:45Z","lastTimestamp":"2015-07-14T16:38:45Z","count":1},{"metadata":{"name":"redis-master.13f0dd978354cc66","namespace":"development","selfLink":"/api/v1/namespaces/development/events/redis-master.13f0dd978354cc66","uid":"ca943971-2a46-11e5-9103-18037327aaeb","resourceVersion":"809","creationTimestamp":"2015-07-14T16:38:43Z","deletionTimestamp":"2015-07-14T17:38:43Z"},"involvedObject":{"kind":"ReplicationController","namespace":"development","name":"redis-master","uid":"ca92fd0e-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"807"},"reason":"successfulCreate","message":"Created
+        pod: redis-master-g2fwd","source":{"component":"replication-controller"},"firstTimestamp":"2015-07-14T16:38:43Z","lastTimestamp":"2015-07-14T16:38:43Z","count":1},{"metadata":{"name":"redis-slave-crgtx.13f0dd9a7a4b9566","namespace":"development","selfLink":"/api/v1/namespaces/development/events/redis-slave-crgtx.13f0dd9a7a4b9566","uid":"d22b0eeb-2a46-11e5-9103-18037327aaeb","resourceVersion":"828","creationTimestamp":"2015-07-14T16:38:56Z","deletionTimestamp":"2015-07-14T17:38:56Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"redis-slave-crgtx","uid":"d2290427-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"821"},"reason":"scheduled","message":"Successfully
+        assigned redis-slave-crgtx to 127.0.0.1","source":{"component":"scheduler"},"firstTimestamp":"2015-07-14T16:38:56Z","lastTimestamp":"2015-07-14T16:38:56Z","count":1},{"metadata":{"name":"redis-slave-crgtx.13f0dd9a7c487991","namespace":"development","selfLink":"/api/v1/namespaces/development/events/redis-slave-crgtx.13f0dd9a7c487991","uid":"d230a5aa-2a46-11e5-9103-18037327aaeb","resourceVersion":"833","creationTimestamp":"2015-07-14T16:38:56Z","deletionTimestamp":"2015-07-14T17:38:56Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"redis-slave-crgtx","uid":"d2290427-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"827","fieldPath":"implicitly
+        required container POD"},"reason":"pulled","message":"Pod container image
+        \"gcr.io/google_containers/pause:0.8.0\" already present on machine","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:56Z","lastTimestamp":"2015-07-14T16:38:56Z","count":1},{"metadata":{"name":"redis-slave-crgtx.13f0dd9ac118243e","namespace":"development","selfLink":"/api/v1/namespaces/development/events/redis-slave-crgtx.13f0dd9ac118243e","uid":"d2e0566d-2a46-11e5-9103-18037327aaeb","resourceVersion":"834","creationTimestamp":"2015-07-14T16:38:57Z","deletionTimestamp":"2015-07-14T17:38:57Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"redis-slave-crgtx","uid":"d2290427-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"827","fieldPath":"implicitly
+        required container POD"},"reason":"created","message":"Created with docker
+        id 8092f671ebb2","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:57Z","lastTimestamp":"2015-07-14T16:38:57Z","count":1},{"metadata":{"name":"redis-slave-crgtx.13f0dd9add47781d","namespace":"development","selfLink":"/api/v1/namespaces/development/events/redis-slave-crgtx.13f0dd9add47781d","uid":"d3287b8a-2a46-11e5-9103-18037327aaeb","resourceVersion":"835","creationTimestamp":"2015-07-14T16:38:58Z","deletionTimestamp":"2015-07-14T17:38:58Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"redis-slave-crgtx","uid":"d2290427-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"827","fieldPath":"implicitly
+        required container POD"},"reason":"started","message":"Started with docker
+        id 8092f671ebb2","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:58Z","lastTimestamp":"2015-07-14T16:38:58Z","count":1},{"metadata":{"name":"redis-slave-ebde7.13f0dd9a79fbeba6","namespace":"development","selfLink":"/api/v1/namespaces/development/events/redis-slave-ebde7.13f0dd9a79fbeba6","uid":"d22a54cc-2a46-11e5-9103-18037327aaeb","resourceVersion":"826","creationTimestamp":"2015-07-14T16:38:56Z","deletionTimestamp":"2015-07-14T17:38:56Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"redis-slave-ebde7","uid":"d22902d6-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"820"},"reason":"scheduled","message":"Successfully
+        assigned redis-slave-ebde7 to 127.0.0.1","source":{"component":"scheduler"},"firstTimestamp":"2015-07-14T16:38:56Z","lastTimestamp":"2015-07-14T16:38:56Z","count":1},{"metadata":{"name":"redis-slave-ebde7.13f0dd9a7c2a705d","namespace":"development","selfLink":"/api/v1/namespaces/development/events/redis-slave-ebde7.13f0dd9a7c2a705d","uid":"d22fe2e6-2a46-11e5-9103-18037327aaeb","resourceVersion":"832","creationTimestamp":"2015-07-14T16:38:56Z","deletionTimestamp":"2015-07-14T17:38:56Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"redis-slave-ebde7","uid":"d22902d6-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"823","fieldPath":"implicitly
+        required container POD"},"reason":"pulled","message":"Pod container image
+        \"gcr.io/google_containers/pause:0.8.0\" already present on machine","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:56Z","lastTimestamp":"2015-07-14T16:38:56Z","count":1},{"metadata":{"name":"redis-slave-ebde7.13f0dd9afd3adb38","namespace":"development","selfLink":"/api/v1/namespaces/development/events/redis-slave-ebde7.13f0dd9afd3adb38","uid":"d37a4508-2a46-11e5-9103-18037327aaeb","resourceVersion":"836","creationTimestamp":"2015-07-14T16:38:58Z","deletionTimestamp":"2015-07-14T17:38:58Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"redis-slave-ebde7","uid":"d22902d6-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"823","fieldPath":"implicitly
+        required container POD"},"reason":"created","message":"Created with docker
+        id b53bccf56856","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:58Z","lastTimestamp":"2015-07-14T16:38:58Z","count":1},{"metadata":{"name":"redis-slave-ebde7.13f0dd9b06eef8e7","namespace":"development","selfLink":"/api/v1/namespaces/development/events/redis-slave-ebde7.13f0dd9b06eef8e7","uid":"d393217e-2a46-11e5-9103-18037327aaeb","resourceVersion":"837","creationTimestamp":"2015-07-14T16:38:59Z","deletionTimestamp":"2015-07-14T17:38:59Z"},"involvedObject":{"kind":"Pod","namespace":"development","name":"redis-slave-ebde7","uid":"d22902d6-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"823","fieldPath":"implicitly
+        required container POD"},"reason":"started","message":"Started with docker
+        id b53bccf56856","source":{"component":"kubelet","host":"127.0.0.1"},"firstTimestamp":"2015-07-14T16:38:59Z","lastTimestamp":"2015-07-14T16:38:59Z","count":1},{"metadata":{"name":"redis-slave.13f0dd9a79afa577","namespace":"development","selfLink":"/api/v1/namespaces/development/events/redis-slave.13f0dd9a79afa577","uid":"d22997cd-2a46-11e5-9103-18037327aaeb","resourceVersion":"822","creationTimestamp":"2015-07-14T16:38:56Z","deletionTimestamp":"2015-07-14T17:38:56Z"},"involvedObject":{"kind":"ReplicationController","namespace":"development","name":"redis-slave","uid":"d2286f84-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"819"},"reason":"successfulCreate","message":"Created
+        pod: redis-slave-ebde7","source":{"component":"replication-controller"},"firstTimestamp":"2015-07-14T16:38:56Z","lastTimestamp":"2015-07-14T16:38:56Z","count":1},{"metadata":{"name":"redis-slave.13f0dd9a79c9169f","namespace":"development","selfLink":"/api/v1/namespaces/development/events/redis-slave.13f0dd9a79c9169f","uid":"d22a12eb-2a46-11e5-9103-18037327aaeb","resourceVersion":"824","creationTimestamp":"2015-07-14T16:38:56Z","deletionTimestamp":"2015-07-14T17:38:56Z"},"involvedObject":{"kind":"ReplicationController","namespace":"development","name":"redis-slave","uid":"d2286f84-2a46-11e5-9103-18037327aaeb","apiVersion":"v1","resourceVersion":"819"},"reason":"successfulCreate","message":"Created
+        pod: redis-slave-crgtx","source":{"component":"replication-controller"},"firstTimestamp":"2015-07-14T16:38:56Z","lastTimestamp":"2015-07-14T16:38:56Z","count":1}]}'
+    http_version: 
+  recorded_at: Tue, 14 Jul 2015 16:38:13 GMT
+- request:
+    method: get
+    uri: http://10.35.0.23:8080/api/v1/endpoints
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - '*/*; q=0.5, application/xml'
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 14 Jul 2015 16:39:07 GMT
+      Content-Length:
+      - '1861'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"EndpointsList","apiVersion":"v1","metadata":{"selfLink":"/api/v1/endpoints","resourceVersion":"838"},"items":[{"metadata":{"name":"kubernetes","namespace":"default","selfLink":"/api/v1/namespaces/default/endpoints/kubernetes","uid":"6e155b8c-2a37-11e5-9103-18037327aaeb","resourceVersion":"8","creationTimestamp":"2015-07-14T14:48:46Z"},"subsets":[{"addresses":[{"ip":"10.35.0.23"}],"ports":[{"port":6443,"protocol":"TCP"}]}]},{"metadata":{"name":"guestbook","namespace":"development","selfLink":"/api/v1/namespaces/development/endpoints/guestbook","uid":"930e6437-2a46-11e5-9103-18037327aaeb","resourceVersion":"805","creationTimestamp":"2015-07-14T16:37:10Z","labels":{"app":"guestbook"}},"subsets":[{"addresses":[{"ip":"172.17.0.7","targetRef":{"kind":"Pod","namespace":"development","name":"guestbook-6rtyr","uid":"be3abe03-2a46-11e5-9103-18037327aaeb","resourceVersion":"804"}},{"ip":"172.17.0.8","targetRef":{"kind":"Pod","namespace":"development","name":"guestbook-7tnqb","uid":"be3ac7e1-2a46-11e5-9103-18037327aaeb","resourceVersion":"799"}},{"ip":"172.17.0.9","targetRef":{"kind":"Pod","namespace":"development","name":"guestbook-6u3q0","uid":"be3abb7c-2a46-11e5-9103-18037327aaeb","resourceVersion":"801"}}],"ports":[{"port":3000,"protocol":"TCP"}]}]},{"metadata":{"name":"redis-master","namespace":"development","selfLink":"/api/v1/namespaces/development/endpoints/redis-master","uid":"9fe6865a-2a46-11e5-9103-18037327aaeb","resourceVersion":"753","creationTimestamp":"2015-07-14T16:37:32Z","labels":{"app":"redis","role":"master"}},"subsets":[]},{"metadata":{"name":"redis-slave","namespace":"development","selfLink":"/api/v1/namespaces/development/endpoints/redis-slave","uid":"a7d39ece-2a46-11e5-9103-18037327aaeb","resourceVersion":"758","creationTimestamp":"2015-07-14T16:37:45Z","labels":{"app":"redis","role":"slave"}},"subsets":[]}]}'
+    http_version: 
+  recorded_at: Tue, 14 Jul 2015 16:38:13 GMT
+- request:
+    method: get
+    uri: http://10.35.0.23:8080/api/v1/namespaces
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - '*/*; q=0.5, application/xml'
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - Ruby
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Tue, 14 Jul 2015 16:39:07 GMT
+      Content-Length:
+      - '657'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"NamespaceList","apiVersion":"v1","metadata":{"selfLink":"/api/v1/namespaces","resourceVersion":"838"},"items":[{"metadata":{"name":"default","selfLink":"/api/v1/namespaces/default","uid":"6e15034e-2a37-11e5-9103-18037327aaeb","resourceVersion":"6","creationTimestamp":"2015-07-14T14:48:46Z"},"spec":{"finalizers":["kubernetes"]},"status":{"phase":"Active"}},{"metadata":{"name":"development","selfLink":"/api/v1/namespaces/development","uid":"58e3bc27-2a46-11e5-9103-18037327aaeb","resourceVersion":"730","creationTimestamp":"2015-07-14T16:35:33Z","labels":{"name":"development"}},"spec":{"finalizers":["kubernetes"]},"status":{"phase":"Active"}}]}'
+    http_version: 
+  recorded_at: Tue, 14 Jul 2015 16:38:13 GMT
+recorded_with: VCR 2.9.3
