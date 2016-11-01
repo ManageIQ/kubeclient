@@ -53,6 +53,17 @@ class KubeClientConfigTest < MiniTest::Test
       assert_kind_of(OpenSSL::X509::Store, context.ssl_options[:cert_store])
       assert_kind_of(OpenSSL::X509::Certificate, context.ssl_options[:client_cert])
       assert_kind_of(OpenSSL::PKey::RSA, context.ssl_options[:client_key])
+      # When certificates expire the quickest way to recreate them is using
+      # an OpenShift tool (100% compatible with kubernetes):
+      #
+      #   $ oc adm ca create-master-certs --hostnames=localhost
+      #
+      # At the time of this writing the files to be updated are:
+      #
+      #   test/config/allinone.kubeconfig
+      #   test/config/external-ca.pem
+      #   test/config/external-cert.pem
+      #   test/config/external-key.rsa
       assert(context.ssl_options[:cert_store].verify(context.ssl_options[:client_cert]))
     else
       assert_equal(OpenSSL::SSL::VERIFY_NONE, context.ssl_options[:verify_ssl])
