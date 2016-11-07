@@ -111,7 +111,7 @@ module Kubeclient
       @entities = {}
       result = JSON.parse(handle_exception { rest_client.get(@headers) })
       result['resources'].each do |resource|
-        next if resource['name'].include?('/')
+        next if resource['name'].include?('/') || resource['kind'].nil?
         entity = ClientMixin.parse_definition(resource['kind'], resource['name'])
         @entities[entity.method_names[0]] = entity if entity
       end
