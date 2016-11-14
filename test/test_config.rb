@@ -26,7 +26,7 @@ class KubeClientConfigTest < MiniTest::Test
 
   def test_user_token
     config = Kubeclient::Config.read(test_config_file('userauth.kubeconfig'))
-    assert_equal(['localhost/system:admin:token', 'localhost/system:admin:userpass'],
+    assert_equal(['localhost/system:admin:token', 'localhost/system:admin:userpass', 'localhost/system:admin:gcptoken'],
                  config.contexts)
     context = config.context('localhost/system:admin:token')
     check_context(context, ssl: false)
@@ -35,12 +35,22 @@ class KubeClientConfigTest < MiniTest::Test
 
   def test_user_password
     config = Kubeclient::Config.read(test_config_file('userauth.kubeconfig'))
-    assert_equal(['localhost/system:admin:token', 'localhost/system:admin:userpass'],
+    assert_equal(['localhost/system:admin:token', 'localhost/system:admin:userpass', 'localhost/system:admin:gcptoken'],
                  config.contexts)
     context = config.context('localhost/system:admin:userpass')
     check_context(context, ssl: false)
     assert_equal('admin', context.auth_options[:username])
     assert_equal('pAssw0rd123', context.auth_options[:password])
+  end
+
+  def test_gcp_token
+    config = Kubeclient::Config.read(test_config_file('userauth.kubeconfig'))
+    assert_equal(['localhost/system:admin:token', 'localhost/system:admin:userpass', 'localhost/system:admin:gcptoken'],
+                 config.contexts)
+    context = config.context('localhost/system:admin:gcptoken')
+    check_context(context, ssl: false)
+    assert_equal('ya29.C0987654321QWERTYUIOPW', context.auth_options[:bearer_token])
+    assert_equal(Time.new(2016, 11, 11, 13, 11, 5.0, '+00:00'), context.auth_options[:bearer_token_expiry])
   end
 
   private

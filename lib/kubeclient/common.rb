@@ -104,6 +104,9 @@ module Kubeclient
         {}
       end
       err_message = json_error_msg['message'] || e.message
+      if e.http_code == 401 && @auth_options.key?(:bearer_token_expiry) && @auth_options[:bearer_token_expiry] < Time.now
+        err_message += '. Your token has expired. If you are using `kubectl`, running any command should renew your token.'
+      end
       raise KubeException.new(e.http_code, err_message, e.response)
     end
 
