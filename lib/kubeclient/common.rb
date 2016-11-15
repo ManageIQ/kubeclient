@@ -104,7 +104,7 @@ module Kubeclient
         {}
       end
 
-      err_message = expired_token_message(
+      err_message = check_token_expiration(
         e.http_code,
         json_error_msg['message'] || e.message
       )
@@ -483,7 +483,7 @@ module Kubeclient
       options.merge(@socket_options)
     end
 
-    def expired_token_message(http_code, message)
+    def check_token_expiration(http_code, message)
       if http_code == 401 &&
          @auth_options.key?(:bearer_token_expiry) &&
          @auth_options[:bearer_token_expiry] < Time.now
