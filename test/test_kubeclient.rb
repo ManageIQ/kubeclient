@@ -2,15 +2,13 @@ require 'test_helper'
 
 # Kubernetes client entity tests
 class KubeClientTest < MiniTest::Test
-
+  # Used to stub responses from RestClient in exceptions
   class RestClientResponseStub < String
+    attr_reader :code
+
     def initialize(body, code)
       @code = code
       super(body)
-    end
-
-    def code
-      @code
     end
   end
 
@@ -427,8 +425,8 @@ class KubeClientTest < MiniTest::Test
     exception.message = error_message
 
     stub_request(:get, 'http://localhost:8080/api/v1')
-        .with(headers: { Authorization: 'Bearer expired_token' })
-        .to_raise(exception)
+      .with(headers: { Authorization: 'Bearer expired_token' })
+      .to_raise(exception)
 
     client = Kubeclient::Client.new 'http://localhost:8080/api/',
                                     auth_options: {
@@ -439,8 +437,9 @@ class KubeClientTest < MiniTest::Test
     exception = assert_raises(KubeException) { client.get_pods }
     assert_equal(401, exception.error_code)
     assert_equal(
-        error_message + '. Your token has expired. If you are using `kubectl`, running any command should renew your token.',
-        exception.message
+      error_message + '. Your token has expired. If you are using `kubectl`, '\
+        'running any command should renew your token.',
+      exception.message
     )
     assert_equal(response, exception.response)
   end

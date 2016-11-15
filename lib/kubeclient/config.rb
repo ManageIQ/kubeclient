@@ -115,7 +115,9 @@ module Kubeclient
       options = {}
       if user.key?('token')
         options[:bearer_token] = user['token']
-      elsif user.key?('auth-provider') && user['auth-provider'].key?('config') && user['auth-provider']['config'].key?('access-token')
+      elsif user.key?('auth-provider') &&
+            user['auth-provider'].key?('config') &&
+            user['auth-provider']['config'].key?('access-token')
         options[:bearer_token] = user['auth-provider']['config']['access-token']
         options[:bearer_token_expiry] = user['auth-provider']['config']['expiry']
       else
