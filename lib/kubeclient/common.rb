@@ -108,13 +108,7 @@ module Kubeclient
     end
 
     def discover
-      @entities = {}
-      result = JSON.parse(handle_exception { rest_client.get(@headers) })
-      result['resources'].each do |resource|
-        next if resource['name'].include?('/') || resource['kind'].nil?
-        entity = ClientMixin.parse_definition(resource['kind'], resource['name'])
-        @entities[entity.method_names[0]] = entity if entity
-      end
+      load_entities
       define_entity_methods
       @discovered = true
     end
@@ -150,8 +144,6 @@ module Kubeclient
     def build_namespace_prefix(namespace)
       namespace.to_s.empty? ? '' : "namespaces/#{namespace}/"
     end
-
-    public
 
     def self.resource_class(class_owner, entity_type)
       if class_owner.const_defined?(entity_type, false)
@@ -429,6 +421,19 @@ module Kubeclient
     end
 
     private
+
+    def load_entities
+      @entities = {}
+      fetch_entities['resources'].each do |resource|
+        next if resource['name'].include?('/') || resource['kind'].nil?
+        entity = ClientMixin.parse_definition(resource['kind'], resource['name'])
+        @entities[entity.method_names[0]] = entity if entity
+      end
+    end
+
+    def fetch_entities
+      JSON.parse(handle_exception { rest_client.get(@headers) })
+    end
 
     def bearer_token(bearer_token)
       @headers ||= {}
