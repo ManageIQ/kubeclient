@@ -1,5 +1,6 @@
 require 'json'
 require 'rest-client'
+
 module Kubeclient
   # Common methods
   # this is mixed in by other gems
