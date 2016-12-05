@@ -7,6 +7,7 @@ require 'kubeclient/watch_notice'
 require 'kubeclient/watch_stream'
 require 'kubeclient/common'
 require 'kubeclient/config'
+require 'kubeclient/missing_kind_compatibility'
 
 module Kubeclient
   # Kubernetes Client

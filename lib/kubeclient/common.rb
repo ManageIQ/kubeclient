@@ -425,7 +425,9 @@ module Kubeclient
     def load_entities
       @entities = {}
       fetch_entities['resources'].each do |resource|
-        next if resource['name'].include?('/') || resource['kind'].nil?
+        next if resource['name'].include?('/')
+        resource['kind'] = Kubeclient::Common::MissingKindCompatibility
+                           .resource_kind(resource['name']) if resource['kind'].nil?
         entity = ClientMixin.parse_definition(resource['kind'], resource['name'])
         @entities[entity.method_names[0]] = entity if entity
       end
