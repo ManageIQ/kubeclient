@@ -21,21 +21,21 @@ class KubeClientTest < MiniTest::Test
     # wrap an ipv6 address in []
     uri = URI::HTTP.build(port: 8080)
     uri.hostname = 'localhost'
-    client = Kubeclient::Client.new uri
+    client = Kubeclient::Client.new(uri)
     rest_client = client.rest_client
-    assert_equal 'http://localhost:8080/api/v1', rest_client.url.to_s
+    assert_equal('http://localhost:8080/api/v1', rest_client.url.to_s)
   end
 
   def test_no_path_in_uri
-    client = Kubeclient::Client.new 'http://localhost:8080', 'v1'
+    client = Kubeclient::Client.new('http://localhost:8080', 'v1')
     rest_client = client.rest_client
-    assert_equal 'http://localhost:8080/api/v1', rest_client.url.to_s
+    assert_equal('http://localhost:8080/api/v1', rest_client.url.to_s)
   end
 
   def test_no_version_passed
-    client = Kubeclient::Client.new 'http://localhost:8080'
+    client = Kubeclient::Client.new('http://localhost:8080')
     rest_client = client.rest_client
-    assert_equal 'http://localhost:8080/api/v1', rest_client.url.to_s
+    assert_equal('http://localhost:8080/api/v1', rest_client.url.to_s)
   end
 
   def test_pass_proxy
@@ -47,7 +47,7 @@ class KubeClientTest < MiniTest::Test
 
     client = Kubeclient::Client.new(uri, http_proxy_uri: proxy_uri)
     rest_client = client.rest_client
-    assert_equal proxy_uri.to_s, rest_client.options[:proxy]
+    assert_equal(proxy_uri.to_s, rest_client.options[:proxy])
 
     watch_client = client.watch_pods
     assert_equal(watch_client.send(:build_client_options)[:proxy][:proxy_address], proxy_uri.host)
@@ -70,7 +70,7 @@ class KubeClientTest < MiniTest::Test
     # service.container_port = 6379
     # service.protocol = 'TCP'
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+    client = Kubeclient::Client.new('http://localhost:8080/api/')
 
     exception = assert_raises(KubeException) do
       service = client.create_service service
@@ -86,7 +86,7 @@ class KubeClientTest < MiniTest::Test
     stub_request(:get, 'http://localhost:8080/api')
       .to_return(status: 200, body: open_test_file('versions_list.json'))
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     response = client.api
     assert_includes(response, 'versions')
   end
@@ -97,7 +97,7 @@ class KubeClientTest < MiniTest::Test
     stub_request(:get, 'http://localhost:8080/api')
       .to_raise(OpenSSL::SSL::SSLError.new(error_message))
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+    client = Kubeclient::Client.new('http://localhost:8080/api/')
 
     exception = assert_raises(KubeException) { client.api }
     assert_equal(error_message, exception.message)
@@ -128,7 +128,7 @@ class KubeClientTest < MiniTest::Test
     stub_request(:get, 'http://localhost:8080/api')
       .to_return(status: 200, body: open_test_file('versions_list.json'))
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'foobar1'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'foobar1')
     refute client.api_valid?
   end
 
@@ -136,7 +136,7 @@ class KubeClientTest < MiniTest::Test
     stub_request(:get, 'http://localhost:8080/api')
       .to_return(status: 200, body: '{}')
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+    client = Kubeclient::Client.new('http://localhost:8080/api/')
     refute client.api_valid?
   end
 
@@ -144,7 +144,7 @@ class KubeClientTest < MiniTest::Test
     stub_request(:get, 'http://localhost:8080/api')
       .to_return(status: 200, body: '[]')
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+    client = Kubeclient::Client.new('http://localhost:8080/api/')
     refute client.api_valid?
   end
 
@@ -152,7 +152,7 @@ class KubeClientTest < MiniTest::Test
     stub_request(:get, 'http://localhost:8080/api')
       .to_return(status: [404, 'Resource Not Found'])
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+    client = Kubeclient::Client.new('http://localhost:8080/api/')
     assert_raises(KubeException) { client.api_valid? }
   end
 
@@ -160,7 +160,7 @@ class KubeClientTest < MiniTest::Test
     stub_request(:get, 'http://localhost:8080/api')
       .to_return(status: 200, body: '<html></html>')
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+    client = Kubeclient::Client.new('http://localhost:8080/api/')
     assert_raises(JSON::ParserError) { client.api_valid? }
   end
 
@@ -172,7 +172,7 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_file('service_illegal_json_404.json'),
                  status: 404)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
 
     exception = assert_raises(KubeException) do
       client.get_services
@@ -207,7 +207,7 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_file('entity_list.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     services = client.get_services
 
     refute_empty(services)
@@ -260,7 +260,7 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_file('entity_list.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     services = client.get_services(label_selector: selector)
 
     assert_instance_of(Kubeclient::Common::EntityList, services)
@@ -279,7 +279,7 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_file('entity_list.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     services = client.get_services(field_selector: selector)
 
     assert_instance_of(Kubeclient::Common::EntityList, services)
@@ -296,7 +296,7 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_file('empty_pod_list.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     pods = client.get_pods
     assert_instance_of(Kubeclient::Common::EntityList, pods)
     assert_equal(0, pods.size)
@@ -373,7 +373,7 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_file('service_account_list.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     result = client.all_entities
     assert_equal(16, result.keys.size)
     assert_instance_of(Kubeclient::Common::EntityList, result['node'])
@@ -476,10 +476,10 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_file('core_api_resource_list.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+    client = Kubeclient::Client.new('http://localhost:8080/api/',
                                     auth_options: {
                                       bearer_token: 'valid_token'
-                                    }
+                                    })
 
     pods = client.get_pods(label_selector: 'name=redis-master')
 
@@ -496,10 +496,10 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_file('pod_list.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+    client = Kubeclient::Client.new('http://localhost:8080/api/',
                                     auth_options: {
                                       bearer_token: 'valid_token'
-                                    }
+                                    })
 
     pods = client.get_pods
 
@@ -516,10 +516,10 @@ class KubeClientTest < MiniTest::Test
       .with(headers: { Authorization: 'Bearer invalid_token' })
       .to_raise(KubeException.new(403, error_message, response))
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+    client = Kubeclient::Client.new('http://localhost:8080/api/',
                                     auth_options: {
                                       bearer_token: 'invalid_token'
-                                    }
+                                    })
 
     exception = assert_raises(KubeException) { client.get_pods }
     assert_equal(403, exception.error_code)
@@ -556,11 +556,11 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_file('pod_list.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+    client = Kubeclient::Client.new('http://localhost:8080/api/',
                                     auth_options: {
                                       username: 'username',
                                       password: 'password'
-                                    }
+                                    })
 
     pods = client.get_pods
 
@@ -579,11 +579,11 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_file('pod_list.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+    client = Kubeclient::Client.new('http://localhost:8080/api/',
                                     auth_options: {
                                       user: 'username',
                                       password: 'password'
-                                    }
+                                    })
 
     pods = client.get_pods
 
@@ -601,11 +601,11 @@ class KubeClientTest < MiniTest::Test
     stub_request(:get, 'http://username:password@localhost:8080/api/v1')
       .to_raise(KubeException.new(401, error_message, response))
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+    client = Kubeclient::Client.new('http://localhost:8080/api/',
                                     auth_options: {
                                       username: 'username',
                                       password: 'password'
-                                    }
+                                    })
 
     exception = assert_raises(KubeException) { client.get_pods }
     assert_equal(401, exception.error_code)
@@ -641,73 +641,73 @@ class KubeClientTest < MiniTest::Test
   def test_init_username_no_password
     expected_msg = 'Basic auth requires both username & password'
     exception = assert_raises(ArgumentError) do
-      Kubeclient::Client.new 'http://localhost:8080',
+      Kubeclient::Client.new('http://localhost:8080',
                              auth_options: {
                                username: 'username'
-                             }
+                             })
     end
-    assert_equal expected_msg, exception.message
+    assert_equal(expected_msg, exception.message)
   end
 
   def test_init_user_no_password
     expected_msg = 'Basic auth requires both username & password'
     exception = assert_raises(ArgumentError) do
-      Kubeclient::Client.new 'http://localhost:8080',
+      Kubeclient::Client.new('http://localhost:8080',
                              auth_options: {
                                user: 'username'
-                             }
+                             })
     end
-    assert_equal expected_msg, exception.message
+    assert_equal(expected_msg, exception.message)
   end
 
   def test_init_username_and_bearer_token
     expected_msg = 'Invalid auth options: specify only one of username/password,' \
                    ' bearer_token or bearer_token_file'
     exception = assert_raises(ArgumentError) do
-      Kubeclient::Client.new 'http://localhost:8080',
+      Kubeclient::Client.new('http://localhost:8080',
                              auth_options: {
                                username: 'username',
                                bearer_token: 'token'
-                             }
+                             })
     end
-    assert_equal expected_msg, exception.message
+    assert_equal(expected_msg, exception.message)
   end
 
   def test_init_user_and_bearer_token
     expected_msg = 'Invalid auth options: specify only one of username/password,' \
                    ' bearer_token or bearer_token_file'
     exception = assert_raises(ArgumentError) do
-      Kubeclient::Client.new 'http://localhost:8080',
+      Kubeclient::Client.new('http://localhost:8080',
                              auth_options: {
                                username: 'username',
                                bearer_token: 'token'
-                             }
+                             })
     end
-    assert_equal expected_msg, exception.message
+    assert_equal(expected_msg, exception.message)
   end
 
   def test_bearer_token_and_bearer_token_file
     expected_msg = 'Invalid auth options: specify only one of username/password,' \
                    ' bearer_token or bearer_token_file'
     exception = assert_raises(ArgumentError) do
-      Kubeclient::Client.new 'http://localhost:8080',
+      Kubeclient::Client.new('http://localhost:8080',
                              auth_options: {
                                bearer_token: 'token',
                                bearer_token_file: 'token-file'
-                             }
+                             })
     end
-    assert_equal expected_msg, exception.message
+    assert_equal(expected_msg, exception.message)
   end
 
   def test_bearer_token_file_not_exist
     expected_msg = 'Token file token-file does not exist'
     exception = assert_raises(ArgumentError) do
-      Kubeclient::Client.new 'http://localhost:8080',
+      Kubeclient::Client.new('http://localhost:8080',
                              auth_options: {
                                bearer_token_file: 'token-file'
-                             }
+                             })
     end
-    assert_equal expected_msg, exception.message
+    assert_equal(expected_msg, exception.message)
   end
 
   def test_api_bearer_token_file_success
@@ -720,10 +720,10 @@ class KubeClientTest < MiniTest::Test
                  status: 200)
 
     file = File.join(File.dirname(__FILE__), 'valid_token_file')
-    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+    client = Kubeclient::Client.new('http://localhost:8080/api/',
                                     auth_options: {
                                       bearer_token_file: file
-                                    }
+                                    })
 
     pods = client.get_pods
 
@@ -736,7 +736,7 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_file('core_api_resource_list.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://host:8080', 'v1'
+    client = Kubeclient::Client.new('http://host:8080', 'v1')
     assert_equal('http://host:8080/api/v1/proxy/namespaces/ns/services/srvname:srvportname',
                  client.proxy_url('service', 'srvname', 'srvportname', 'ns'))
 
@@ -765,17 +765,17 @@ class KubeClientTest < MiniTest::Test
   end
 
   def test_attr_readers
-    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+    client = Kubeclient::Client.new('http://localhost:8080/api/',
                                     ssl_options: {
                                       client_key: 'secret'
                                     },
                                     auth_options: {
                                       bearer_token: 'token'
-                                    }
-    assert_equal '/api', client.api_endpoint.path
-    assert_equal 'secret', client.ssl_options[:client_key]
-    assert_equal 'token', client.auth_options[:bearer_token]
-    assert_equal 'Bearer token', client.headers[:Authorization]
+                                    })
+    assert_equal('/api', client.api_endpoint.path)
+    assert_equal('secret', client.ssl_options[:client_key])
+    assert_equal('token', client.auth_options[:bearer_token])
+    assert_equal('Bearer token', client.headers[:Authorization])
   end
 
   def test_nil_items
@@ -787,7 +787,7 @@ class KubeClientTest < MiniTest::Test
       .to_return(body: open_test_file('persistent_volume_claims_nil_items.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     client.get_persistent_volume_claims
   end
 
