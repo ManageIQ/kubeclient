@@ -2,6 +2,16 @@ require 'test_helper'
 
 # Kubernetes client entity tests
 class KubeClientTest < MiniTest::Test
+  # Used to stub responses from RestClient in exceptions
+  class RestClientResponseStub < String
+    attr_reader :code
+
+    def initialize(body, code)
+      @code = code
+      super(body)
+    end
+  end
+
   def test_json
     our_object = Kubeclient::Resource.new
     our_object.foo = 'bar'
@@ -389,11 +399,13 @@ class KubeClientTest < MiniTest::Test
   def test_api_bearer_token_failure
     error_message = '"/api/v1" is forbidden because ' \
                     'system:anonymous cannot list on pods in'
-    response = OpenStruct.new(code: 401, message: error_message)
+    response = RestClientResponseStub.new('', 403)
+    exception = RestClient::Exception.new(response)
+    exception.message = error_message
 
     stub_request(:get, 'http://localhost:8080/api/v1')
       .with(headers: { Authorization: 'Bearer invalid_token' })
-      .to_raise(KubeException.new(403, error_message, response))
+      .to_raise(exception)
 
     client = Kubeclient::Client.new('http://localhost:8080/api/',
                                     auth_options: {
@@ -403,6 +415,32 @@ class KubeClientTest < MiniTest::Test
     exception = assert_raises(KubeException) { client.get_pods }
     assert_equal(403, exception.error_code)
     assert_equal(error_message, exception.message)
+    assert_equal(response, exception.response)
+  end
+
+  def test_api_bearer_token_expired
+    error_message = '401 Unauthorized'
+    response = RestClientResponseStub.new('Unauthorized', 401)
+    exception = RestClient::Exception.new(response)
+    exception.message = error_message
+
+    stub_request(:get, 'http://localhost:8080/api/v1')
+      .with(headers: { Authorization: 'Bearer expired_token' })
+      .to_raise(exception)
+
+    client = Kubeclient::Client.new 'http://localhost:8080/api/',
+                                    auth_options: {
+                                      bearer_token: 'expired_token',
+                                      bearer_token_expiry: Time.at(Time.now.to_i - 1)
+                                    }
+
+    exception = assert_raises(KubeException) { client.get_pods }
+    assert_equal(401, exception.error_code)
+    assert_equal(
+      error_message + '. Your token has expired. If you are using `kubectl`, '\
+        'running any command should renew your token.',
+      exception.message
+    )
     assert_equal(response, exception.response)
   end
 
@@ -454,10 +492,12 @@ class KubeClientTest < MiniTest::Test
 
   def test_api_basic_auth_failure
     error_message = 'HTTP status code 401, 401 Unauthorized'
-    response = OpenStruct.new(code: 401, message: '401 Unauthorized')
+    response = RestClientResponseStub.new('401 Unauthorized', 401)
+    exception = RestClient::Exception.new(response)
+    exception.message = error_message
 
     stub_request(:get, 'http://username:password@localhost:8080/api/v1')
-      .to_raise(KubeException.new(401, error_message, response))
+      .to_raise(exception)
 
     client = Kubeclient::Client.new('http://localhost:8080/api/',
                                     auth_options: {
