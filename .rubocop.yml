@@ -1,3 +1,5 @@
+AllCops:
+  DisplayCopNames: true
 MethodLength:
   Enabled: false
 ClassLength:
@@ -10,3 +12,5 @@ Metrics/ParameterLists:
   Max: 8
 Metrics/CyclomaticComplexity:
   Max: 8
+Metrics/ModuleLength:
+  Enabled: false

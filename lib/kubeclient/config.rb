@@ -20,7 +20,7 @@ module Kubeclient
     def initialize(kcfg, kcfg_path)
       @kcfg = kcfg
       @kcfg_path = kcfg_path
-      fail 'Unknown kubeconfig version' if @kcfg['apiVersion'] != 'v1'
+      raise 'Unknown kubeconfig version' if @kcfg['apiVersion'] != 'v1'
     end
 
     def self.read(filename)
@@ -72,13 +72,13 @@ module Kubeclient
         break x['context'] if x['name'] == context_name
       end
 
-      fail "Unknown context #{context_name}" unless context
+      raise "Unknown context #{context_name}" unless context
 
       cluster = @kcfg['clusters'].detect do |x|
         break x['cluster'] if x['name'] == context['cluster']
       end
 
-      fail "Unknown cluster #{context['cluster']}" unless cluster
+      raise "Unknown cluster #{context['cluster']}" unless cluster
 
       user = @kcfg['users'].detect do |x|
         break x['user'] if x['name'] == context['user']
@@ -89,25 +89,25 @@ module Kubeclient
 
     def fetch_cluster_ca_data(cluster)
       if cluster.key?('certificate-authority')
-        return File.read(ext_file_path(cluster['certificate-authority']))
+        File.read(ext_file_path(cluster['certificate-authority']))
       elsif cluster.key?('certificate-authority-data')
-        return Base64.decode64(cluster['certificate-authority-data'])
+        Base64.decode64(cluster['certificate-authority-data'])
       end
     end
 
     def fetch_user_cert_data(user)
       if user.key?('client-certificate')
-        return File.read(ext_file_path(user['client-certificate']))
+        File.read(ext_file_path(user['client-certificate']))
       elsif user.key?('client-certificate-data')
-        return Base64.decode64(user['client-certificate-data'])
+        Base64.decode64(user['client-certificate-data'])
       end
     end
 
     def fetch_user_key_data(user)
       if user.key?('client-key')
-        return File.read(ext_file_path(user['client-key']))
+        File.read(ext_file_path(user['client-key']))
       elsif user.key?('client-key-data')
-        return Base64.decode64(user['client-key-data'])
+        Base64.decode64(user['client-key-data'])
       end
     end
 
