@@ -19,10 +19,14 @@ class CreateGuestbookGo < MiniTest::Test
 
       # delete in case they existed before so creation can be tested
       delete_namespace(client, testing_ns.metadata.name)
-      delete_services(client, testing_ns.metadata.name,
-                      ['guestbook', 'redis-master', 'redis-slave'])
-      delete_replication_controllers(client, testing_ns.metadata.name,
-                                     ['guestbook', 'redis-master', 'redis-slave'])
+      delete_services(
+        client, testing_ns.metadata.name,
+        ['guestbook', 'redis-master', 'redis-slave']
+      )
+      delete_replication_controllers(
+        client, testing_ns.metadata.name,
+        ['guestbook', 'redis-master', 'redis-slave']
+      )
 
       client.create_namespace testing_ns
       services = create_services(client, testing_ns.metadata.name)
@@ -41,9 +45,9 @@ class CreateGuestbookGo < MiniTest::Test
 
   def delete_namespace(client, namespace_name)
     client.delete_namespace namespace_name
-    rescue KubeException => exception
-      assert_instance_of(KubeException, exception)
-      assert_equal(404, exception.error_code)
+  rescue KubeException => exception
+    assert_instance_of(KubeException, exception)
+    assert_equal(404, exception.error_code)
   end
 
   def get_namespaces(client)
@@ -135,10 +139,14 @@ class CreateGuestbookGo < MiniTest::Test
     rc.spec.selector.role = 'master'
     rc.spec.template.metadata.labels.app = 'redis'
     rc.spec.template.metadata.labels.role = 'master'
-    rc.spec.template.spec.containers = [{ 'name' => 'redis-master',
-                                          'image' => 'redis',
-                                          'ports' => [{ 'name' => 'redis-server',
-                                                        'containerPort' => 6379 }] }]
+    rc.spec.template.spec.containers = [{
+      'name' => 'redis-master',
+      'image' => 'redis',
+      'ports' => [{
+        'name' => 'redis-server',
+        'containerPort' => 6379
+      }]
+    }]
     rc
   end
 
@@ -152,11 +160,14 @@ class CreateGuestbookGo < MiniTest::Test
     rc.spec.selector.role = 'slave'
     rc.spec.template.metadata.labels.app = 'redis'
     rc.spec.template.metadata.labels.role = 'slave'
-    rc.spec.template.spec.containers = [{ 'name'          => 'redis-slave',
-                                          'image'         => 'kubernetes/redis-slave:v2',
-                                          'ports'         => [{ 'name'          => 'redis-server',
-                                                                'containerPort' => 6379 }
-                                                             ] }]
+    rc.spec.template.spec.containers = [{
+      'name'          => 'redis-slave',
+      'image'         => 'kubernetes/redis-slave:v2',
+      'ports'         => [{
+        'name'          => 'redis-server',
+        'containerPort' => 6379
+      }]
+    }]
     rc
   end
 
@@ -168,12 +179,18 @@ class CreateGuestbookGo < MiniTest::Test
     rc.spec.replicas = 3
     rc.spec.selector.app = 'guestbook'
     rc.spec.template.metadata.labels.app = 'guestbook'
-    rc.spec.template.spec.containers = [{ 'name'     => 'guestbook',
-                                          'image'    => 'kubernetes/guestbook:v2',
-                                          'ports'    => [{ 'name'          => 'http-server',
-                                                           'containerPort' => 3000 }]
-                                        }]
-
+    rc.spec.template.spec.containers = [
+      {
+        'name'     => 'guestbook',
+        'image'    => 'kubernetes/guestbook:v2',
+        'ports'    => [
+          {
+            'name'          => 'http-server',
+            'containerPort' => 3000
+          }
+        ]
+      }
+    ]
     rc
   end
 
@@ -192,11 +209,7 @@ class CreateGuestbookGo < MiniTest::Test
     our_service.metadata.name = 'redis-slave'
     our_service.metadata.labels.app = 'redis'
     our_service.metadata.labels.role = 'slave'
-
-    our_service.spec.ports = [{ 'port' => 6379,
-                                'targetPort' => 'redis-server'
-                              }]
-
+    our_service.spec.ports = [{ 'port' => 6379, 'targetPort' => 'redis-server' }]
     our_service.spec.selector.app = 'redis'
     our_service.spec.selector.role = 'slave'
     our_service
@@ -207,11 +220,7 @@ class CreateGuestbookGo < MiniTest::Test
     our_service.metadata.name = 'redis-master'
     our_service.metadata.labels.app = 'redis'
     our_service.metadata.labels.role = 'master'
-
-    our_service.spec.ports = [{ 'port' => 6379,
-                                'targetPort' => 'redis-server'
-                              }]
-
+    our_service.spec.ports = [{ 'port' => 6379, 'targetPort' => 'redis-server' }]
     our_service.spec.selector.app = 'redis'
     our_service.spec.selector.role = 'master'
     our_service
@@ -221,11 +230,7 @@ class CreateGuestbookGo < MiniTest::Test
     our_service = base_service(namespace)
     our_service.metadata.name = 'guestbook'
     our_service.metadata.labels.name = 'guestbook'
-
-    our_service.spec.ports = [{ 'port' => 3000,
-                                'targetPort' => 'http-server'
-                              }]
-
+    our_service.spec.ports = [{ 'port' => 3000, 'targetPort' => 'http-server' }]
     our_service.spec.selector.app = 'guestbook'
     our_service.type = 'LoadBalancer'
     our_service

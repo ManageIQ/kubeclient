@@ -58,7 +58,7 @@ module Kubeclient
         'templates'                  => 'Template',
         'useridentitymappings'       => 'UserIdentityMapping',
         'users'                      => 'User'
-      }
+      }.freeze
 
       def self.resource_kind(name)
         MAPPING[name]
