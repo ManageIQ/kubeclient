@@ -262,7 +262,7 @@ Input parameter - object of type `Service`, `Pod`, `ReplicationController`.
 The below example is for v1
 
 ```ruby
-service = Service.new
+service = Kubeclient::Resource.new
 service.metadata = {}
 service.metadata.name = "redis-master"
 service.metadata.namespace = 'staging'
