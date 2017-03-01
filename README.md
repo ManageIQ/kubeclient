@@ -390,6 +390,8 @@ Input parameter - template (hash)
 Besides its metadata, the template should include a list of objects to be processed and a list of parameters
 to be substituted. Note that for a required parameter that does not provide a generated value, you must supply a value.
 
+##### Note: This functionality is not supported by K8s at this moment. See the following [issue](https://github.com/kubernetes/kubernetes/issues/23896)
+
 ```ruby
 client.process_template template
 ```
