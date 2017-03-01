@@ -72,13 +72,13 @@ module Kubeclient
         break x['context'] if x['name'] == context_name
       end
 
-      raise "Unknown context #{context_name}" unless context
+      raise KeyError, "Unknown context #{context_name}" unless context
 
       cluster = @kcfg['clusters'].detect do |x|
         break x['cluster'] if x['name'] == context['cluster']
       end
 
-      raise "Unknown cluster #{context['cluster']}" unless cluster
+      raise KeyError, "Unknown cluster #{context['cluster']}" unless cluster
 
       user = @kcfg['users'].detect do |x|
         break x['user'] if x['name'] == context['user']
