@@ -6,8 +6,9 @@
 [![Dependency Status](https://gemnasium.com/abonas/kubeclient.svg)](https://gemnasium.com/abonas/kubeclient)
 
 A Ruby client for Kubernetes REST api.
-The client supports GET, POST, PUT, DELETE on nodes, pods, secrets, services, replication controllers, namespaces, resource quotas, limit ranges, endpoints, persistent volumes, persistent volume claims, component statuses and service accounts.
+The client supports GET, POST, PUT, DELETE on all the entities available in kubernetes in both the core and group apis.
 The client currently supports Kubernetes REST api version v1.
+To learn more about groups and versions in kubernetes refer to [k8s docs](https://kubernetes.io/docs/api/)
 
 ## Installation
 
@@ -137,7 +138,7 @@ client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
                                 auth_options: auth_options
 ```
 
-You can find information about token in [this guide](http://kubernetes.io/docs/user-guide/accessing-the-cluster/) and in [this reference](http://kubernetes.io/docs/admin/authentication/).
+You can find information about tokens in [this guide](http://kubernetes.io/docs/user-guide/accessing-the-cluster/) and in [this reference](http://kubernetes.io/docs/admin/authentication/).
 
 ### Non-blocking IO
 
@@ -301,7 +302,7 @@ Input parameter - object of type `Service`, `Pod`, `ReplicationController`.
 The below example is for v1
 
 ```ruby
-service = Service.new
+service = Kubeclient::Resource.new
 service.metadata = {}
 service.metadata.name = "redis-master"
 service.metadata.namespace = 'staging'
