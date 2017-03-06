@@ -26,6 +26,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'vcr'
   spec.add_development_dependency 'rubocop', '= 0.46.0'
   spec.add_dependency 'rest-client'
-  spec.add_dependency 'recursive-open-struct', '= 1.0.0'
+  spec.add_dependency 'recursive-open-struct', '~> 1.0.0'
   spec.add_dependency 'http', '= 0.9.8'
 end
