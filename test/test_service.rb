@@ -40,7 +40,7 @@ class TestService < MiniTest::Test
     assert_equal(created.spec.ports.size, our_service.spec.ports.size)
 
     # Check that original entity_config is not modified by kind/apiVersion patches:
-    assert_equal(our_service.kind, nil)
+    assert_nil(our_service.kind)
 
     assert_requested(:post, expected_url, times: 1) do |req|
       data = JSON.parse(req.body)
