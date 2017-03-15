@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'minitest'
   spec.add_development_dependency 'webmock', '~> 1.24.2'
   spec.add_development_dependency 'vcr'
-  spec.add_development_dependency 'rubocop', '= 0.46.0'
+  spec.add_development_dependency 'rubocop', '= 0.47.1'
   spec.add_dependency 'rest-client'
   spec.add_dependency 'recursive-open-struct', '~> 1.0.0'
   spec.add_dependency 'http', '= 0.9.8'

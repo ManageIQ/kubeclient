@@ -3,7 +3,7 @@ require 'test_helper'
 # Process Template tests
 class TestProcessTemplate < MiniTest::Test
   def test_process_template
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     template = {}
     template[:metadata] = {}
     template[:metadata][:name] = 'my-template'
@@ -29,7 +29,7 @@ class TestProcessTemplate < MiniTest::Test
       .with(body: req_body, headers: { 'Content-Type' => 'application/json' })
       .to_return(body: open_test_file('processed_template.json'), status: 200)
 
-    processed_template = client.process_template template
+    processed_template = client.process_template(template)
 
     assert_equal('test/my-service', processed_template['objects'].first['metadata']['name'])
 

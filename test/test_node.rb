@@ -8,7 +8,7 @@ class TestNode < MiniTest::Test
     stub_request(:get, %r{/api/v1$})
       .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     node = client.get_node('127.0.0.1')
 
     assert_instance_of(Kubeclient::Node, node)

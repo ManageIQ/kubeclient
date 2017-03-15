@@ -8,8 +8,8 @@ class TestPod < MiniTest::Test
     stub_request(:get, %r{/api/v1$})
       .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    pod = client.get_pod 'redis-master-pod', 'default'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    pod = client.get_pod('redis-master-pod', 'default')
 
     assert_instance_of(Kubeclient::Pod, pod)
     assert_equal('redis-master3', pod.metadata.name)

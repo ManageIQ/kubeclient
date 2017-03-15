@@ -10,8 +10,8 @@ class TestReplicationController < MiniTest::Test
       .to_return(body: open_test_file('replication_controller.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    rc = client.get_replication_controller 'frontendController', 'default'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    rc = client.get_replication_controller('frontendController', 'default')
 
     assert_instance_of(Kubeclient::ReplicationController, rc)
     assert_equal('guestbook-controller', rc.metadata.name)

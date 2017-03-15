@@ -8,8 +8,8 @@ class TestComponentStatus < MiniTest::Test
     stub_request(:get, %r{/api/v1$})
       .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    component_status = client.get_component_status 'etcd-0', 'default'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    component_status = client.get_component_status('etcd-0', 'default')
 
     assert_instance_of(Kubeclient::ComponentStatus, component_status)
     assert_equal('etcd-0', component_status.metadata.name)
