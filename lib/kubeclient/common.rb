@@ -313,6 +313,13 @@ module Kubeclient
       new_entity(result, klass)
     end
 
+    def create(entity_config)
+      discover unless @discovered
+      entity = @entity_store.from_api_version_and_kind(@api_version, entity_config.kind)
+
+      create_entity(entity.kind, entity.api_name, entity_config, entity.klass(@class_owner))
+    end
+
     def update_entity(resource_name, entity_config)
       name      = entity_config[:metadata][:name]
       ns_prefix = build_namespace_prefix(entity_config[:metadata][:namespace])
@@ -419,13 +426,16 @@ module Kubeclient
     private
 
     def load_entities
+      @entity_store = Kubeclient::Common::EntityStore.new
       @entities = {}
+
       fetch_entities['resources'].each do |resource|
         next if resource['name'].include?('/')
         resource['kind'] ||=
           Kubeclient::Common::MissingKindCompatibility.resource_kind(resource['name'])
         entity = ClientMixin.parse_definition(resource['kind'], resource['name'])
         @entities[entity.method_names[0]] = entity if entity
+        @entity_store.add(Kubeclient::Common::Entity.new(resource['kind'], @api_version, resource['name']))
       end
     end
 

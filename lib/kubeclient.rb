@@ -8,6 +8,8 @@ require 'kubeclient/watch_stream'
 require 'kubeclient/common'
 require 'kubeclient/config'
 require 'kubeclient/missing_kind_compatibility'
+require 'kubeclient/entity'
+require 'kubeclient/entity_store'
 
 module Kubeclient
   # Kubernetes Client
