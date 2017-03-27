@@ -313,13 +313,6 @@ module Kubeclient
       new_entity(result, klass)
     end
 
-    def create(entity_config)
-      discover unless @discovered
-      entity = @entity_store.from_api_version_and_kind(@api_version, entity_config.kind)
-
-      create_entity(entity.kind, entity.api_name, entity_config, entity.klass(@class_owner))
-    end
-
     def update_entity(resource_name, entity_config)
       name      = entity_config[:metadata][:name]
       ns_prefix = build_namespace_prefix(entity_config[:metadata][:namespace])
@@ -338,6 +331,38 @@ module Kubeclient
             { 'Content-Type' => 'application/strategic-merge-patch+json' }.merge(@headers)
           )
       end
+    end
+
+    def create(entity_config)
+      discover unless @discovered
+      entity = @entity_store.from_api_version_and_kind(@api_version, entity_config.kind)
+
+      create_entity(entity.kind, entity.api_name, entity_config, entity.klass(@class_owner))
+    end
+
+    def update(entity_config)
+      discover unless @discovered
+      entity = @entity_store.from_api_version_and_kind(@api_version, entity_config.kind)
+
+      update_entity(entity.api_name, entity_config)
+    end
+
+    def patch(entity_config)
+      discover unless @discovered
+      entity = @entity_store.from_api_version_and_kind(@api_version, entity_config.kind)
+
+      patch_entity(entity.api_name, entity_config[:metadata][:name], entity_config, entity_config[:metadata][:namespace])
+    end
+
+    def delete(entity_config)
+      discover unless @discovered
+      entity = @entity_store.from_api_version_and_kind(@api_version, entity_config.kind)
+
+      delete_entity(
+        entity.api_name,
+        entity_config[:metadata][:name],
+        entity_config[:metadata][:namespace]
+      )
     end
 
     def new_entity(hash, klass)
