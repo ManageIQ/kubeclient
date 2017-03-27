@@ -337,7 +337,7 @@ module Kubeclient
       discover unless @discovered
       entity = @entity_store.from_api_version_and_kind(@api_version, entity_config.kind)
 
-      create_entity(entity.kind, entity.api_name, entity_config, entity.klass(@class_owner))
+      create_entity(entity.kind, entity.api_name, entity_config, entity.klass)
     end
 
     def update(entity_config)
@@ -460,7 +460,7 @@ module Kubeclient
           Kubeclient::Common::MissingKindCompatibility.resource_kind(resource['name'])
         entity = ClientMixin.parse_definition(resource['kind'], resource['name'])
         @entities[entity.method_names[0]] = entity if entity
-        @entity_store.add(Kubeclient::Common::Entity.new(resource['kind'], @api_version, resource['name']))
+        @entity_store.add(Kubeclient::Common::Entity.new(@class_owner, resource['kind'], @api_version, resource['name']))
       end
     end
 
