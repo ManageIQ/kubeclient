@@ -9,6 +9,8 @@ require 'kubeclient/watch_stream'
 require 'kubeclient/common'
 require 'kubeclient/config'
 require 'kubeclient/missing_kind_compatibility'
+require 'kubeclient/api'
+require 'kubeclient/apis'
 require 'kubeclient/entity'
 require 'kubeclient/entity_store'
 

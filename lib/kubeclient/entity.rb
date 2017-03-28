@@ -1,13 +1,28 @@
+require 'weakref'
+
 module Kubeclient
   module Common
     class Entity
-      attr_reader :klass_owner, :kind, :api_version, :api_name
+      attr_reader :namespace_module, :api, :kind, :api_name, :singular_method, :plural_method
 
-      def initialize(klass_owner, kind, api_version, api_name)
-        @klass_owner = klass_owner
+      def initialize(namespace_module, api, kind, api_name, singular_method, plural_method)
+        @namespace_module = namespace_module
         @kind = kind
-        @api_version = api_version
+        @api = WeakRef.new(api)
         @api_name = api_name
+        @singular_method = singular_method
+        @plural_method = plural_method
+      end
+
+      def rest_client(namespace = nil)
+        ns_prefix =
+          if namespace.to_s.empty?
+            ''
+          else
+            "namespaces/#{namespace}/"
+          end
+
+        api.rest_client[ns_prefix + api_name]
       end
 
       def klass
@@ -21,15 +36,15 @@ module Kubeclient
       private
 
       def klass_exists?
-        klass_owner.const_defined?(kind, false)
+        namespace_module.const_defined?(kind, false)
       end
 
       def get_klass
-        klass_owner.const_get(kind, false)
+        namespace_module.const_get(kind, false)
       end
 
       def create_klass
-        klass_owner.const_set(
+        namespace_module.const_set(
           kind,
           Class.new(RecursiveOpenStruct) do
             def initialize(hash = nil, args = {})
