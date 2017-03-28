@@ -152,41 +152,44 @@ module Kubeclient
     end
 
     def define_entity_methods
-      @entities.values.each do |entity|
-        klass = ClientMixin.resource_class(@class_owner, entity.entity_type)
-        # get all entities of a type e.g. get_nodes, get_pods, etc.
-        define_singleton_method("get_#{entity.method_names[1]}") do |options = {}|
-          get_entities(entity.entity_type, klass, entity.resource_name, options)
-        end
+      @apis.apis.values.each do |api|
+        api.entities.each do |entity|
 
-        # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
-        define_singleton_method("watch_#{entity.method_names[1]}") do |options = {}|
-          # This method used to take resource_version as a param, so
-          # this conversion is to keep backwards compatibility
-          options = { resource_version: options } unless options.is_a?(Hash)
+          klass = entity.klass
+          # get all entities of a type e.g. get_nodes, get_pods, etc.
+          define_singleton_method("get_#{entity.plural_method}") do |options = {}|
+            get_entities(entity, options)
+          end
 
-          watch_entities(entity.resource_name, options)
-        end
+          # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
+          define_singleton_method("watch_#{entity.plural_method}") do |options = {}|
+            # This method used to take resource_version as a param, so
+            # this conversion is to keep backwards compatibility
+            options = { resource_version: options } unless options.is_a?(Hash)
 
-        # get a single entity of a specific type by name
-        define_singleton_method("get_#{entity.method_names[0]}") do |name, namespace = nil|
-          get_entity(klass, entity.resource_name, name, namespace)
-        end
+            watch_entities(entity.api_name, options)
+          end
 
-        define_singleton_method("delete_#{entity.method_names[0]}") do |name, namespace = nil|
-          delete_entity(entity.resource_name, name, namespace)
-        end
+          # get a single entity of a specific type by name
+          define_singleton_method("get_#{entity.singular_method}") do |name, namespace = nil|
+            get_entity(klass, entity.api_name, name, namespace)
+          end
 
-        define_singleton_method("create_#{entity.method_names[0]}") do |entity_config|
-          create_entity(entity.entity_type, entity.resource_name, entity_config, klass)
-        end
+          define_singleton_method("delete_#{entity.singular_method}") do |name, namespace = nil|
+            delete_entity(entity.api_name, name, namespace)
+          end
 
-        define_singleton_method("update_#{entity.method_names[0]}") do |entity_config|
-          update_entity(entity.resource_name, entity_config)
-        end
+          define_singleton_method("create_#{entity.singular_method}") do |entity_config|
+            create_entity(entity.kind, entity.api_name, entity_config, klass)
+          end
 
-        define_singleton_method("patch_#{entity.method_names[0]}") do |name, patch, namespace = nil|
-          patch_entity(entity.resource_name, name, patch, namespace)
+          define_singleton_method("update_#{entity.singular_method}") do |entity_config|
+            update_entity(entity.api_name, entity_config)
+          end
+
+          define_singleton_method("patch_#{entity.singular_method}") do |name, patch, namespace = nil|
+            patch_entity(entity.api_name, name, patch, namespace)
+          end
         end
       end
     end
@@ -222,7 +225,7 @@ module Kubeclient
     #   :label_selector - a selector to restrict the list of returned objects by their labels.
     #   :field_selector - a selector to restrict the list of returned objects by their fields.
     #   :resource_version - shows changes that occur after that particular version of a resource.
-    def watch_entities(resource_name, options = {})
+    def watch_entities(entity, options = {})
       ns = build_namespace_prefix(options[:namespace])
 
       path = "watch/#{ns}#{resource_name}"
@@ -240,13 +243,12 @@ module Kubeclient
     #   :namespace - the namespace of the entity.
     #   :label_selector - a selector to restrict the list of returned objects by their labels.
     #   :field_selector - a selector to restrict the list of returned objects by their fields.
-    def get_entities(entity_type, klass, resource_name, options = {})
+    def get_entities(entity, options = {})
       params = {}
       SEARCH_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
 
-      ns_prefix = build_namespace_prefix(options[:namespace])
       response = handle_exception do
-        rest_client[ns_prefix + resource_name]
+        entity.rest_client(options[:namespace])
           .get({ 'params' => params }.merge(@headers))
       end
 
@@ -258,9 +260,9 @@ module Kubeclient
         end
 
       # result['items'] might be nil due to https://github.com/kubernetes/kubernetes/issues/13096
-      collection = result['items'].to_a.map { |item| new_entity(item, klass) }
+      collection = result['items'].to_a.map { |item| new_entity(item, entity.klass) }
 
-      Kubeclient::Common::EntityList.new(entity_type, resource_version, collection)
+      Kubeclient::Common::EntityList.new(entity.kind, resource_version, collection)
     end
 
     def get_entity(klass, resource_name, name, namespace = nil)
@@ -323,30 +325,37 @@ module Kubeclient
       end
     end
 
+    def get(klass, name, namespace = nil)
+      discover unless @discovered
+      entity = @entity_index.from_klass(klass)
+
+      get_entity(entity.klass, entity.api_name, name, namespace)
+    end
+
     def create(entity_config)
       discover unless @discovered
-      entity = @entity_store.from_api_version_and_kind(@api_version, entity_config.kind)
+      entity = @entity_index.from_api_version_and_kind(@api_version, entity_config.kind)
 
       create_entity(entity.kind, entity.api_name, entity_config, entity.klass)
     end
 
     def update(entity_config)
       discover unless @discovered
-      entity = @entity_store.from_api_version_and_kind(@api_version, entity_config.kind)
+      entity = @entity_index.from_api_version_and_kind(@api_version, entity_config.kind)
 
       update_entity(entity.api_name, entity_config)
     end
 
     def patch(entity_config)
       discover unless @discovered
-      entity = @entity_store.from_api_version_and_kind(@api_version, entity_config.kind)
+      entity = @entity_index.from_api_version_and_kind(@api_version, entity_config.kind)
 
       patch_entity(entity.api_name, entity_config[:metadata][:name], entity_config, entity_config[:metadata][:namespace])
     end
 
     def delete(entity_config)
       discover unless @discovered
-      entity = @entity_store.from_api_version_and_kind(@api_version, entity_config.kind)
+      entity = @entity_index.from_api_version_and_kind(@api_version, entity_config.kind)
 
       delete_entity(
         entity.api_name,
@@ -441,17 +450,8 @@ module Kubeclient
     private
 
     def load_entities
-      @entity_store = Kubeclient::Common::EntityStore.new
-      @entities = {}
-
-      fetch_entities['resources'].each do |resource|
-        next if resource['name'].include?('/')
-        resource['kind'] ||=
-          Kubeclient::Common::MissingKindCompatibility.resource_kind(resource['name'])
-        entity = ClientMixin.parse_definition(resource['kind'], resource['name'])
-        @entities[entity.method_names[0]] = entity if entity
-        @entity_store.add(Kubeclient::Common::Entity.new(@class_owner, resource['kind'], @api_version, resource['name']))
-      end
+      @apis = Kubeclient::Common::Apis.new(@class_owner, create_rest_client('/'), @api_version)
+      @entity_index = Kubeclient::Common::EntityIndex.new(@apis)
     end
 
     def fetch_entities
