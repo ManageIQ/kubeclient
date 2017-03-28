@@ -4,6 +4,8 @@ module Kubeclient
   # Common methods
   # this is mixed in by other gems
   module ClientMixin
+    include Kubeclient::ErrorHandling
+
     ENTITY_METHODS = %w(get watch delete create update patch).freeze
 
     DEFAULT_SSL_OPTIONS = {
@@ -93,18 +95,6 @@ module Kubeclient
 
     def discovery_needed?(method_sym)
       !@discovered && ENTITY_METHODS.any? { |x| method_sym.to_s.start_with?(x) }
-    end
-
-    def handle_exception
-      yield
-    rescue RestClient::Exception => e
-      json_error_msg = begin
-        JSON.parse(e.response || '') || {}
-      rescue JSON::ParserError
-        {}
-      end
-      err_message = json_error_msg['message'] || e.message
-      raise KubeException.new(e.http_code, err_message, e.response)
     end
 
     def discover
