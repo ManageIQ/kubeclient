@@ -184,7 +184,7 @@ module Kubeclient
           end
 
           define_singleton_method("update_#{entity.singular_method}") do |entity_config|
-            update_entity(entity.api_name, entity_config)
+            update_entity(entity, entity_config)
           end
 
           define_singleton_method("patch_#{entity.singular_method}") do |name, patch, namespace = nil|
@@ -301,11 +301,10 @@ module Kubeclient
       new_entity(result, entity.klass)
     end
 
-    def update_entity(resource_name, entity_config)
+    def update_entity(entity, entity_config)
       name      = entity_config[:metadata][:name]
-      ns_prefix = build_namespace_prefix(entity_config[:metadata][:namespace])
       handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
+        entity.rest_client(entity_config[:metadata][:namespace])[name]
           .put(entity_config.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
       end
     end
@@ -339,7 +338,7 @@ module Kubeclient
       discover unless @discovered
       entity = @entity_index.from_api_version_and_kind(@api_version, entity_config.kind)
 
-      update_entity(entity.api_name, entity_config)
+      update_entity(entity, entity_config)
     end
 
     def patch(entity_config)
