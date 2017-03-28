@@ -385,15 +385,19 @@ module Kubeclient
     end
 
     def watch_pod_log(pod_name, namespace, container: nil)
+      # todo: is it possible to do this without discovery?
+      discover unless @discovered
+
       # Adding the "follow=true" query param tells the Kubernetes API to keep
       # the connection open and stream updates to the log.
       params = { follow: true }
       params[:container] = container if container
 
+      # todo: this is ugly lookup by kind instead?
+      entity = @entity_index.from_klass(@class_owner::Pod)
       ns = build_namespace_prefix(namespace)
 
-      uri = @api_endpoint.dup
-      uri.path += "/#{@api_version}/#{ns}pods/#{pod_name}/log"
+      uri = URI(entity.rest_client(namespace)[pod_name]['log'].url)
       uri.query = URI.encode_www_form(params)
 
       Kubeclient::Common::WatchStream.new(uri, http_options(uri), format: :text)
