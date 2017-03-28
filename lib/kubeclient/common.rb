@@ -172,7 +172,7 @@ module Kubeclient
 
           # get a single entity of a specific type by name
           define_singleton_method("get_#{entity.singular_method}") do |name, namespace = nil|
-            get_entity(klass, entity.api_name, name, namespace)
+            get_entity(entity, name, namespace)
           end
 
           define_singleton_method("delete_#{entity.singular_method}") do |name, namespace = nil|
@@ -265,14 +265,13 @@ module Kubeclient
       Kubeclient::Common::EntityList.new(entity.kind, resource_version, collection)
     end
 
-    def get_entity(klass, resource_name, name, namespace = nil)
-      ns_prefix = build_namespace_prefix(namespace)
+    def get_entity(entity, name, namespace = nil)
       response = handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
+        entity.rest_client(namespace)[name]
           .get(@headers)
       end
       result = JSON.parse(response)
-      new_entity(result, klass)
+      new_entity(result, entity.klass)
     end
 
     def delete_entity(resource_name, name, namespace = nil)
@@ -329,7 +328,7 @@ module Kubeclient
       discover unless @discovered
       entity = @entity_index.from_klass(klass)
 
-      get_entity(entity.klass, entity.api_name, name, namespace)
+      get_entity(entity, name, namespace)
     end
 
     def create(entity_config)
