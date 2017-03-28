@@ -176,7 +176,7 @@ module Kubeclient
           end
 
           define_singleton_method("delete_#{entity.singular_method}") do |name, namespace = nil|
-            delete_entity(entity.api_name, name, namespace)
+            delete_entity(entity, name, namespace)
           end
 
           define_singleton_method("create_#{entity.singular_method}") do |entity_config|
@@ -274,10 +274,9 @@ module Kubeclient
       new_entity(result, entity.klass)
     end
 
-    def delete_entity(resource_name, name, namespace = nil)
-      ns_prefix = build_namespace_prefix(namespace)
+    def delete_entity(entity, name, namespace = nil)
       handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
+        entity.rest_client(namespace)[name]
           .delete(@headers)
       end
     end
@@ -357,7 +356,7 @@ module Kubeclient
       entity = @entity_index.from_api_version_and_kind(@api_version, entity_config.kind)
 
       delete_entity(
-        entity.api_name,
+        entity,
         entity_config[:metadata][:name],
         entity_config[:metadata][:namespace]
       )
