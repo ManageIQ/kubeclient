@@ -12,7 +12,7 @@ require 'kubeclient/missing_kind_compatibility'
 require 'kubeclient/api'
 require 'kubeclient/apis'
 require 'kubeclient/entity'
-require 'kubeclient/entity_store'
+require 'kubeclient/entity_index'
 
 module Kubeclient
   # Kubernetes Client
