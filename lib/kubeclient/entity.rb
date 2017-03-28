@@ -25,6 +25,18 @@ module Kubeclient
         api.rest_client[ns_prefix + api_name]
       end
 
+      def watch_uri(options = {})
+        namespace = options[:namespace].to_s
+        name = options[:name].to_s
+
+        rest_client = api.rest_client['watch']
+        rest_client = rest_client['namespaces'][namespace] if !namespace.empty?
+        rest_client = rest_client[api_name]
+        rest_client = rest_client[name] if !name.empty?
+
+        URI(rest_client.url)
+      end
+
       def klass
         if klass_exists?
           get_klass

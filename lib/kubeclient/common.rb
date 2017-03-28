@@ -167,7 +167,7 @@ module Kubeclient
             # this conversion is to keep backwards compatibility
             options = { resource_version: options } unless options.is_a?(Hash)
 
-            watch_entities(entity.api_name, options)
+            watch_entities(entity, options)
           end
 
           # get a single entity of a specific type by name
@@ -226,11 +226,7 @@ module Kubeclient
     #   :field_selector - a selector to restrict the list of returned objects by their fields.
     #   :resource_version - shows changes that occur after that particular version of a resource.
     def watch_entities(entity, options = {})
-      ns = build_namespace_prefix(options[:namespace])
-
-      path = "watch/#{ns}#{resource_name}"
-      path += "/#{options[:name]}" if options[:name]
-      uri = @api_endpoint.merge("#{@api_endpoint.path}/#{@api_version}/#{path}")
+      uri = entity.watch_uri(options)
 
       params = {}
       WATCH_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
