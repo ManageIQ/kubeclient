@@ -188,7 +188,7 @@ module Kubeclient
           end
 
           define_singleton_method("patch_#{entity.singular_method}") do |name, patch, namespace = nil|
-            patch_entity(entity.api_name, name, patch, namespace)
+            patch_entity(entity, name, patch, namespace)
           end
         end
       end
@@ -309,10 +309,9 @@ module Kubeclient
       end
     end
 
-    def patch_entity(resource_name, name, patch, namespace = nil)
-      ns_prefix = build_namespace_prefix(namespace)
+    def patch_entity(entity, name, patch, namespace = nil)
       handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
+        entity.rest_client(namespace)[name]
           .patch(
             patch.to_json,
             { 'Content-Type' => 'application/strategic-merge-patch+json' }.merge(@headers)
@@ -345,7 +344,7 @@ module Kubeclient
       discover unless @discovered
       entity = @entity_index.from_api_version_and_kind(@api_version, entity_config.kind)
 
-      patch_entity(entity.api_name, entity_config[:metadata][:name], entity_config, entity_config[:metadata][:namespace])
+      patch_entity(entity, entity_config[:metadata][:name], entity_config, entity_config[:metadata][:namespace])
     end
 
     def delete(entity_config)
