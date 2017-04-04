@@ -9,7 +9,7 @@ class TestEndpoint < MiniTest::Test
         status: 200
       )
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     testing_ep = Kubeclient::Resource.new
     testing_ep.metadata = {}
     testing_ep.metadata.name = 'myendpoint'
@@ -29,7 +29,7 @@ class TestEndpoint < MiniTest::Test
       .with(body: req_body)
       .to_return(body: open_test_file('created_endpoint.json'), status: 201)
 
-    created_ep = client.create_endpoint testing_ep
+    created_ep = client.create_endpoint(testing_ep)
     assert_equal('Endpoints', created_ep.kind)
   end
 end

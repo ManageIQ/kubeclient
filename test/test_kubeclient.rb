@@ -72,7 +72,7 @@ class KubeClientTest < MiniTest::Test
     client = Kubeclient::Client.new('http://localhost:8080/api/')
 
     exception = assert_raises(KubeException) do
-      service = client.create_service service
+      service = client.create_service(service)
     end
 
     assert_instance_of(KubeException, exception)

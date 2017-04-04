@@ -8,8 +8,8 @@ class TestPersistentVolume < MiniTest::Test
     stub_request(:get, %r{/api/v1$})
       .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    volume = client.get_persistent_volume 'pv0001'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    volume = client.get_persistent_volume('pv0001')
 
     assert_instance_of(Kubeclient::PersistentVolume, volume)
     assert_equal('pv0001', volume.metadata.name)

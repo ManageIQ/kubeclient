@@ -146,7 +146,7 @@ module Kubeclient
       raise ArgumentError, 'Missing uri' unless uri
       @api_endpoint = (uri.is_a?(URI) ? uri : URI.parse(uri))
       @api_endpoint.path = path if @api_endpoint.path.empty?
-      @api_endpoint.path = @api_endpoint.path.chop if @api_endpoint.path.end_with? '/'
+      @api_endpoint.path = @api_endpoint.path.chop if @api_endpoint.path.end_with?('/')
       components = @api_endpoint.path.to_s.split('/') # ["", "api"] or ["", "apis", batch]
       @api_group = components.length > 2 ? components[2] + '/' : ''
     end

@@ -17,7 +17,7 @@ class TestWatch < MiniTest::Test
       .to_return(body: open_test_file('watch_stream.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
 
     client.watch_pods.to_enum.with_index do |notice, index|
       assert_instance_of(Kubeclient::Common::WatchNotice, notice)
@@ -35,8 +35,8 @@ class TestWatch < MiniTest::Test
                  status: 200)
     stub_request(:get, %r{.*\/watch/pods}).to_return(status: 404)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    assert_raises KubeException do
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    assert_raises(KubeException) do
       client.watch_pods.each do
       end
     end
@@ -68,7 +68,7 @@ class TestWatch < MiniTest::Test
       .to_return(body: open_test_file('watch_stream.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new api_host, 'v1'
+    client = Kubeclient::Client.new(api_host, 'v1')
     results = client.watch_events(version).to_enum
 
     assert_equal(3, results.count)
@@ -88,7 +88,7 @@ class TestWatch < MiniTest::Test
       .to_return(body: open_test_file('watch_stream.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new api_host, 'v1'
+    client = Kubeclient::Client.new(api_host, 'v1')
     results = client.watch_events(label_selector: selector).to_enum
 
     assert_equal(3, results.count)
@@ -108,7 +108,7 @@ class TestWatch < MiniTest::Test
       .to_return(body: open_test_file('watch_stream.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new api_host, 'v1'
+    client = Kubeclient::Client.new(api_host, 'v1')
     results = client.watch_events(field_selector: selector).to_enum
 
     assert_equal(3, results.count)
