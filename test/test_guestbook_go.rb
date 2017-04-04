@@ -6,12 +6,12 @@ class CreateGuestbookGo < MiniTest::Test
   def test_create_guestbook_entities
     VCR.configure do |c|
       c.cassette_library_dir = 'test/cassettes'
-      c.hook_into :webmock
+      c.hook_into(:webmock)
     end
 
     # WebMock.allow_net_connect!
     VCR.use_cassette('kubernetes_guestbook') do # , record: :new_episodes) do
-      client = Kubeclient::Client.new 'http://10.35.0.23:8080/api/', 'v1'
+      client = Kubeclient::Client.new('http://10.35.0.23:8080/api/', 'v1')
 
       testing_ns = Kubeclient::Resource.new
       testing_ns.metadata = {}
@@ -28,7 +28,7 @@ class CreateGuestbookGo < MiniTest::Test
         ['guestbook', 'redis-master', 'redis-slave']
       )
 
-      client.create_namespace testing_ns
+      client.create_namespace(testing_ns)
       services = create_services(client, testing_ns.metadata.name)
       replicators = create_replication_controllers(client, testing_ns.metadata.name)
 
@@ -39,12 +39,12 @@ class CreateGuestbookGo < MiniTest::Test
       delete_services(client, testing_ns.metadata.name, services)
       delete_replication_controllers(client, testing_ns.metadata.name, replicators)
 
-      client.delete_namespace testing_ns.metadata.name
+      client.delete_namespace(testing_ns.metadata.name)
     end
   end
 
   def delete_namespace(client, namespace_name)
-    client.delete_namespace namespace_name
+    client.delete_namespace(namespace_name)
   rescue KubeException => exception
     assert_instance_of(KubeException, exception)
     assert_equal(404, exception.error_code)
@@ -66,16 +66,16 @@ class CreateGuestbookGo < MiniTest::Test
   end
 
   def create_services(client, ns)
-    guestbook_service = client.create_service guestbook_service(ns)
-    redis_service = client.create_service redis_service(ns)
-    redis_slave_service = client.create_service redis_slave_service(ns)
+    guestbook_service = client.create_service(guestbook_service(ns))
+    redis_service = client.create_service(redis_service(ns))
+    redis_slave_service = client.create_service(redis_slave_service(ns))
     [guestbook_service, redis_service, redis_slave_service]
   end
 
   def create_replication_controllers(client, namespace)
-    rc = client.create_replication_controller guestbook_rc(namespace)
-    rc2 = client.create_replication_controller redis_master_rc(namespace)
-    rc3 = client.create_replication_controller redis_slave_rc(namespace)
+    rc = client.create_replication_controller(guestbook_rc(namespace))
+    rc2 = client.create_replication_controller(redis_master_rc(namespace))
+    rc3 = client.create_replication_controller(redis_slave_rc(namespace))
     [rc, rc2, rc3]
   end
 
@@ -84,10 +84,10 @@ class CreateGuestbookGo < MiniTest::Test
     services.each do |service|
       begin
         if service.instance_of?(Kubeclient::Service)
-          client.delete_service service.metadata.name, namespace
+          client.delete_service(service.metadata.name, namespace)
         else
           # it's just a string - service name
-          client.delete_service service, namespace
+          client.delete_service(service, namespace)
         end
       rescue KubeException => exception
         assert_instance_of(KubeException, exception)
@@ -101,10 +101,10 @@ class CreateGuestbookGo < MiniTest::Test
     replication_controllers.each do |rc|
       begin
         if rc.instance_of?(Kubeclient::ReplicationController)
-          client.delete_replication_controller rc.metadata.name, namespace
+          client.delete_replication_controller(rc.metadata.name, namespace)
         else
           # it's just a string - rc name
-          client.delete_replication_controller rc, namespace
+          client.delete_replication_controller(rc, namespace)
         end
       rescue KubeException => exception
         assert_instance_of(KubeException, exception)

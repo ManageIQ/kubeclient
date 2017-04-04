@@ -24,7 +24,7 @@ module Kubeclient
         response.body.each do |chunk|
           buffer << chunk
           while (line = buffer.slice!(/.+\n/))
-            yield @format == :json ? WatchNotice.new(JSON.parse(line)) : line.chomp
+            yield(@format == :json ? WatchNotice.new(JSON.parse(line)) : line.chomp)
           end
         end
       rescue IOError

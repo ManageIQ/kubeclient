@@ -7,7 +7,7 @@ class TestPodLog < MiniTest::Test
       .to_return(body: open_test_file('pod_log.txt'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     retrieved_log = client.get_pod_log('redis-master-pod', 'default')
 
     assert_equal(open_test_file('pod_log.txt').read, retrieved_log)
@@ -22,7 +22,7 @@ class TestPodLog < MiniTest::Test
       .to_return(body: open_test_file('pod_log.txt'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     retrieved_log = client.get_pod_log('redis-master-pod', 'default', container: 'ruby')
 
     assert_equal(open_test_file('pod_log.txt').read, retrieved_log)
@@ -39,7 +39,7 @@ class TestPodLog < MiniTest::Test
       .to_return(body: open_test_file('pod_log.txt'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
 
     stream = client.watch_pod_log('redis-master-pod', 'default')
     stream.to_enum.with_index do |notice, index|

@@ -11,8 +11,8 @@ class TestSecret < MiniTest::Test
       .to_return(body: open_test_file('created_secret.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    secret = client.get_secret 'test-secret', 'dev'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    secret = client.get_secret('test-secret', 'dev')
 
     assert_instance_of(Kubeclient::Secret, secret)
     assert_equal('4e38a198-2bcb-11e5-a483-0e840567604d', secret.metadata.uid)
@@ -33,8 +33,8 @@ class TestSecret < MiniTest::Test
     stub_request(:delete, %r{/secrets})
       .to_return(status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    client.delete_secret 'test-secret', 'dev'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    client.delete_secret('test-secret', 'dev')
 
     assert_requested(:delete,
                      'http://localhost:8080/api/v1/namespaces/dev/secrets/test-secret',
@@ -57,8 +57,8 @@ class TestSecret < MiniTest::Test
     secret.data = {}
     secret.data['super-secret'] = 'Y2F0J3MgYXJlIGF3ZXNvbWUK'
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
-    created_secret = client.create_secret secret
+    client = Kubeclient::Client.new('http://localhost:8080/api/')
+    created_secret = client.create_secret(secret)
     assert_instance_of(Kubeclient::Secret, created_secret)
     assert_equal(secret.metadata.name, created_secret.metadata.name)
     assert_equal(secret.metadata.namespace, created_secret.metadata.namespace)

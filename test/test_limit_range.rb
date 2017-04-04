@@ -9,8 +9,8 @@ class TestLimitRange < MiniTest::Test
     stub_request(:get, %r{/limitranges})
       .to_return(body: open_test_file('limit_range.json'), status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    limit_range = client.get_limit_range 'limits', 'quota-example'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    limit_range = client.get_limit_range('limits', 'quota-example')
 
     assert_instance_of(Kubeclient::LimitRange, limit_range)
     assert_equal('limits', limit_range.metadata.name)

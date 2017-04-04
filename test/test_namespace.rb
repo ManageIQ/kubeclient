@@ -8,8 +8,8 @@ class TestNamespace < MiniTest::Test
     stub_request(:get, %r{/namespaces})
       .to_return(body: open_test_file('namespace.json'), status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    namespace = client.get_namespace 'staging'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    namespace = client.get_namespace('staging')
 
     assert_instance_of(Kubeclient::Namespace, namespace)
     assert_equal('e388bc10-c021-11e4-a514-3c970e4a436a', namespace.metadata.uid)
@@ -33,8 +33,8 @@ class TestNamespace < MiniTest::Test
       .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
     stub_request(:delete, %r{/namespaces})
       .to_return(status: 200)
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    client.delete_namespace our_namespace.metadata.name
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    client.delete_namespace(our_namespace.metadata.name)
 
     assert_requested(
       :delete,
@@ -53,8 +53,8 @@ class TestNamespace < MiniTest::Test
     namespace.metadata = {}
     namespace.metadata.name = 'development'
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
-    created_namespace = client.create_namespace namespace
+    client = Kubeclient::Client.new('http://localhost:8080/api/')
+    created_namespace = client.create_namespace(namespace)
     assert_instance_of(Kubeclient::Namespace, created_namespace)
     assert_equal(namespace.metadata.name, created_namespace.metadata.name)
   end
