@@ -20,23 +20,28 @@ gem 'kubeclient'
 
 And then execute:
 
-    $ bundle
+```Bash
+bundle
+```
 
 Or install it yourself as:
 
-    $ gem install kubeclient
+```Bash
+gem install kubeclient
+```
 
 ## Usage
 
 Initialize the client:
+
 ```ruby
-client = Kubeclient::Client.new 'http://localhost:8080/api/' , "v1"
+client = Kubeclient::Client.new('http://localhost:8080/api/', "v1")
 ```
 
 Or without specifying version (it will be set by default to "v1")
 
 ```ruby
-client = Kubeclient::Client.new 'http://localhost:8080/api/'
+client = Kubeclient::Client.new('http://localhost:8080/api/')
 ```
 
 For A Group Api:
@@ -49,7 +54,7 @@ Another option is to initialize the client with URI object:
 
 ```ruby
 uri = URI::HTTP.build(host: "somehostname", port: 8080)
-client = Kubeclient::Client.new uri
+client = Kubeclient::Client.new(uri)
 ```
 
 ### SSL
@@ -63,8 +68,9 @@ ssl_options = {
   ca_file:     '/path/to/ca.crt',
   verify_ssl:  OpenSSL::SSL::VERIFY_PEER
 }
-client = Kubeclient::Client.new 'https://localhost:8443/api/' , "v1",
-                                ssl_options: ssl_options
+client = Kubeclient::Client.new(
+  'https://localhost:8443/api/', "v1", ssl_options: ssl_options
+)
 ```
 
 As an alternative to the `ca_file` it's possible to use the `cert_store`:
@@ -76,16 +82,18 @@ ssl_options = {
   cert_store: cert_store,
   verify_ssl: OpenSSL::SSL::VERIFY_PEER
 }
-client = Kubeclient::Client.new 'https://localhost:8443/api/' , "v1",
-                                ssl_options: ssl_options
+client = Kubeclient::Client.new(
+  'https://localhost:8443/api/', "v1", ssl_options: ssl_options
+)
 ```
 
 For testing and development purpose you can disable the ssl check with:
 
 ```ruby
 ssl_options = { verify_ssl: OpenSSL::SSL::VERIFY_NONE }
-client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
-                                ssl_options: ssl_options
+client = Kubeclient::Client.new(
+  'https://localhost:8443/api/', 'v1', ssl_options: ssl_options
+)
 ```
 
 ### Authentication
@@ -99,8 +107,9 @@ auth_options = {
   username: 'username',
   password: 'password'
 }
-client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
-                                auth_options: auth_options
+client = Kubeclient::Client.new(
+  'https://localhost:8443/api/', 'v1', auth_options: auth_options
+)
 ```
 
 or
@@ -109,8 +118,9 @@ or
 auth_options = {
   bearer_token: 'MDExMWJkMjItOWY1Ny00OGM5LWJlNDEtMjBiMzgxODkxYzYz'
 }
-client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
-                                auth_options: auth_options
+client = Kubeclient::Client.new(
+  'https://localhost:8443/api/', 'v1', auth_options: auth_options
+)
 ```
 
 or
@@ -119,8 +129,9 @@ or
 auth_options = {
   bearer_token_file: '/path/to/token_file'
 }
-client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
-                                auth_options: auth_options
+client = Kubeclient::Client.new(
+  'https://localhost:8443/api/', 'v1', auth_options: auth_options
+)
 ```
 
 If you are running your app using kubeclient inside a Kubernetes cluster, then you can have a bearer token file
@@ -134,8 +145,9 @@ for more details). For example:
 auth_options = {
   bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token'
 }
-client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
-                                auth_options: auth_options
+client = Kubeclient::Client.new(
+  'https://localhost:8443/api/', 'v1', auth_options: auth_options
+)
 ```
 
 You can find information about tokens in [this guide](http://kubernetes.io/docs/user-guide/accessing-the-cluster/) and in [this reference](http://kubernetes.io/docs/admin/authentication/).
@@ -151,8 +163,9 @@ socket_options = {
   socket_class: Celluloid::IO::TCPSocket,
   ssl_socket_class: Celluloid::IO::SSLSocket
 }
-client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
-                                socket_options: socket_options
+client = Kubeclient::Client.new(
+  'https://localhost:8443/api/', 'v1', socket_options: socket_options
+)
 ```
 
 This affects only `.watch_*` sockets, not one-off actions like `.get_*`, `.delete_*` etc.
@@ -163,8 +176,9 @@ You can also use kubeclient with an http proxy server such as tinyproxy. It can 
 For example:
 ```ruby
 proxy_uri = URI::HTTP.build(host: "myproxyhost", port: 8443)
-client = Kubeclient::Client.new('https://localhost:8443/api/',
-                                :http_proxy_uri => proxy_uri)
+client = Kubeclient::Client.new(
+  'https://localhost:8443/api/', http_proxy_uri: proxy_uri
+)
 ```
 
 
@@ -194,13 +208,15 @@ If you want ruby-independent behavior, always specify `:open`.
 Discovery from the kube-apiserver is done lazily on method calls so it would not change behavior.
 
 It can also  be done explicitly:
-```
+
+```ruby
 client = Kubeclient::Client.new('http://localhost:8080/api', 'v1')
 client.discover
 ```
 
 It is possible to check the status of discovery
-```
+
+```ruby
 unless client.discovered
   client.discover
 end
@@ -209,6 +225,7 @@ end
 ### Kubeclient::Config
 
 If you've been using `kubectl` and have a `.kube/config` file, you can auto-populate a config object using `Kubeclient::Config`:
+
 ```ruby
 config = Kubeclient::Config.read('/path/to/.kube/config')
 ```
@@ -217,20 +234,21 @@ config = Kubeclient::Config.read('/path/to/.kube/config')
 
 ```
 Kubeclient::Client.new(
-	config.context.api_endpoint,
+  config.context.api_endpoint,
     config.context.api_version,
     {
-    	ssl_options: config.context.ssl_options,
-    	auth_options: config.context.auth_options
+      ssl_options: config.context.ssl_options,
+      auth_options: config.context.auth_options
     }
 )
 ```
 
 You can also load your JSONified config in from an ENV variable (e.g. `KUBE_CONFIG`) like so:
 
-```
+```ruby
 Kubeclient::Config.new(JSON.parse(ENV['KUBE_CONFIG']), nil)
 ```
+
 ###Supported kubernetes versions
 
 For 1.1 only the core api v1 is supported, all api groups are supported in later versions.
@@ -257,6 +275,7 @@ pods = client.get_pods(label_selector: 'name=redis-master')
 ```
 
 You can specify multiple labels (that option will return entities which have both labels:
+
 ```ruby
 pods = client.get_pods(label_selector: 'name=redis-master,app=redis')
 ```
@@ -290,8 +309,9 @@ node = client.get_node "127.0.0.1", as: :raw
 For example: `delete_pod "pod name"` , `delete_replication_controller "rc name"`, `delete_node "node name"`, `delete_secret "secret name"`
 
 Input parameter - name (string) specifying service name, pod name, replication controller name.
+
 ```ruby
-client.delete_service "redis-service"
+client.delete_service("redis-service")
 ```
 
 #### Create an entity
@@ -307,16 +327,17 @@ service.metadata = {}
 service.metadata.name = "redis-master"
 service.metadata.namespace = 'staging'
 service.spec = {}
-service.spec.ports = [{ 'port' => 6379,
-                                'targetPort' => 'redis-server'
-                              }]
+service.spec.ports = [{ 
+  'port' => 6379,
+  'targetPort' => 'redis-server'
+}]
 service.spec.selector = {}
 service.spec.selector.name = "redis"
 service.spec.selector.role = "master"
 service.metadata.labels = {}
 service.metadata.labels.app = 'redis'
 service.metadata.labels.role = 'slave'
-client.create_service service`
+client.create_service(service)
 ```
 
 #### Update an entity
@@ -327,7 +348,7 @@ Input parameter - object of type `Pod`, `Service`, `ReplicationController` etc.
 The below example is for v1
 
 ```ruby
-client.update_service service1
+client.update_service(service1)
 ```
 
 #### Patch an entity (by name)
@@ -340,7 +361,7 @@ The PATCH request should include the namespace name, except for nodes and namesp
 The below example is for v1
 
 ```ruby
-client.patch_pod "docker-registry", {:metadata => {:annotations => {:key => 'value'}}}, "default"
+client.patch_pod("docker-registry", {metadata: {annotations: {key: 'value'}}}, "default")
 ```
 
 #### Get all entities of all types : all_entities
@@ -382,14 +403,14 @@ You can get a complete URL for connecting a kubernetes entity via the proxy.
 
 ```ruby
 client.proxy_url('service', 'srvname', 'srvportname', 'ns')
- => "https://localhost.localdomain:8443/api/v1/proxy/namespaces/ns/services/srvname:srvportname"
+# => "https://localhost.localdomain:8443/api/v1/proxy/namespaces/ns/services/srvname:srvportname"
 ```
 
 Note the third parameter, port, is a port name for services and an integer for pods:
 
 ```ruby
 client.proxy_url('pod', 'podname', 5001, 'ns')
- => "https://localhost.localdomain:8443/api/v1/namespaces/ns/pods/podname:5001/proxy"
+# => "https://localhost.localdomain:8443/api/v1/namespaces/ns/pods/podname:5001/proxy"
 ```
 
 #### Get the logs of a pod
@@ -398,14 +419,14 @@ namespace where the pod is running:
 
 ```ruby
 client.get_pod_log('pod-name', 'default')
- => "Running...\nRunning...\nRunning...\n"
+# => "Running...\nRunning...\nRunning...\n"
 ```
 
 If that pod has more than one container, you must specify the container:
 
 ```ruby
 client.get_pod_log('pod-name', 'default', container: 'ruby')
- => "..."
+# => "..."
 ```
 
 If a container in a pod terminates, a new container is started, and you want to
@@ -413,7 +434,7 @@ retrieve the logs of the dead container, you can pass in the `:previous` option:
 
 ```ruby
 client.get_pod_log('pod-name', 'default', previous: true)
- => "..."
+# => "..."
 ```
 
 You can also watch the logs of a pod to get a stream of data:
@@ -441,13 +462,17 @@ client.process_template template
 
 #### past version 1.2.0
 Replace Specific Entity class references:
+
 ```ruby
 Kubeclient::Service
 ```
+
 with the generic
+
 ```ruby
 Kubeclient::Resource.new
 ```
+
 Where ever possible.
 
 ## Contributing
