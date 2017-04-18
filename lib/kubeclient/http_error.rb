@@ -1,4 +1,5 @@
-# Kubernetes HTTP Exceptions
+# TODO: remove this on next major version bump
+# Deprected http exception
 class KubeException < StandardError
   attr_reader :error_code, :message, :response
 
@@ -14,5 +15,11 @@ class KubeException < StandardError
       string << " for #{@response.request.method.upcase} #{@response.request.url}"
     end
     string
+  end
+end
+
+module Kubeclient
+  # Exception that is raised when a http request fails
+  class HttpError < KubeException
   end
 end

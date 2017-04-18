@@ -1,31 +1,27 @@
 require 'test_helper'
 
-def test_config_file(name)
-  File.new(File.join(File.dirname(__FILE__), 'config', name))
-end
-
 # Testing Kubernetes client configuration
-class KubeClientConfigTest < MiniTest::Test
+class KubeclientConfigTest < MiniTest::Test
   def test_allinone
-    config = Kubeclient::Config.read(test_config_file('allinone.kubeconfig'))
+    config = Kubeclient::Config.read(config_file('allinone.kubeconfig'))
     assert_equal(['default/localhost:8443/system:admin'], config.contexts)
     check_context(config.context, ssl: true)
   end
 
   def test_external
-    config = Kubeclient::Config.read(test_config_file('external.kubeconfig'))
+    config = Kubeclient::Config.read(config_file('external.kubeconfig'))
     assert_equal(['default/localhost:8443/system:admin'], config.contexts)
     check_context(config.context, ssl: true)
   end
 
   def test_nouser
-    config = Kubeclient::Config.read(test_config_file('nouser.kubeconfig'))
+    config = Kubeclient::Config.read(config_file('nouser.kubeconfig'))
     assert_equal(['default/localhost:8443/nouser'], config.contexts)
     check_context(config.context, ssl: false)
   end
 
   def test_user_token
-    config = Kubeclient::Config.read(test_config_file('userauth.kubeconfig'))
+    config = Kubeclient::Config.read(config_file('userauth.kubeconfig'))
     assert_equal(['localhost/system:admin:token', 'localhost/system:admin:userpass'],
                  config.contexts)
     context = config.context('localhost/system:admin:token')
@@ -34,7 +30,7 @@ class KubeClientConfigTest < MiniTest::Test
   end
 
   def test_user_password
-    config = Kubeclient::Config.read(test_config_file('userauth.kubeconfig'))
+    config = Kubeclient::Config.read(config_file('userauth.kubeconfig'))
     assert_equal(['localhost/system:admin:token', 'localhost/system:admin:userpass'],
                  config.contexts)
     context = config.context('localhost/system:admin:userpass')
@@ -68,5 +64,9 @@ class KubeClientConfigTest < MiniTest::Test
     else
       assert_equal(OpenSSL::SSL::VERIFY_NONE, context.ssl_options[:verify_ssl])
     end
+  end
+
+  def config_file(name)
+    File.new(File.join(File.dirname(__FILE__), 'config', name))
   end
 end

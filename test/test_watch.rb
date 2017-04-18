@@ -36,7 +36,7 @@ class TestWatch < MiniTest::Test
     stub_request(:get, %r{.*\/watch/pods}).to_return(status: 404)
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
-    assert_raises(KubeException) do
+    assert_raises(Kubeclient::HttpError) do
       client.watch_pods.each do
       end
     end
