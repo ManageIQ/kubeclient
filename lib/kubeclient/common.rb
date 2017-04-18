@@ -4,6 +4,8 @@ module Kubeclient
   # Common methods
   # this is mixed in by other gems
   module ClientMixin
+    include Kubeclient::ErrorHandling
+
     ENTITY_METHODS = %w(get watch delete create update patch).freeze
 
     DEFAULT_SSL_OPTIONS = {
@@ -95,18 +97,6 @@ module Kubeclient
       !@discovered && ENTITY_METHODS.any? { |x| method_sym.to_s.start_with?(x) }
     end
 
-    def handle_exception
-      yield
-    rescue RestClient::Exception => e
-      json_error_msg = begin
-        JSON.parse(e.response || '') || {}
-      rescue JSON::ParserError
-        {}
-      end
-      err_message = json_error_msg['message'] || e.message
-      raise KubeException.new(e.http_code, err_message, e.response)
-    end
-
     def discover
       load_entities
       define_entity_methods
@@ -162,41 +152,44 @@ module Kubeclient
     end
 
     def define_entity_methods
-      @entities.values.each do |entity|
-        klass = ClientMixin.resource_class(@class_owner, entity.entity_type)
-        # get all entities of a type e.g. get_nodes, get_pods, etc.
-        define_singleton_method("get_#{entity.method_names[1]}") do |options = {}|
-          get_entities(entity.entity_type, klass, entity.resource_name, options)
-        end
+      @apis.apis.values.each do |api|
+        api.entities.each do |entity|
 
-        # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
-        define_singleton_method("watch_#{entity.method_names[1]}") do |options = {}|
-          # This method used to take resource_version as a param, so
-          # this conversion is to keep backwards compatibility
-          options = { resource_version: options } unless options.is_a?(Hash)
+          klass = entity.klass
+          # get all entities of a type e.g. get_nodes, get_pods, etc.
+          define_singleton_method("get_#{entity.plural_method}") do |options = {}|
+            get_entities(entity, options)
+          end
 
-          watch_entities(entity.resource_name, options)
-        end
+          # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
+          define_singleton_method("watch_#{entity.plural_method}") do |options = {}|
+            # This method used to take resource_version as a param, so
+            # this conversion is to keep backwards compatibility
+            options = { resource_version: options } unless options.is_a?(Hash)
 
-        # get a single entity of a specific type by name
-        define_singleton_method("get_#{entity.method_names[0]}") do |name, namespace = nil|
-          get_entity(klass, entity.resource_name, name, namespace)
-        end
+            watch_entities(entity, options)
+          end
 
-        define_singleton_method("delete_#{entity.method_names[0]}") do |name, namespace = nil|
-          delete_entity(entity.resource_name, name, namespace)
-        end
+          # get a single entity of a specific type by name
+          define_singleton_method("get_#{entity.singular_method}") do |name, namespace = nil|
+            get_entity(entity, name, namespace)
+          end
 
-        define_singleton_method("create_#{entity.method_names[0]}") do |entity_config|
-          create_entity(entity.entity_type, entity.resource_name, entity_config, klass)
-        end
+          define_singleton_method("delete_#{entity.singular_method}") do |name, namespace = nil|
+            delete_entity(entity, name, namespace)
+          end
 
-        define_singleton_method("update_#{entity.method_names[0]}") do |entity_config|
-          update_entity(entity.resource_name, entity_config)
-        end
+          define_singleton_method("create_#{entity.singular_method}") do |entity_config|
+            create_entity(entity, entity_config)
+          end
 
-        define_singleton_method("patch_#{entity.method_names[0]}") do |name, patch, namespace = nil|
-          patch_entity(entity.resource_name, name, patch, namespace)
+          define_singleton_method("update_#{entity.singular_method}") do |entity_config|
+            update_entity(entity, entity_config)
+          end
+
+          define_singleton_method("patch_#{entity.singular_method}") do |name, patch, namespace = nil|
+            patch_entity(entity, name, patch, namespace)
+          end
         end
       end
     end
@@ -232,12 +225,8 @@ module Kubeclient
     #   :label_selector - a selector to restrict the list of returned objects by their labels.
     #   :field_selector - a selector to restrict the list of returned objects by their fields.
     #   :resource_version - shows changes that occur after that particular version of a resource.
-    def watch_entities(resource_name, options = {})
-      ns = build_namespace_prefix(options[:namespace])
-
-      path = "watch/#{ns}#{resource_name}"
-      path += "/#{options[:name]}" if options[:name]
-      uri = @api_endpoint.merge("#{@api_endpoint.path}/#{@api_version}/#{path}")
+    def watch_entities(entity, options = {})
+      uri = entity.watch_uri(options)
 
       params = {}
       WATCH_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
@@ -250,13 +239,12 @@ module Kubeclient
     #   :namespace - the namespace of the entity.
     #   :label_selector - a selector to restrict the list of returned objects by their labels.
     #   :field_selector - a selector to restrict the list of returned objects by their fields.
-    def get_entities(entity_type, klass, resource_name, options = {})
+    def get_entities(entity, options = {})
       params = {}
       SEARCH_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
 
-      ns_prefix = build_namespace_prefix(options[:namespace])
       response = handle_exception do
-        rest_client[ns_prefix + resource_name]
+        entity.rest_client(options[:namespace])
           .get({ 'params' => params }.merge(@headers))
       end
 
@@ -268,69 +256,102 @@ module Kubeclient
         end
 
       # result['items'] might be nil due to https://github.com/kubernetes/kubernetes/issues/13096
-      collection = result['items'].to_a.map { |item| new_entity(item, klass) }
+      collection = result['items'].to_a.map { |item| new_entity(item, entity.klass) }
 
-      Kubeclient::Common::EntityList.new(entity_type, resource_version, collection)
+      Kubeclient::Common::EntityList.new(entity.kind, resource_version, collection)
     end
 
-    def get_entity(klass, resource_name, name, namespace = nil)
-      ns_prefix = build_namespace_prefix(namespace)
+    def get_entity(entity, name, namespace = nil)
       response = handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
+        entity.rest_client(namespace)[name]
           .get(@headers)
       end
       result = JSON.parse(response)
-      new_entity(result, klass)
+      new_entity(result, entity.klass)
     end
 
-    def delete_entity(resource_name, name, namespace = nil)
-      ns_prefix = build_namespace_prefix(namespace)
+    def delete_entity(entity, name, namespace = nil)
       handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
+        entity.rest_client(namespace)[name]
           .delete(@headers)
       end
     end
 
-    def create_entity(entity_type, resource_name, entity_config, klass)
+    def create_entity(entity, entity_config)
       # Duplicate the entity_config to a hash so that when we assign
       # kind and apiVersion, this does not mutate original entity_config obj.
       hash = entity_config.to_hash
-
-      ns_prefix = build_namespace_prefix(hash[:metadata][:namespace])
 
       # TODO: temporary solution to add "kind" and apiVersion to request
       # until this issue is solved
       # https://github.com/GoogleCloudPlatform/kubernetes/issues/6439
       # TODO: #2 solution for
       # https://github.com/kubernetes/kubernetes/issues/8115
-      hash[:kind] = (entity_type.eql?('Endpoint') ? 'Endpoints' : entity_type)
-      hash[:apiVersion] = @api_group + @api_version
+      hash[:kind] = (entity.kind.eql?('Endpoint') ? 'Endpoints' : entity.kind)
+      hash[:apiVersion] = entity.api.api_version
       response = handle_exception do
-        rest_client[ns_prefix + resource_name]
+        entity.rest_client(hash[:metadata][:namespace])
           .post(hash.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
       end
       result = JSON.parse(response)
-      new_entity(result, klass)
+      new_entity(result, entity.klass)
     end
 
-    def update_entity(resource_name, entity_config)
+    def update_entity(entity, entity_config)
       name      = entity_config[:metadata][:name]
-      ns_prefix = build_namespace_prefix(entity_config[:metadata][:namespace])
       handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
+        entity.rest_client(entity_config[:metadata][:namespace])[name]
           .put(entity_config.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
       end
     end
 
-    def patch_entity(resource_name, name, patch, namespace = nil)
-      ns_prefix = build_namespace_prefix(namespace)
+    def patch_entity(entity, name, patch, namespace = nil)
       handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
+        entity.rest_client(namespace)[name]
           .patch(
             patch.to_json,
             { 'Content-Type' => 'application/strategic-merge-patch+json' }.merge(@headers)
           )
       end
+    end
+
+    def get(klass, name, namespace = nil)
+      discover unless @discovered
+      entity = @entity_index.from_klass(klass)
+
+      get_entity(entity, name, namespace)
+    end
+
+    def create(entity_config)
+      discover unless @discovered
+      entity = @entity_index.from_api_version_and_kind(@api_version, entity_config.kind)
+
+      create_entity(entity, entity_config)
+    end
+
+    def update(entity_config)
+      discover unless @discovered
+      entity = @entity_index.from_api_version_and_kind(@api_version, entity_config.kind)
+
+      update_entity(entity, entity_config)
+    end
+
+    def patch(entity_config)
+      discover unless @discovered
+      entity = @entity_index.from_api_version_and_kind(@api_version, entity_config.kind)
+
+      patch_entity(entity, entity_config[:metadata][:name], entity_config, entity_config[:metadata][:namespace])
+    end
+
+    def delete(entity_config)
+      discover unless @discovered
+      entity = @entity_index.from_api_version_and_kind(@api_version, entity_config.kind)
+
+      delete_entity(
+        entity,
+        entity_config[:metadata][:name],
+        entity_config[:metadata][:namespace]
+      )
     end
 
     def new_entity(hash, klass)
@@ -364,15 +385,19 @@ module Kubeclient
     end
 
     def watch_pod_log(pod_name, namespace, container: nil)
+      # todo: is it possible to do this without discovery?
+      discover unless @discovered
+
       # Adding the "follow=true" query param tells the Kubernetes API to keep
       # the connection open and stream updates to the log.
       params = { follow: true }
       params[:container] = container if container
 
+      # todo: this is ugly lookup by kind instead?
+      entity = @entity_index.from_klass(@class_owner::Pod)
       ns = build_namespace_prefix(namespace)
 
-      uri = @api_endpoint.dup
-      uri.path += "/#{@api_version}/#{ns}pods/#{pod_name}/log"
+      uri = URI(entity.rest_client(namespace)[pod_name]['log'].url)
       uri.query = URI.encode_www_form(params)
 
       Kubeclient::Common::WatchStream.new(uri, http_options(uri), format: :text)
@@ -419,14 +444,8 @@ module Kubeclient
     private
 
     def load_entities
-      @entities = {}
-      fetch_entities['resources'].each do |resource|
-        next if resource['name'].include?('/')
-        resource['kind'] ||=
-          Kubeclient::Common::MissingKindCompatibility.resource_kind(resource['name'])
-        entity = ClientMixin.parse_definition(resource['kind'], resource['name'])
-        @entities[entity.method_names[0]] = entity if entity
-      end
+      @apis = Kubeclient::Common::Apis.new(@class_owner, create_rest_client('/'), @api_version)
+      @entity_index = Kubeclient::Common::EntityIndex.new(@apis)
     end
 
     def fetch_entities
