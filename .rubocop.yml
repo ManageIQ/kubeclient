@@ -9,7 +9,8 @@ Metrics/AbcSize:
 Metrics/LineLength:
   Max: 100
 Metrics/ParameterLists:
-  Max: 8
+  Max: 5
+  CountKeywordArgs: false
 Metrics/CyclomaticComplexity:
   Max: 8
 Metrics/ModuleLength:
