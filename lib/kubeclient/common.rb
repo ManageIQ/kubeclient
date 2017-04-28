@@ -26,6 +26,12 @@ module Kubeclient
       ssl_socket_class: nil
     }.freeze
 
+    DEFAULT_TIMEOUTS = {
+      # These do NOT affect watch, watching never times out.
+      open: Net::HTTP.new('127.0.0.1').open_timeout, # depends on ruby version
+      read: Net::HTTP.new('127.0.0.1').read_timeout
+    }.freeze
+
     DEFAULT_HTTP_PROXY_URI = nil
 
     SEARCH_ARGUMENTS = {
@@ -50,6 +56,7 @@ module Kubeclient
       ssl_options: DEFAULT_SSL_OPTIONS,
       auth_options: DEFAULT_AUTH_OPTIONS,
       socket_options: DEFAULT_SOCKET_OPTIONS,
+      timeouts: DEFAULT_TIMEOUTS,
       http_proxy_uri: DEFAULT_HTTP_PROXY_URI
     )
       validate_auth_options(auth_options)
@@ -63,6 +70,9 @@ module Kubeclient
       @ssl_options = ssl_options
       @auth_options = auth_options
       @socket_options = socket_options
+      # Allow passing partial timeouts hash, without unspecified
+      # @timeouts[:foo] == nil resulting in infinite timeout.
+      @timeouts = DEFAULT_TIMEOUTS.merge(timeouts)
       @http_proxy_uri = http_proxy_uri.to_s if http_proxy_uri
 
       if auth_options[:bearer_token]
@@ -215,7 +225,9 @@ module Kubeclient
         ssl_client_key: @ssl_options[:client_key],
         proxy: @http_proxy_uri,
         user: @auth_options[:username],
-        password: @auth_options[:password]
+        password: @auth_options[:password],
+        open_timeout: @timeouts[:open],
+        ClientMixin.restclient_read_timeout_option => @timeouts[:read]
       }
       RestClient::Resource.new(@api_endpoint.merge(path).to_s, options)
     end
@@ -414,6 +426,18 @@ module Kubeclient
     def api
       response = handle_exception { create_rest_client.get(@headers) }
       JSON.parse(response)
+    end
+
+    def self.restclient_read_timeout_option
+      @restclient_read_timeout_option ||=
+        # RestClient silently accepts unknown options, so check accessors instead.
+        if RestClient::Resource.instance_methods.include?(:read_timeout) # rest-client 2.0
+          :read_timeout
+        elsif RestClient::Resource.instance_methods.include?(:timeout) # rest-client 1.x
+          :timeout
+        else
+          raise ArgumentError("RestClient doesn't support neither :read_timeout nor :timeout")
+        end
     end
 
     private

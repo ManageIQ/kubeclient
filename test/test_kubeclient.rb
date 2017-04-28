@@ -116,6 +116,15 @@ class KubeclientTest < MiniTest::Test
     assert_equal(error_message, exception.message)
   end
 
+  def test_api_timeout
+    stub_request(:get, 'http://localhost:8080/api').to_timeout
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/')
+
+    exception = assert_raises(Kubeclient::HttpError) { client.api }
+    assert_match(/(timed out|timeout)/i, exception.message)
+  end
+
   def test_api_valid
     stub_request(:get, 'http://localhost:8080/api')
       .to_return(status: 200, body: open_test_file('versions_list.json'))
@@ -612,6 +621,69 @@ class KubeclientTest < MiniTest::Test
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     client.get_persistent_volume_claims
+  end
+
+  # Timeouts
+
+  def test_timeouts_defaults
+    client = Kubeclient::Client.new(
+      'http://localhost:8080/api/'
+    )
+    rest_client = client.rest_client
+    assert_default_open_timeout(rest_client.open_timeout)
+    assert_equal(60, read_timeout(rest_client))
+  end
+
+  def test_timeouts_open
+    client = Kubeclient::Client.new(
+      'http://localhost:8080/api/',
+      timeouts: { open: 10 }
+    )
+    rest_client = client.rest_client
+    assert_equal(10, rest_client.open_timeout)
+    assert_equal(60, read_timeout(rest_client))
+  end
+
+  def test_timeouts_read
+    client = Kubeclient::Client.new(
+      'http://localhost:8080/api/',
+      timeouts: { read: 300 }
+    )
+    rest_client = client.rest_client
+    assert_default_open_timeout(rest_client.open_timeout)
+    assert_equal(300, read_timeout(rest_client))
+  end
+
+  def test_timeouts_both
+    client = Kubeclient::Client.new(
+      'http://localhost:8080/api/',
+      timeouts: { open: 10, read: 300 }
+    )
+    rest_client = client.rest_client
+    assert_equal(10, rest_client.open_timeout)
+    assert_equal(300, read_timeout(rest_client))
+  end
+
+  def test_timeouts_infinite
+    client = Kubeclient::Client.new(
+      'http://localhost:8080/api/',
+      timeouts: { open: nil, read: nil }
+    )
+    rest_client = client.rest_client
+    assert_nil(rest_client.open_timeout)
+    assert_nil(read_timeout(rest_client))
+  end
+
+  def read_timeout(rest_client)
+    rest_client.send(Kubeclient::ClientMixin.restclient_read_timeout_option)
+  end
+
+  def assert_default_open_timeout(actual)
+    if RUBY_VERSION >= '2.3'
+      assert_equal(60, actual)
+    else
+      assert_nil(actual)
+    end
   end
 
   private
