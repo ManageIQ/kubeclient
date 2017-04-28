@@ -45,8 +45,7 @@ class CreateGuestbookGo < MiniTest::Test
 
   def delete_namespace(client, namespace_name)
     client.delete_namespace(namespace_name)
-  rescue Kubeclient::HttpError => exception
-    assert_instance_of(Kubeclient::HttpError, exception)
+  rescue Kubeclient::ResourceNotFoundError => exception
     assert_equal(404, exception.error_code)
   end
 
@@ -89,8 +88,7 @@ class CreateGuestbookGo < MiniTest::Test
           # it's just a string - service name
           client.delete_service(service, namespace)
         end
-      rescue Kubeclient::HttpError => exception
-        assert_instance_of(Kubeclient::HttpError, exception)
+      rescue Kubeclient::ResourceNotFoundError => exception
         assert_equal(404, exception.error_code)
       end
     end
@@ -106,8 +104,7 @@ class CreateGuestbookGo < MiniTest::Test
           # it's just a string - rc name
           client.delete_replication_controller(rc, namespace)
         end
-      rescue Kubeclient::HttpError => exception
-        assert_instance_of(Kubeclient::HttpError, exception)
+      rescue Kubeclient::ResourceNotFoundError => exception
         assert_equal(404, exception.error_code)
       end
     end

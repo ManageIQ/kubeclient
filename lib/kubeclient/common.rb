@@ -114,7 +114,8 @@ module Kubeclient
         {}
       end
       err_message = json_error_msg['message'] || e.message
-      raise Kubeclient::HttpError.new(e.http_code, err_message, e.response)
+      error_klass = e.http_code == 404 ? ResourceNotFoundError : HttpError
+      raise error_klass.new(e.http_code, err_message, e.response)
     end
 
     def discover

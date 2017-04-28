@@ -185,11 +185,10 @@ class KubeclientTest < MiniTest::Test
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
 
-    exception = assert_raises(Kubeclient::HttpError) do
+    exception = assert_raises(Kubeclient::ResourceNotFoundError) do
       client.get_services
     end
 
-    assert_instance_of(Kubeclient::HttpError, exception)
     assert(exception.message.include?('Not Found'))
     assert_equal(404, exception.error_code)
   end
