@@ -51,6 +51,8 @@ uri = URI::HTTP.build(host: "somehostname", port: 8080)
 client = Kubeclient::Client.new uri
 ```
 
+### SSL
+
 It is also possible to use https and configure ssl with:
 
 ```ruby
@@ -84,6 +86,8 @@ ssl_options = { verify_ssl: OpenSSL::SSL::VERIFY_NONE }
 client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
                                 ssl_options: ssl_options
 ```
+
+### Authentication
 
 If you are using basic authentication or bearer tokens as described
 [here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/authentication.md) then you can specify one
@@ -135,6 +139,8 @@ client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
 
 You can find information about token in [this guide](http://kubernetes.io/docs/user-guide/accessing-the-cluster/) and in [this reference](http://kubernetes.io/docs/admin/authentication/).
 
+### Non-blocking IO
+
 You can also use kubeclient with non-blocking sockets such as Celluloid::IO, see [here](https://github.com/httprb/http/wiki/Parallel-requests-with-Celluloid%3A%3AIO) 
 for details. For example:
 
@@ -148,13 +154,39 @@ client = Kubeclient::Client.new 'https://localhost:8443/api/' , 'v1',
                                 socket_options: socket_options
 ```
 
-You can also use kubeclient with an http proxy server such as tinyproxy. It can be entered as a string or a URI object
+This affects only `.watch_*` sockets, not one-off actions like `.get_*`, `.delete_*` etc.
+
+### Proxies
+
+You can also use kubeclient with an http proxy server such as tinyproxy. It can be entered as a string or a URI object.
 For example:
 ```ruby
 proxy_uri = URI::HTTP.build(host: "myproxyhost", port: 8443)
 client = Kubeclient::Client.new('https://localhost:8443/api/',
                                 :http_proxy_uri => proxy_uri)
 ```
+
+
+### Timeouts
+
+Watching never times out.
+
+One-off actions like `.get_*`, `.delete_*` have a configurable timeout:
+```ruby
+timeouts = {
+  open: 10,  # unit is seconds
+  read: nil  # nil means never time out
+}
+client = Kubeclient::Client.new(
+  'https://localhost:8443/api/', timeouts: timeouts
+)
+```
+
+Default timeouts match `Net::HTTP` and `RestClient`, which unfortunately depends on ruby version:
+- open was infinite up to ruby 2.2, 60 seconds in 2.3+.
+- read is 60 seconds.
+
+If you want ruby-independent behavior, always specify `:open`.
 
 ### Discovery
 
