@@ -23,7 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'minitest'
   spec.add_development_dependency 'minitest-rg'
-  spec.add_development_dependency 'webmock', '~> 1.24.2'
+  spec.add_development_dependency 'webmock', '~> 2.3.1'
   spec.add_development_dependency 'vcr'
   spec.add_development_dependency 'rubocop', '= 0.47.1'
   spec.add_dependency 'rest-client'

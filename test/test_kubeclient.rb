@@ -537,9 +537,11 @@ class KubeclientTest < MiniTest::Test
   end
 
   def test_api_basic_auth_success
-    stub_request(:get, 'http://username:password@localhost:8080/api/v1')
+    stub_request(:get, 'http://localhost:8080/api/v1')
+      .with(basic_auth: %w(username password))
       .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
-    stub_request(:get, 'http://username:password@localhost:8080/api/v1/pods')
+    stub_request(:get, 'http://localhost:8080/api/v1/pods')
+      .with(basic_auth: %w(username password))
       .to_return(body: open_test_file('pod_list.json'), status: 200)
 
     client = Kubeclient::Client.new(
@@ -553,15 +555,17 @@ class KubeclientTest < MiniTest::Test
     assert_equal(1, pods.size)
     assert_requested(
       :get,
-      'http://username:password@localhost:8080/api/v1/pods',
+      'http://localhost:8080/api/v1/pods',
       times: 1
     )
   end
 
   def test_api_basic_auth_back_comp_success
-    stub_request(:get, 'http://username:password@localhost:8080/api/v1')
+    stub_request(:get, 'http://localhost:8080/api/v1')
+      .with(basic_auth: %w(username password))
       .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
-    stub_request(:get, 'http://username:password@localhost:8080/api/v1/pods')
+    stub_request(:get, 'http://localhost:8080/api/v1/pods')
+      .with(basic_auth: %w(username password))
       .to_return(body: open_test_file('pod_list.json'), status: 200)
 
     client = Kubeclient::Client.new(
@@ -573,14 +577,15 @@ class KubeclientTest < MiniTest::Test
 
     assert_equal('Pod', pods.kind)
     assert_equal(1, pods.size)
-    assert_requested(:get, 'http://username:password@localhost:8080/api/v1/pods', times: 1)
+    assert_requested(:get, 'http://localhost:8080/api/v1/pods', times: 1)
   end
 
   def test_api_basic_auth_failure
     error_message = 'HTTP status code 401, 401 Unauthorized'
     response = OpenStruct.new(code: 401, message: '401 Unauthorized')
 
-    stub_request(:get, 'http://username:password@localhost:8080/api/v1')
+    stub_request(:get, 'http://localhost:8080/api/v1')
+      .with(basic_auth: %w(username password))
       .to_raise(Kubeclient::HttpError.new(401, error_message, response))
 
     client = Kubeclient::Client.new(
@@ -592,7 +597,7 @@ class KubeclientTest < MiniTest::Test
     assert_equal(401, exception.error_code)
     assert_equal(error_message, exception.message)
     assert_equal(response, exception.response)
-    assert_requested(:get, 'http://username:password@localhost:8080/api/v1', times: 1)
+    assert_requested(:get, 'http://localhost:8080/api/v1', times: 1)
   end
 
   def test_api_basic_auth_failure_raw
