@@ -66,7 +66,7 @@ module Kubeclient
       @entities = {}
       @discovered = false
       @api_version = version
-      @headers = { 'Host': URI(uri).host }
+      @headers = { 'Host' => URI(uri).host }
       @ssl_options = ssl_options
       @auth_options = auth_options
       @socket_options = socket_options
