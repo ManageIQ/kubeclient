@@ -23,7 +23,7 @@ module Kubeclient
         buffer = ''
         response.body.each do |chunk|
           buffer << chunk
-          yield(@format == :json ? WatchNotice.new(JSON.parse(line)) : buffer.chomp)
+          yield(@format == :json ? WatchNotice.new(JSON.parse(chunk)) : buffer.chomp)
           # while (line = buffer.slice!(/.+\n/))
           #   yield(@format == :json ? WatchNotice.new(JSON.parse(line)) : line.chomp)
           # end
