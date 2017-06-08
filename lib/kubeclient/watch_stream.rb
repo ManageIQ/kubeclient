@@ -23,9 +23,10 @@ module Kubeclient
         buffer = ''
         response.body.each do |chunk|
           buffer << chunk
-          while (line = buffer.slice!(/.+\n/))
-            yield(@format == :json ? WatchNotice.new(JSON.parse(line)) : line.chomp)
-          end
+          yield(@format == :json ? WatchNotice.new(JSON.parse(line)) : buffer.chomp)
+          # while (line = buffer.slice!(/.+\n/))
+          #   yield(@format == :json ? WatchNotice.new(JSON.parse(line)) : line.chomp)
+          # end
         end
       rescue IOError
         raise unless @finished
@@ -74,6 +75,9 @@ module Kubeclient
         end
         if @http_options[:secondsSince] then
           client_options[:secondsSince] = @http_options[:secondsSince]
+        end
+        if @http_options[:tailLines] then
+          client_options[:tailLines] = @http_options[:tailLines]
         end
         client_options[socket_option] = @http_options[socket_option] if @http_options[socket_option]
         client_options
