@@ -20,10 +20,8 @@ module Kubeclient
           raise Kubeclient::HttpError.new(response.code, response.reason, response)
         end
 
-        buffer = ''
         response.body.each do |chunk|
-          buffer << chunk
-          @format == :json ? WatchNotice.new(JSON.parse(chunk)) : buffer.chomp
+          yield(@format == :json ? WatchNotice.new(JSON.parse(chunk)) : chunk.chomp)
           # while (line = buffer.slice!(/.+\n/))
           #   yield(@format == :json ? WatchNotice.new(JSON.parse(line)) : line.chomp)
           # end
