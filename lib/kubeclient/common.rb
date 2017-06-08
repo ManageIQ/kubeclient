@@ -376,7 +376,7 @@ module Kubeclient
       end
     end
 
-    def watch_pod_log(pod_name, namespace, sinceSeconds:nil)
+    def watch_pod_log(pod_name, namespace, sinceSeconds=nil)
       # Adding the "follow=true" query param tells the Kubernetes API to keep
       # the connection open and stream updates to the log.
       params = { follow: true }
