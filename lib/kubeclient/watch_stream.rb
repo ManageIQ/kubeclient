@@ -72,6 +72,9 @@ module Kubeclient
         else
           socket_option = :socket_class
         end
+        if @http_options[:secondsSince] then
+          client_options[:secondsSince] = @http_options[:secondsSince]
+        end
         client_options[socket_option] = @http_options[socket_option] if @http_options[socket_option]
         client_options
       end
