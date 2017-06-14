@@ -405,10 +405,10 @@ class KubeclientTest < MiniTest::Test
 
   def test_api_basic_auth_success
     stub_request(:get, 'http://localhost:8080/api/v1')
-      .with(basic_auth: %w(username password))
+      .with(basic_auth: %w[username password])
       .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
     stub_request(:get, 'http://localhost:8080/api/v1/pods')
-      .with(basic_auth: %w(username password))
+      .with(basic_auth: %w[username password])
       .to_return(body: open_test_file('pod_list.json'), status: 200)
 
     client = Kubeclient::Client.new(
@@ -429,10 +429,10 @@ class KubeclientTest < MiniTest::Test
 
   def test_api_basic_auth_back_comp_success
     stub_request(:get, 'http://localhost:8080/api/v1')
-      .with(basic_auth: %w(username password))
+      .with(basic_auth: %w[username password])
       .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
     stub_request(:get, 'http://localhost:8080/api/v1/pods')
-      .with(basic_auth: %w(username password))
+      .with(basic_auth: %w[username password])
       .to_return(body: open_test_file('pod_list.json'), status: 200)
 
     client = Kubeclient::Client.new(
@@ -452,7 +452,7 @@ class KubeclientTest < MiniTest::Test
     response = OpenStruct.new(code: 401, message: '401 Unauthorized')
 
     stub_request(:get, 'http://localhost:8080/api/v1')
-      .with(basic_auth: %w(username password))
+      .with(basic_auth: %w[username password])
       .to_raise(Kubeclient::HttpError.new(401, error_message, response))
 
     client = Kubeclient::Client.new(

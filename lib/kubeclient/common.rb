@@ -4,7 +4,7 @@ module Kubeclient
   # Common methods
   # this is mixed in by other gems
   module ClientMixin
-    ENTITY_METHODS = %w(get watch delete create update patch).freeze
+    ENTITY_METHODS = %w[get watch delete create update patch].freeze
 
     DEFAULT_SSL_OPTIONS = {
       client_cert: nil,
@@ -394,7 +394,7 @@ module Kubeclient
     def proxy_url(kind, name, port, namespace = '')
       discover unless @discovered
       entity_name_plural =
-        if %w(services pods nodes).include?(kind.to_s)
+        if %w[services pods nodes].include?(kind.to_s)
           kind.to_s
         else
           @entities[kind.to_s].resource_name
@@ -467,13 +467,13 @@ module Kubeclient
       # maintain backward compatibility:
       opts[:username] = opts[:user] if opts[:user]
 
-      if [:bearer_token, :bearer_token_file, :username].count { |key| opts[key] } > 1
+      if %i[bearer_token bearer_token_file username].count { |key| opts[key] } > 1
         raise(
           ArgumentError,
           'Invalid auth options: specify only one of username/password,' \
           ' bearer_token or bearer_token_file'
         )
-      elsif [:username, :password].count { |key| opts[key] } == 1
+      elsif %i[username password].count { |key| opts[key] } == 1
         raise ArgumentError, 'Basic auth requires both username & password'
       end
     end
