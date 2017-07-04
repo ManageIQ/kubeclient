@@ -116,7 +116,7 @@ module Kubeclient
       if user.key?('token')
         options[:bearer_token] = user['token']
       else
-        %w(username password).each do |attr|
+        %w[username password].each do |attr|
           options[attr.to_sym] = user[attr] if user.key?(attr)
         end
       end

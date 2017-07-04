@@ -3,7 +3,7 @@ require 'test_helper'
 # Unit tests for the common module
 class CommonTest < MiniTest::Test
   def test_underscore_entity
-    %w(
+    %w[
       Pod pod
       Service service
       ReplicationController replication_controller
@@ -25,7 +25,7 @@ class CommonTest < MiniTest::Test
       BuildConfig build_config
       Image image
       ImageStream image_stream
-    ).each_slice(2) do |singular, plural|
+    ].each_slice(2) do |singular, plural|
       assert_equal(Kubeclient::ClientMixin.underscore_entity(singular), plural)
     end
   end

@@ -15,19 +15,19 @@ class TestResourceListWithoutKind < MiniTest::Test
         entity: 'pod',
         type: 'Pod',
         name: 'pods',
-        methods: %w(pod pods)
+        methods: %w[pod pods]
       },
       {
         entity: 'node',
         type: 'Node',
         name: 'nodes',
-        methods: %w(node nodes)
+        methods: %w[node nodes]
       },
       {
         entity: 'service',
         type: 'Service',
         name: 'services',
-        methods: %w(service services)
+        methods: %w[service services]
       }
     ].each { |h| assert_entities(client.instance_variable_get(:@entities)[h[:entity]], h) }
 
@@ -49,19 +49,19 @@ class TestResourceListWithoutKind < MiniTest::Test
         entity: 'template',
         type: 'Template',
         name: 'templates',
-        methods: %w(template templates)
+        methods: %w[template templates]
       },
       {
         entity: 'build',
         type: 'Build',
         name: 'builds',
-        methods: %w(build builds)
+        methods: %w[build builds]
       },
       {
         entity: 'project',
         type: 'Project',
         name: 'projects',
-        methods: %w(project projects)
+        methods: %w[project projects]
       }
     ].each { |h| assert_entities(client.instance_variable_get(:@entities)[h[:entity]], h) }
 
