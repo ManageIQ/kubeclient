@@ -39,6 +39,12 @@ module Kubeclient
       'fieldSelector' => :field_selector
     }.freeze
 
+    DELETE_ARGUMENTS = {
+      'gracePeriodSeconds' => :grace_period_seconds,
+      'orphanDependents'   => :orphan_dependents,
+      'propagationPolicy'  => :propagation_policy
+    }.freeze
+
     WATCH_ARGUMENTS = { 'resourceVersion' => :resource_version }.merge!(SEARCH_ARGUMENTS).freeze
 
     attr_reader :api_endpoint
@@ -194,8 +200,9 @@ module Kubeclient
           get_entity(klass, entity.resource_name, name, namespace)
         end
 
-        define_singleton_method("delete_#{entity.method_names[0]}") do |name, ns = nil, query = {}|
-          delete_entity(entity.resource_name, name, ns, query)
+        # ns = namespace, opts = options
+        define_singleton_method("delete_#{entity.method_names[0]}") do |name, ns = nil, opts = {}|
+          delete_entity(entity.resource_name, name, ns, opts)
         end
 
         define_singleton_method("create_#{entity.method_names[0]}") do |entity_config|
@@ -297,10 +304,10 @@ module Kubeclient
     end
 
     def delete_entity(resource_name, name, namespace = nil, options = nil)
-      ns_prefix = build_namespace_prefix(namespace)
-
       params = {}
-      params.merge!(options[:query]) if options.include?(:query)
+      DELETE_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
+
+      ns_prefix = build_namespace_prefix(namespace)
 
       handle_exception do
         rest_client[ns_prefix + resource_name + "/#{name}"]
