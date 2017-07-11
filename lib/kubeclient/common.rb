@@ -364,10 +364,11 @@ module Kubeclient
       end
     end
 
-    def get_pod_log(pod_name, namespace, container: nil, previous: false)
+    def get_pod_log(pod_name, namespace, container: nil, previous: false, timestamps: true)
       params = {}
       params[:previous] = true if previous
       params[:container] = container if container
+      params[:timestamps] = true if timestamps
 
       ns = build_namespace_prefix(namespace)
       handle_exception do
