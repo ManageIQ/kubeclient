@@ -364,7 +364,7 @@ module Kubeclient
       end
     end
 
-    def get_pod_log(pod_name, namespace, container: nil, previous: false, timestamps: true)
+    def get_pod_log(pod_name, namespace, container: nil, previous: false, timestamps: false)
       params = {}
       params[:previous] = true if previous
       params[:container] = container if container
