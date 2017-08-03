@@ -39,12 +39,6 @@ module Kubeclient
       'fieldSelector' => :field_selector
     }.freeze
 
-    DELETE_ARGUMENTS = {
-      'gracePeriodSeconds' => :grace_period_seconds,
-      'orphanDependents'   => :orphan_dependents,
-      'propagationPolicy'  => :propagation_policy
-    }.freeze
-
     WATCH_ARGUMENTS = { 'resourceVersion' => :resource_version }.merge!(SEARCH_ARGUMENTS).freeze
 
     attr_reader :api_endpoint
@@ -303,9 +297,9 @@ module Kubeclient
       new_entity(result, klass)
     end
 
-    def delete_entity(resource_name, name, namespace = nil, options = nil)
+    def delete_entity(resource_name, name, namespace = nil, query_params = nil)
       params = {}
-      DELETE_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
+      params.merge!(query_params) if query_params
 
       ns_prefix = build_namespace_prefix(namespace)
 
