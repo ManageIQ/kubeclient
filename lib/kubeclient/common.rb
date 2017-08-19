@@ -73,7 +73,7 @@ module Kubeclient
       # Allow passing partial timeouts hash, without unspecified
       # @timeouts[:foo] == nil resulting in infinite timeout.
       @timeouts = DEFAULT_TIMEOUTS.merge(timeouts)
-      @http_proxy_uri = http_proxy_uri.to_s if http_proxy_uri
+      @http_proxy_uri = http_proxy_uri ? http_proxy_uri.to_s : nil
 
       if auth_options[:bearer_token]
         bearer_token(@auth_options[:bearer_token])
