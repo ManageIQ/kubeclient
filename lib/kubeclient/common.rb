@@ -127,9 +127,9 @@ module Kubeclient
     def self.parse_definition(kind, name)
       # "name": "componentstatuses", networkpolicies, endpoints
       # "kind": "ComponentStatus" NetworkPolicy, Endpoints
-      # maintain pre group api compatibility for endpoints.
+      # maintain pre group api compatibility for endpoints and securitycontextconstraints.
       # See: https://github.com/kubernetes/kubernetes/issues/8115
-      kind = 'Endpoint' if kind == 'Endpoints'
+      kind = kind[0..-2] if %w[Endpoints SecurityContextConstraints].include?(kind)
 
       prefix = kind[0..kind.rindex(/[A-Z]/)] # NetworkP
       m = name.match(/^#{prefix.downcase}(.*)$/)
