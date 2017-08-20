@@ -189,8 +189,8 @@ module Kubeclient
         end
 
         # get a single entity of a specific type by name
-        define_singleton_method("get_#{entity.method_names[0]}") do |name, namespace = nil|
-          get_entity(klass, entity.resource_name, name, namespace)
+        define_singleton_method("get_#{entity.method_names[0]}") do |name, ns = nil, opts = {}|
+          get_entity(klass, entity.resource_name, name, ns, opts)
         end
 
         define_singleton_method("delete_#{entity.method_names[0]}") do |name, namespace = nil|
@@ -238,12 +238,12 @@ module Kubeclient
       end
     end
 
-    # Accepts the following string options:
-    #   :namespace - the namespace of the entity.
-    #   :name - the name of the entity to watch.
-    #   :label_selector - a selector to restrict the list of returned objects by their labels.
-    #   :field_selector - a selector to restrict the list of returned objects by their fields.
-    #   :resource_version - shows changes that occur after that particular version of a resource.
+    # Accepts the following options:
+    #   :namespace (string) - the namespace of the entity.
+    #   :name (string) - the name of the entity to watch.
+    #   :label_selector (string) - a selector to restrict the list of returned objects by labels.
+    #   :field_selector (string) - a selector to restrict the list of returned objects by fields.
+    #   :resource_version (string) - shows changes that occur after passed version of a resource.
     def watch_entities(resource_name, options = {})
       ns = build_namespace_prefix(options[:namespace])
 
@@ -258,10 +258,14 @@ module Kubeclient
       Kubeclient::Common::WatchStream.new(uri, http_options(uri))
     end
 
-    # Accepts the following string options:
-    #   :namespace - the namespace of the entity.
-    #   :label_selector - a selector to restrict the list of returned objects by their labels.
-    #   :field_selector - a selector to restrict the list of returned objects by their fields.
+    # Accepts the following options:
+    #   :namespace (string) - the namespace of the entity.
+    #   :label_selector (string) - a selector to restrict the list of returned objects by labels.
+    #   :field_selector (string) - a selector to restrict the list of returned objects by fields.
+    #   :as (symbol) - if :raw, return the raw response body (as a string)
+    #
+    #   Default response type will return a collection RecursiveOpenStruct
+    #   (:ros) objects, unless `:as` is passed with `:raw`.
     def get_entities(entity_type, klass, resource_name, options = {})
       params = {}
       SEARCH_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
@@ -271,6 +275,7 @@ module Kubeclient
         rest_client[ns_prefix + resource_name]
         .get({ 'params' => params }.merge(@headers))
       end
+      return response.body if options[:as] == :raw
 
       result = JSON.parse(response)
 
@@ -286,12 +291,19 @@ module Kubeclient
       Kubeclient::Common::EntityList.new(entity_type, resource_version, collection)
     end
 
-    def get_entity(klass, resource_name, name, namespace = nil)
+    # Accepts the following options:
+    #   :as (symbol) - if :raw, return the raw response body (as a string)
+    #
+    #   Default response type will return an entity as a  RecursiveOpenStruct
+    #   (:ros) object, unless `:as` is passed with `:raw`.
+    def get_entity(klass, resource_name, name, namespace = nil, options = {})
       ns_prefix = build_namespace_prefix(namespace)
       response = handle_exception do
         rest_client[ns_prefix + resource_name + "/#{name}"]
         .get(@headers)
       end
+      return response.body if options[:as] == :raw
+
       result = JSON.parse(response)
       new_entity(result, klass)
     end
@@ -354,14 +366,14 @@ module Kubeclient
       klass.new(hash)
     end
 
-    def all_entities
+    def all_entities(options = {})
       discover unless @discovered
       @entities.values.each_with_object({}) do |entity, result_hash|
         # method call for get each entities
         # build hash of entity name to array of the entities
         method_name = "get_#{entity.method_names[1]}"
         begin
-          result_hash[entity.method_names[0]] = send(method_name)
+          result_hash[entity.method_names[0]] = send(method_name, options)
         rescue KubeException
           next # do not fail due to resources not supporting get
         end
