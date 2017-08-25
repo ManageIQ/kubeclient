@@ -73,7 +73,7 @@ module Kubeclient
       # Allow passing partial timeouts hash, without unspecified
       # @timeouts[:foo] == nil resulting in infinite timeout.
       @timeouts = DEFAULT_TIMEOUTS.merge(timeouts)
-      @http_proxy_uri = http_proxy_uri.to_s if http_proxy_uri
+      @http_proxy_uri = http_proxy_uri ? http_proxy_uri.to_s : nil
 
       if auth_options[:bearer_token]
         bearer_token(@auth_options[:bearer_token])
@@ -127,9 +127,9 @@ module Kubeclient
     def self.parse_definition(kind, name)
       # "name": "componentstatuses", networkpolicies, endpoints
       # "kind": "ComponentStatus" NetworkPolicy, Endpoints
-      # maintain pre group api compatibility for endpoints.
+      # maintain pre group api compatibility for endpoints and securitycontextconstraints.
       # See: https://github.com/kubernetes/kubernetes/issues/8115
-      kind = 'Endpoint' if kind == 'Endpoints'
+      kind = kind[0..-2] if %w[Endpoints SecurityContextConstraints].include?(kind)
 
       prefix = kind[0..kind.rindex(/[A-Z]/)] # NetworkP
       m = name.match(/^#{prefix.downcase}(.*)$/)
