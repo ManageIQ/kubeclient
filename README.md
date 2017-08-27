@@ -276,6 +276,14 @@ service = client.get_service "guestbook", 'development'
 Note - Kubernetes doesn't work with the uid, but rather with the 'name' property.
 Querying with uid causes 404.
 
+#### Getting raw responses
+By passing `as: :raw`, the response from the client is given as a string, which is the raw JSON body from openshift:
+
+```ruby
+pods = client.get_pods as: :raw
+node = client.get_node "127.0.0.1", as: :raw
+```
+
 #### Delete an entity (by name)
 
 For example: `delete_pod "pod name"` , `delete_replication_controller "rc name"`, `delete_node "node name"`, `delete_secret "secret name"`
