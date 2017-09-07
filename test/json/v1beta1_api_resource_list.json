@@ -1,0 +1,11 @@
+{
+  "kind": "APIResourceList",
+  "groupVersion": "extensions/v1beta1",
+  "resources": [
+   {
+      "name": "deployments",
+      "namespaced": true,
+      "kind": "Deployment"
+    }
+  ]
+}

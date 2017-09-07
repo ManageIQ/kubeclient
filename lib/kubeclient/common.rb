@@ -194,8 +194,9 @@ module Kubeclient
           get_entity(klass, entity.resource_name, name, ns, opts)
         end
 
-        define_singleton_method("delete_#{entity.method_names[0]}") do |name, namespace = nil|
-          delete_entity(entity.resource_name, name, namespace)
+        # ns = namespace, opts = options
+        define_singleton_method("delete_#{entity.method_names[0]}") do |name, ns = nil, opts = {}|
+          delete_entity(entity.resource_name, name, ns, opts)
         end
 
         define_singleton_method("create_#{entity.method_names[0]}") do |entity_config|
@@ -308,11 +309,15 @@ module Kubeclient
       new_entity(result, klass)
     end
 
-    def delete_entity(resource_name, name, namespace = nil)
+    def delete_entity(resource_name, name, namespace = nil, query_params = nil)
+      params = {}
+      params.merge!(query_params) if query_params
+
       ns_prefix = build_namespace_prefix(namespace)
+
       handle_exception do
         rest_client[ns_prefix + resource_name + "/#{name}"]
-          .delete(@headers)
+          .delete({ 'params' => params }.merge(@headers))
       end
     end
 
