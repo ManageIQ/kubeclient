@@ -304,6 +304,22 @@ pods = client.get_pods as: :raw
 node = client.get_node "127.0.0.1", as: :raw
 ```
 
+### Yielding lists entity-by-entity
+ By passing a block to any `get_*` method that returns a list (e.g.: `get_pods`, `get_nodes`, `get_namespaces`), entities will be yielded one-by-one to the passed block rather than returned as an array. This permits handling entities in large lists asynchronously while parsing takes place.
+   
+ For example:
+ ```ruby
+ client.get_services do |service, resource_version|
+   puts service
+   puts resource_version
+ end
+    
+ #<Kubeclient::Service metadata={:name=>"kubernetes", :namespace=>"default", :selfLink=>"/api/v1/services/kubernetes?namespace=default", :uid=>"016e9dcd-ce39-11e4-ac24-3c970e4a436a", :resourceVersion=>"6", :creationTimestamp=>"2015-03-19T15:08:16+02:00", :labels=>{:component=>"apiserver", :provider=>"kubernetes"}}, spec={:port=>443, :protocol=>"TCP", :selector=>nil, :clusterIP=>"10.0.0.2", :containerPort=>0, :sessionAffinity=>"None"}, status={}>
+ 59
+ #<Kubeclient::Service metadata={:name=>"kubernetes-ro", :namespace=>"default", :selfLink=>"/api/v1/services/kubernetes-ro?namespace=default", :uid=>"015b78bf-ce39-11e4-ac24-3c970e4a436a", :resourceVersion=>"5", :creationTimestamp=>"2015-03-19T15:08:15+02:00", :labels=>{:component=>"apiserver", :provider=>"kubernetes"}}, spec={:port=>80, :protocol=>"TCP", :selector=>nil, :clusterIP=>"10.0.0.1", :containerPort=>0, :sessionAffinity=>"None"}, status={}>
+ 59
+ ```
+
 #### Delete an entity (by name)
 
 For example: `delete_pod "pod name"` , `delete_replication_controller "rc name"`, `delete_node "node name"`, `delete_secret "secret name"`

@@ -1,5 +1,7 @@
 require 'json'
 require 'rest-client'
+require 'json/streamer'
+
 module Kubeclient
   # Common methods
   # this is mixed in by other gems
@@ -113,9 +115,7 @@ module Kubeclient
       rescue JSON::ParserError
         {}
       end
-      err_message = json_error_msg['message'] || e.message
-      error_klass = e.http_code == 404 ? ResourceNotFoundError : HttpError
-      raise error_klass.new(e.http_code, err_message, e.response)
+      raise_http_err(json_error_msg, e)
     end
 
     def discover
@@ -176,8 +176,8 @@ module Kubeclient
       @entities.values.each do |entity|
         klass = ClientMixin.resource_class(@class_owner, entity.entity_type)
         # get all entities of a type e.g. get_nodes, get_pods, etc.
-        define_singleton_method("get_#{entity.method_names[1]}") do |options = {}|
-          get_entities(entity.entity_type, klass, entity.resource_name, options)
+        define_singleton_method("get_#{entity.method_names[1]}") do |options = {}, &block|
+          get_entities(entity.entity_type, klass, entity.resource_name, options, &block)
         end
 
         # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
@@ -218,19 +218,7 @@ module Kubeclient
 
     def create_rest_client(path = nil)
       path ||= @api_endpoint.path
-      options = {
-        ssl_ca_file: @ssl_options[:ca_file],
-        ssl_cert_store: @ssl_options[:cert_store],
-        verify_ssl: @ssl_options[:verify_ssl],
-        ssl_client_cert: @ssl_options[:client_cert],
-        ssl_client_key: @ssl_options[:client_key],
-        proxy: @http_proxy_uri,
-        user: @auth_options[:username],
-        password: @auth_options[:password],
-        open_timeout: @timeouts[:open],
-        read_timeout: @timeouts[:read]
-      }
-      RestClient::Resource.new(@api_endpoint.merge(path).to_s, options)
+      RestClient::Resource.new(@api_endpoint.merge(path).to_s, rest_client_options)
     end
 
     def rest_client
@@ -267,7 +255,8 @@ module Kubeclient
     #
     #   Default response type will return a collection RecursiveOpenStruct
     #   (:ros) objects, unless `:as` is passed with `:raw`.
-    def get_entities(entity_type, klass, resource_name, options = {})
+    def get_entities(entity_type, klass, resource_name, options = {}, &block)
+      return get_entities_async(klass, resource_name, options, &block) if block_given?
       params = {}
       SEARCH_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
 
@@ -443,6 +432,96 @@ module Kubeclient
 
     private
 
+    def do_rest_request(args)
+      uri = @api_endpoint.merge("#{@api_endpoint.path}/#{@api_version}/#{args[:path]}")
+      options = {
+        url: uri.to_s,
+        method: args[:method],
+        headers: (args[:headers] || {}).merge('params' => args[:params])
+      }.merge(rest_client_options)
+      options[:block_response] = args[:block] if args[:block]
+      resp = RestClient::Request.execute(options)
+      return unless resp.instance_of?(Net::HTTPClientError)
+      code = resp.code
+      code = code.to_i if code.instance_of?(String)
+      raise HttpError.new(code, resp.message, resp)
+    end
+
+    def rest_client_options
+      {
+        ssl_ca_file: @ssl_options[:ca_file],
+        ssl_cert_store: @ssl_options[:cert_store],
+        verify_ssl: @ssl_options[:verify_ssl],
+        ssl_client_cert: @ssl_options[:client_cert],
+        ssl_client_key: @ssl_options[:client_key],
+        proxy: @http_proxy_uri,
+        user: @auth_options[:username],
+        password: @auth_options[:password],
+        open_timeout: @timeouts[:open],
+        read_timeout: @timeouts[:read]
+      }
+    end
+
+    def get_entities_async(klass, resource_name, options = {})
+      if options[:as] == :raw
+        raise ArgumentError('Cannot pass block to get_entities when requesting options[:as] == raw')
+      end
+
+      params = {}
+      SEARCH_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
+
+      ns_prefix = build_namespace_prefix(options[:namespace])
+
+      conditions = Json::Streamer::Conditions.new
+      conditions.yield_object = lambda do |aggregator:, object:|
+        aggregator.level.eql?(2) && aggregator.key_for_level(1).eql?('items')
+      end
+
+      entity_streamer = Json::Streamer::JsonStreamer.new
+      # result['items'] might be nil due to https://github.com/kubernetes/kubernetes/issues/13096
+      entity_streamer.get_with_conditions(conditions) do |object|
+        entity = new_entity(object, klass)
+        yield(entity)
+      end
+
+      resource_version = nil
+      resource_version_streamer = Json::Streamer::JsonStreamer.new
+      resource_version_streamer.get(key: 'resourceVersion') do |value|
+        resource_version = value.to_i unless resource_version
+      end
+
+      kind = nil
+      kind_streamer = Json::Streamer::JsonStreamer.new
+      kind_streamer.get(key: 'kind') do |value|
+        kind = value unless kind
+      end
+
+      block = proc do |response|
+        if response.instance_of?(Net::HTTPNotFound)
+          raise ResourceNotFoundError.new(404,
+                                          'Not Found',
+                                          response)
+        end
+        response.read_body do |chunk|
+          entity_streamer.parser << chunk
+          resource_version_streamer.parser << chunk unless resource_version
+          kind_streamer.parser << chunk unless kind
+        end
+      end
+
+      handle_exception do
+        # disable compression by setting Accept-Encoding to empty string
+        do_rest_request(path: ns_prefix + resource_name,
+                        block: block, method: :get,
+                        headers: @headers.merge('Accept-Encoding' => ''), params: params)
+      end
+
+      {
+        resourceVersion: resource_version,
+        kind: kind
+      }
+    end
+
     def load_entities
       @entities = {}
       fetch_entities['resources'].each do |resource|
@@ -507,6 +586,12 @@ module Kubeclient
       end
 
       options.merge(@socket_options)
+    end
+
+    def raise_http_err(json_error_msg, e)
+      err_message = json_error_msg['message'] || e.message
+      error_klass = e.http_code == 404 ? ResourceNotFoundError : HttpError
+      raise error_klass.new((e.http_code || 404), err_message, e.response)
     end
   end
 end
