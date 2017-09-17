@@ -789,7 +789,7 @@ class KubeclientTest < MiniTest::Test
     )
     rest_client = client.rest_client
     assert_default_open_timeout(rest_client.open_timeout)
-    assert_equal(60, read_timeout(rest_client))
+    assert_equal(60, rest_client.read_timeout)
   end
 
   def test_timeouts_open
@@ -799,7 +799,7 @@ class KubeclientTest < MiniTest::Test
     )
     rest_client = client.rest_client
     assert_equal(10, rest_client.open_timeout)
-    assert_equal(60, read_timeout(rest_client))
+    assert_equal(60, rest_client.read_timeout)
   end
 
   def test_timeouts_read
@@ -809,7 +809,7 @@ class KubeclientTest < MiniTest::Test
     )
     rest_client = client.rest_client
     assert_default_open_timeout(rest_client.open_timeout)
-    assert_equal(300, read_timeout(rest_client))
+    assert_equal(300, rest_client.read_timeout)
   end
 
   def test_timeouts_both
@@ -819,7 +819,7 @@ class KubeclientTest < MiniTest::Test
     )
     rest_client = client.rest_client
     assert_equal(10, rest_client.open_timeout)
-    assert_equal(300, read_timeout(rest_client))
+    assert_equal(300, rest_client.read_timeout)
   end
 
   def test_timeouts_infinite
@@ -829,11 +829,7 @@ class KubeclientTest < MiniTest::Test
     )
     rest_client = client.rest_client
     assert_nil(rest_client.open_timeout)
-    assert_nil(read_timeout(rest_client))
-  end
-
-  def read_timeout(rest_client)
-    rest_client.send(Kubeclient::ClientMixin.restclient_read_timeout_option)
+    assert_nil(rest_client.read_timeout)
   end
 
   def assert_default_open_timeout(actual)
