@@ -1,5 +1,6 @@
 AllCops:
   DisplayCopNames: true
+  TargetRubyVersion: 2.2 # Oldest version kubeclient supports
 MethodLength:
   Enabled: false
 ClassLength:
