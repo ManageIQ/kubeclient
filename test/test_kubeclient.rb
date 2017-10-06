@@ -193,6 +193,22 @@ class KubeclientTest < MiniTest::Test
     assert_equal(404, exception.error_code)
   end
 
+  def test_nonjson_exception_raw
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+    stub_request(:get, %r{/servic})
+      .to_return(body: open_test_file('service_illegal_json_404.json'), status: 404)
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+
+    exception = assert_raises(Kubeclient::ResourceNotFoundError) do
+      client.get_services(as: :raw)
+    end
+
+    assert(exception.message.include?('Not Found'))
+    assert_equal(404, exception.error_code)
+  end
+
   def test_entity_list
     stub_request(:get, %r{/api/v1$})
       .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
@@ -210,6 +226,34 @@ class KubeclientTest < MiniTest::Test
     assert_instance_of(Kubeclient::Service, services[1])
 
     assert_requested(:get, 'http://localhost:8080/api/v1/services', times: 1)
+  end
+
+  def test_entity_list_raw
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+    stub_request(:get, %r{/services})
+      .to_return(body: open_test_file('entity_list.json'), status: 200)
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    response = client.get_services(as: :raw)
+
+    refute_empty(response)
+    assert_equal(open_test_file('entity_list.json').read, response)
+
+    assert_requested(:get, 'http://localhost:8080/api/v1/services', times: 1)
+  end
+
+  def test_entity_list_raw_failure
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+    stub_request(:get, %r{/services})
+      .to_return(body: open_test_file('entity_list.json'), status: 500)
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+
+    exception = assert_raises(Kubeclient::HttpError) { client.get_services(as: :raw) }
+    assert_equal('500 Internal Server Error', exception.message)
+    assert_equal(500, exception.error_code)
   end
 
   def test_entities_with_label_selector
@@ -341,6 +385,74 @@ class KubeclientTest < MiniTest::Test
     assert_instance_of(Kubeclient::ServiceAccount, result['service_account'][0])
   end
 
+  def test_get_all_raw
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+
+    stub_request(:get, %r{/bindings})
+      .to_return(body: open_test_file('bindings_list.json'), status: 404)
+
+    stub_request(:get, %r{/configmaps})
+      .to_return(body: open_test_file('config_map_list.json'), status: 200)
+
+    stub_request(:get, %r{/podtemplates})
+      .to_return(body: open_test_file('pod_template_list.json'), status: 200)
+
+    stub_request(:get, %r{/services})
+      .to_return(body: open_test_file('service_list.json'), status: 200)
+
+    stub_request(:get, %r{/pods})
+      .to_return(body: open_test_file('pod_list.json'), status: 200)
+
+    stub_request(:get, %r{/nodes})
+      .to_return(body: open_test_file('node_list.json'), status: 200)
+
+    stub_request(:get, %r{/replicationcontrollers})
+      .to_return(body: open_test_file('replication_controller_list.json'), status: 200)
+
+    stub_request(:get, %r{/events})
+      .to_return(body: open_test_file('event_list.json'), status: 200)
+
+    stub_request(:get, %r{/endpoints})
+      .to_return(body: open_test_file('endpoint_list.json'), status: 200)
+
+    stub_request(:get, %r{/namespaces})
+      .to_return(body: open_test_file('namespace_list.json'), status: 200)
+
+    stub_request(:get, %r{/secrets})
+      .to_return(body: open_test_file('secret_list.json'), status: 200)
+
+    stub_request(:get, %r{/resourcequotas})
+      .to_return(body: open_test_file('resource_quota_list.json'), status: 200)
+
+    stub_request(:get, %r{/limitranges})
+      .to_return(body: open_test_file('limit_range_list.json'), status: 200)
+
+    stub_request(:get, %r{/persistentvolumes})
+      .to_return(body: open_test_file('persistent_volume_list.json'), status: 200)
+
+    stub_request(:get, %r{/persistentvolumeclaims})
+      .to_return(body: open_test_file('persistent_volume_claim_list.json'), status: 200)
+
+    stub_request(:get, %r{/componentstatuses})
+      .to_return(body: open_test_file('component_status_list.json'), status: 200)
+
+    stub_request(:get, %r{/serviceaccounts})
+      .to_return(body: open_test_file('service_account_list.json'), status: 200)
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    result = client.all_entities(as: :raw)
+    assert_equal(16, result.keys.size)
+
+    %w[
+      component_status config_map endpoint event limit_range namespace node
+      persistent_volume persistent_volume_claim pod replication_controller
+      resource_quota secret service service_account
+    ].each do |entity|
+      assert_equal(open_test_file("#{entity}_list.json").read, result[entity])
+    end
+  end
+
   def test_api_bearer_token_with_params_success
     stub_request(:get, 'http://localhost:8080/api/v1/pods?labelSelector=name=redis-master')
       .with(headers: { Authorization: 'Bearer valid_token' })
@@ -403,12 +515,33 @@ class KubeclientTest < MiniTest::Test
     assert_equal(response, exception.response)
   end
 
+  def test_api_bearer_token_failure_raw
+    error_message =
+      '"/api/v1" is forbidden because ' \
+      'system:anonymous cannot list on pods in'
+    response = OpenStruct.new(code: 401, message: error_message)
+
+    stub_request(:get, 'http://localhost:8080/api/v1')
+      .with(headers: { Authorization: 'Bearer invalid_token' })
+      .to_raise(Kubeclient::HttpError.new(403, error_message, response))
+
+    client = Kubeclient::Client.new(
+      'http://localhost:8080/api/',
+      auth_options: { bearer_token: 'invalid_token' }
+    )
+
+    exception = assert_raises(Kubeclient::HttpError) { client.get_pods(as: :raw) }
+    assert_equal(403, exception.error_code)
+    assert_equal(error_message, exception.message)
+    assert_equal(response, exception.response)
+  end
+
   def test_api_basic_auth_success
     stub_request(:get, 'http://localhost:8080/api/v1')
-      .with(basic_auth: %w(username password))
+      .with(basic_auth: %w[username password])
       .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
     stub_request(:get, 'http://localhost:8080/api/v1/pods')
-      .with(basic_auth: %w(username password))
+      .with(basic_auth: %w[username password])
       .to_return(body: open_test_file('pod_list.json'), status: 200)
 
     client = Kubeclient::Client.new(
@@ -429,10 +562,10 @@ class KubeclientTest < MiniTest::Test
 
   def test_api_basic_auth_back_comp_success
     stub_request(:get, 'http://localhost:8080/api/v1')
-      .with(basic_auth: %w(username password))
+      .with(basic_auth: %w[username password])
       .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
     stub_request(:get, 'http://localhost:8080/api/v1/pods')
-      .with(basic_auth: %w(username password))
+      .with(basic_auth: %w[username password])
       .to_return(body: open_test_file('pod_list.json'), status: 200)
 
     client = Kubeclient::Client.new(
@@ -452,7 +585,7 @@ class KubeclientTest < MiniTest::Test
     response = OpenStruct.new(code: 401, message: '401 Unauthorized')
 
     stub_request(:get, 'http://localhost:8080/api/v1')
-      .with(basic_auth: %w(username password))
+      .with(basic_auth: %w[username password])
       .to_raise(Kubeclient::HttpError.new(401, error_message, response))
 
     client = Kubeclient::Client.new(
@@ -464,6 +597,27 @@ class KubeclientTest < MiniTest::Test
     assert_equal(401, exception.error_code)
     assert_equal(error_message, exception.message)
     assert_equal(response, exception.response)
+    assert_requested(:get, 'http://localhost:8080/api/v1', times: 1)
+  end
+
+  def test_api_basic_auth_failure_raw
+    error_message = 'HTTP status code 401, 401 Unauthorized'
+    response = OpenStruct.new(code: 401, message: '401 Unauthorized')
+
+    stub_request(:get, 'http://localhost:8080/api/v1')
+      .with(basic_auth: %w[username password])
+      .to_raise(Kubeclient::HttpError.new(401, error_message, response))
+
+    client = Kubeclient::Client.new(
+      'http://localhost:8080/api/',
+      auth_options: { username: 'username', password: 'password' }
+    )
+
+    exception = assert_raises(Kubeclient::HttpError) { client.get_pods(as: :raw) }
+    assert_equal(401, exception.error_code)
+    assert_equal(error_message, exception.message)
+    assert_equal(response, exception.response)
+
     assert_requested(:get, 'http://localhost:8080/api/v1', times: 1)
   end
 
