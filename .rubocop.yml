@@ -19,8 +19,6 @@ Metrics/ModuleLength:
 Style/MethodCallWithArgsParentheses:
   Enabled: true
   IgnoredMethods: [require, raise, include, attr_reader, refute, assert]
-  Exclude: [Gemfile*, Rakefile, kubeclient.gemspec]
-Style/FileName:
-  Exclude: [Gemfile*]
+  Exclude: [Gemfile, Rakefile, kubeclient.gemspec]
 Security/MarshalLoad:
   Exclude: [test/**/*]

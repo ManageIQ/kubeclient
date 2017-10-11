@@ -228,7 +228,7 @@ module Kubeclient
         user: @auth_options[:username],
         password: @auth_options[:password],
         open_timeout: @timeouts[:open],
-        ClientMixin.restclient_read_timeout_option => @timeouts[:read]
+        read_timeout: @timeouts[:read]
       }
       RestClient::Resource.new(@api_endpoint.merge(path).to_s, options)
     end
@@ -439,18 +439,6 @@ module Kubeclient
     def api
       response = handle_exception { create_rest_client.get(@headers) }
       JSON.parse(response)
-    end
-
-    def self.restclient_read_timeout_option
-      @restclient_read_timeout_option ||=
-        # RestClient silently accepts unknown options, so check accessors instead.
-        if RestClient::Resource.instance_methods.include?(:read_timeout) # rest-client 2.0
-          :read_timeout
-        elsif RestClient::Resource.instance_methods.include?(:timeout) # rest-client 1.x
-          :timeout
-        else
-          raise ArgumentError("RestClient doesn't support neither :read_timeout nor :timeout")
-        end
     end
 
     private

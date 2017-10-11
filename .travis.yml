@@ -3,17 +3,9 @@ rvm:
   - "2.2"
   - "2.3.0"
   - "2.4.0"
-gemfile:
-  - Gemfile
-  - Gemfile-rest-client-1.8.rb
 sudo: false
 cache: bundler
 script: bundle exec rake $TASK
 env:
  - TASK=test
  - TASK=rubocop
-matrix:
-  exclude:
-    # No point running rubocop with old rest-client
-    - gemfile: Gemfile-rest-client-1.8.rb
-      env: TASK=rubocop
