@@ -21,14 +21,25 @@ module Kubeclient
         end
 
         buffer = ''
+        done = false
         response.body.each do |chunk|
+          done = false
           buffer << chunk
           while (line = buffer.slice!(/.+\n/))
             yield(@format == :json ? WatchNotice.new(JSON.parse(line)) : line.chomp)
           end
+          done = true
         end
+        done
       rescue IOError
         raise unless @finished
+      end
+
+      def each_with_retry(&block)
+        loop do
+          done = each(&block)
+          break if !done || @finished
+        end
       end
 
       def finish

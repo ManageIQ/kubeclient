@@ -9,15 +9,7 @@ class TestWatch < MiniTest::Test
       { 'type' => 'DELETED', 'resourceVersion' => '1398' }
     ]
 
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
-
-    stub_request(:get, %r{.*\/watch/pods})
-      .to_return(body: open_test_file('watch_stream.json'),
-                 status: 200)
-
-    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    client = setup_regular_response
 
     client.watch_pods.to_enum.with_index do |notice, index|
       assert_instance_of(Kubeclient::Common::WatchNotice, notice)
@@ -115,5 +107,54 @@ class TestWatch < MiniTest::Test
     assert_requested(:get,
                      "#{api_host}/v1/watch/events?fieldSelector=#{selector}",
                      times: 1)
+  end
+
+  def test_watch_with_retry_continues_on_stream_closure
+    Timeout.timeout(1) do
+      events = 0
+      setup_regular_response.watch_pods.each_with_retry do
+        events += 1
+        break if events == 10
+      end
+      assert_equal(10, events)
+    end
+  end
+
+  def test_watch_with_retry_stops_on_finish
+    Timeout.timeout(1) do
+      events = 0
+      watcher = setup_regular_response.watch_pods
+      watcher.each_with_retry do
+        watcher.finish
+        events += 1
+        break if events == 10
+      end
+      assert_equal(3, events)
+    end
+  end
+
+  def test_watch_with_retry_stops_on_finish_exceptions
+    Timeout.timeout(1) do
+      events = 0
+      watcher = setup_regular_response.watch_pods
+      watcher.each_with_retry do
+        watcher.finish
+        events += 1
+        raise IOError
+      end
+      assert_equal(1, events)
+    end
+  end
+
+  private
+
+  def setup_regular_response
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+
+    stub_request(:get, %r{.*\/watch/pods})
+      .to_return(body: open_test_file('watch_stream.json'), status: 200)
+
+    Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
   end
 end
