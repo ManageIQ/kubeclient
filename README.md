@@ -314,6 +314,20 @@ Input parameter - name (string) specifying service name, pod name, replication c
 client.delete_service("redis-service")
 ```
 
+If you want to cascade delete, for example a deployment, you can use the `delete_options` parameter.
+
+```ruby
+deployment_name = 'redis-deployment'
+namespace = 'default'
+delete_options = Kubeclient::Resource.new(
+    apiVersion: 'meta/v1',
+    gracePeriodSeconds: 0,
+    kind: 'DeleteOptions',
+    propagationPolicy: 'Foreground' # Orphan, Foreground, or Background
+)
+client.delete_deployment(deployment_name, namespace, delete_options: delete_options)
+```
+
 #### Create an entity
 For example: `create_pod pod_object`, `create_replication_controller rc_obj`, `create_secret secret_object`, `create_resource_quota resource_quota_object`, `create_limit_range limit_range_object`, `create_persistent_volume persistent_volume_object`, `create_persistent_volume_claim persistent_volume_claim_object`, `create_service_account service_account_object`
 

@@ -24,4 +24,29 @@ class TestReplicationController < MiniTest::Test
                      'http://localhost:8080/api/v1/namespaces/default/replicationcontrollers/frontendController',
                      times: 1)
   end
+
+  def test_delete_replicaset_cascade
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    opts = Kubeclient::Resource.new(
+      apiVersion: 'meta/v1',
+      gracePeriodSeconds: 0,
+      kind: 'DeleteOptions',
+      propagationPolicy: 'Foreground'
+    )
+
+    stub_request(:delete,
+                 'http://localhost:8080/api/v1/namespaces/default/replicationcontrollers/frontendController')
+      .with(body: opts.to_hash.to_json)
+      .to_return(status: 200, body: '', headers: {})
+
+    client.delete_replication_controller('frontendController', 'default', delete_options: opts)
+
+    assert_requested(:delete,
+                     'http://localhost:8080/api/v1/namespaces/default/replicationcontrollers/frontendController',
+                     times: 1)
+  end
 end
