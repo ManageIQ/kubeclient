@@ -190,12 +190,14 @@ module Kubeclient
         end
 
         # get a single entity of a specific type by name
-        define_singleton_method("get_#{entity.method_names[0]}") do |name, ns = nil, opts = {}|
-          get_entity(klass, entity.resource_name, name, ns, opts)
+        define_singleton_method("get_#{entity.method_names[0]}") \
+        do |name, namespace = nil, opts = {}|
+          get_entity(klass, entity.resource_name, name, namespace, opts)
         end
 
-        define_singleton_method("delete_#{entity.method_names[0]}") do |name, namespace = nil|
-          delete_entity(entity.resource_name, name, namespace)
+        define_singleton_method("delete_#{entity.method_names[0]}") \
+        do |name, namespace = nil, opts = {}|
+          delete_entity(entity.resource_name, name, namespace, opts)
         end
 
         define_singleton_method("create_#{entity.method_names[0]}") do |entity_config|
@@ -308,11 +310,20 @@ module Kubeclient
       new_entity(result, klass)
     end
 
-    def delete_entity(resource_name, name, namespace = nil)
+    def delete_entity(resource_name, name, namespace = nil, delete_options: {})
+      delete_options_hash = delete_options.to_hash
       ns_prefix = build_namespace_prefix(namespace)
-      handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
-          .delete(@headers)
+      payload = delete_options_hash.to_json unless delete_options_hash.empty?
+      _response = handle_exception do
+        rs = rest_client[ns_prefix + resource_name + "/#{name}"]
+        RestClient::Request.execute(
+          rs.options.merge(
+            method: :delete,
+            url: rs.url,
+            headers: { 'Content-Type' => 'application/json' }.merge(@headers),
+            payload: payload
+          )
+        )
       end
     end
 
