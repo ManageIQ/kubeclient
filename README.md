@@ -396,6 +396,12 @@ watcher.each do |notice|
 end
 ```
 
+The `.each` will stop when the connection is interrupted, use `each_with_retry` if you want to continue:
+
+```ruby
+client.watch_pods.each_with_retry { |notice| ... }
+```
+
 It is possible to interrupt the watcher from another thread with:
 
 ```ruby
