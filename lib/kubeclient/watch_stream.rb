@@ -27,7 +27,7 @@ module Kubeclient
             yield(@format == :json ? WatchNotice.new(JSON.parse(line)) : line.chomp)
           end
         end
-      rescue IOError
+      rescue IOError, Errno::EBADF
         raise unless @finished
       end
 
