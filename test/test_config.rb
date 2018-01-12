@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 # Testing Kubernetes client configuration
 class KubeclientConfigTest < MiniTest::Test

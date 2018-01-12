@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 # Unit tests for the common module
 class CommonTest < MiniTest::Test

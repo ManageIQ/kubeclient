@@ -5,8 +5,5 @@ require 'yaml'
 
 task default: %i[test rubocop] # same as .travis.yml
 
-Rake::TestTask.new do |t|
-  t.libs << 'test'
-end
-
+Rake::TestTask.new
 RuboCop::RakeTask.new

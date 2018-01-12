@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 # Core api resource list without kind tests
 class TestResourceListWithoutKind < MiniTest::Test

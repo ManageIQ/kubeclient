@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 # ResourceQuota tests
 class TestResourceQuota < MiniTest::Test

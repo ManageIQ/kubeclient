@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 # Replication Controller entity tests
 class TestReplicationController < MiniTest::Test

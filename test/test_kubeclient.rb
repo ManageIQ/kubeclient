@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 # Kubernetes client entity tests
 class KubeclientTest < MiniTest::Test
