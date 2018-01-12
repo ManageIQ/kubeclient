@@ -247,6 +247,8 @@ module Kubeclient
     #   :label_selector (string) - a selector to restrict the list of returned objects by labels.
     #   :field_selector (string) - a selector to restrict the list of returned objects by fields.
     #   :resource_version (string) - shows changes that occur after passed version of a resource.
+    #   Default response type will return an entity as a  RecursiveOpenStruct
+    #   (:ros) object, unless `:as` is passed with `:raw`.
     def watch_entities(resource_name, options = {})
       ns = build_namespace_prefix(options[:namespace])
 
@@ -258,7 +260,7 @@ module Kubeclient
       WATCH_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
       uri.query = URI.encode_www_form(params) if params.any?
 
-      Kubeclient::Common::WatchStream.new(uri, http_options(uri))
+      Kubeclient::Common::WatchStream.new(uri, http_options(uri), as: options[:as] || :ros)
     end
 
     # Accepts the following options:
@@ -411,7 +413,7 @@ module Kubeclient
       uri.path += "/#{@api_version}/#{ns}pods/#{pod_name}/log"
       uri.query = URI.encode_www_form(params)
 
-      Kubeclient::Common::WatchStream.new(uri, http_options(uri), format: :text)
+      Kubeclient::Common::WatchStream.new(uri, http_options(uri), as: :raw)
     end
 
     def proxy_url(kind, name, port, namespace = '')
