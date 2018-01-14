@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 # LimitRange tests
 class TestLimitRange < MiniTest::Test

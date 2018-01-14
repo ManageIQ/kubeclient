@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 # Service entity tests
 class TestService < MiniTest::Test

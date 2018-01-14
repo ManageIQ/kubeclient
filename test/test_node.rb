@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 # Node entity tests
 class TestNode < MiniTest::Test

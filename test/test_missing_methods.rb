@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 # Test method_missing, respond_to? and respond_to_missing behaviour
 class TestMissingMethods < MiniTest::Test
