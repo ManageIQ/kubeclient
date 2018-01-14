@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 # Pod entity tests
 class TestPod < MiniTest::Test

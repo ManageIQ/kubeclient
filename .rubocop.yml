@@ -23,3 +23,6 @@ Style/MethodCallWithArgsParentheses:
   Exclude: [Gemfile, Rakefile, kubeclient.gemspec]
 Security/MarshalLoad:
   Exclude: [test/**/*]
+Style/MethodCallWithArgsParentheses:
+  IgnoredMethods:
+  - require_relative
