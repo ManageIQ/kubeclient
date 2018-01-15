@@ -4,11 +4,11 @@ module Kubeclient
   module Common
     # HTTP Stream used to watch changes on entities
     class WatchStream
-      def initialize(uri, http_options, format: :json)
+      def initialize(uri, http_options, as:)
         @uri = uri
         @http_client = nil
         @http_options = http_options
-        @format = format
+        @as = as
       end
 
       def each
@@ -24,7 +24,13 @@ module Kubeclient
         response.body.each do |chunk|
           buffer << chunk
           while (line = buffer.slice!(/.+\n/))
-            yield(@format == :json ? WatchNotice.new(JSON.parse(line)) : line.chomp)
+            result =
+              case @as
+              when :ros then WatchNotice.new(JSON.parse(line))
+              when :raw then line.chomp
+              else raise NotImplementedError, "Unsupported as #{@as.inspect}"
+              end
+            yield(result)
           end
         end
       rescue IOError, Errno::EBADF

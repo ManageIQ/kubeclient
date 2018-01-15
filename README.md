@@ -402,6 +402,8 @@ It is possible to interrupt the watcher from another thread with:
 watcher.finish
 ```
 
+Pass `as: :raw` to `watch_*` get raw replies.
+
 #### Watch events for a particular object
 You can use the `field_selector` option as part of the watch methods.
 

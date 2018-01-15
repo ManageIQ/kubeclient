@@ -3,17 +3,15 @@ require_relative 'test_helper'
 # Watch entity tests
 class TestWatch < MiniTest::Test
   def test_watch_pod_success
+    stub_resource_list
+
     expected = [
       { 'type' => 'ADDED', 'resourceVersion' => '1389' },
       { 'type' => 'MODIFIED', 'resourceVersion' => '1390' },
       { 'type' => 'DELETED', 'resourceVersion' => '1398' }
     ]
 
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
-
-    stub_request(:get, %r{.*\/watch/pods})
+    stub_request(:get, %r{/watch/pods})
       .to_return(body: open_test_file('watch_stream.json'),
                  status: 200)
 
@@ -29,11 +27,24 @@ class TestWatch < MiniTest::Test
     end
   end
 
+  def test_watch_pod_raw
+    stub_resource_list
+
+    stub_request(:get, %r{/watch/pods}).to_return(
+      body: open_test_file('watch_stream.json'),
+      status: 200
+    )
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+
+    got = nil
+    client.watch_pods(as: :raw).each { |notice| got = notice }
+    assert_match(/\A{"type":"DELETED"/, got)
+  end
+
   def test_watch_pod_failure
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
-    stub_request(:get, %r{.*\/watch/pods}).to_return(status: 404)
+    stub_resource_list
+    stub_request(:get, %r{/watch/pods}).to_return(status: 404)
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     assert_raises(Kubeclient::HttpError) do
@@ -51,19 +62,28 @@ class TestWatch < MiniTest::Test
       .to_return(body: open_test_file('pod_log.txt'),
                  status: 200)
 
-    stream = Kubeclient::Common::WatchStream.new(URI.parse(url), {}, format: :txt)
+    stream = Kubeclient::Common::WatchStream.new(URI.parse(url), {}, as: :raw)
     stream.to_enum.with_index do |line, index|
       assert_instance_of(String, line)
       assert_equal(expected_lines[index], line)
     end
   end
 
+  # Ensure that WatchStream respects a format that's not JSON
+  def test_watch_stream_unknown
+    url = 'http://www.example.com/foobar'
+    stub_request(:get, url)
+      .to_return(body: open_test_file('pod_log.txt'),
+                 status: 200)
+
+    stream = Kubeclient::Common::WatchStream.new(URI.parse(url), {}, as: :foo)
+    assert_raises(NotImplementedError) { stream.each {} }
+  end
+
   def test_watch_with_resource_version
     api_host = 'http://localhost:8080/api'
     version = '1995'
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
+    stub_resource_list
     stub_request(:get, %r{.*\/watch/events})
       .to_return(body: open_test_file('watch_stream.json'),
                  status: 200)
@@ -81,9 +101,7 @@ class TestWatch < MiniTest::Test
     api_host = 'http://localhost:8080/api'
     selector = 'name=redis-master'
 
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
+    stub_resource_list
     stub_request(:get, %r{.*\/watch/events})
       .to_return(body: open_test_file('watch_stream.json'),
                  status: 200)
@@ -101,9 +119,7 @@ class TestWatch < MiniTest::Test
     api_host = 'http://localhost:8080/api'
     selector = 'involvedObject.kind=Pod'
 
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
+    stub_resource_list
     stub_request(:get, %r{.*\/watch/events})
       .to_return(body: open_test_file('watch_stream.json'),
                  status: 200)
@@ -120,9 +136,7 @@ class TestWatch < MiniTest::Test
   def test_watch_with_finish_and_ebadf
     api_host = 'http://localhost:8080/api'
 
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
+    stub_resource_list
     stub_request(:get, %r{.*\/watch/events})
       .to_return(body: open_test_file('watch_stream.json'), status: 200)
 
@@ -136,5 +150,14 @@ class TestWatch < MiniTest::Test
     end
 
     assert_requested(:get, "#{api_host}/v1/watch/events", times: 1)
+  end
+
+  private
+
+  def stub_resource_list
+    stub_request(:get, %r{/api/v1$}).to_return(
+      body: open_test_file('core_api_resource_list.json'),
+      status: 200
+    )
   end
 end
