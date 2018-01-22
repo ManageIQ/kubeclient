@@ -19,10 +19,10 @@ class TestProcessTemplate < MiniTest::Test
     param = { name: 'NAME_PREFIX', value: 'test/' }
     template[:parameters] = [param]
 
-    req_body = "{\"metadata\":{\"name\":\"my-template\",\"namespace\":\"default\"},"\
-    "\"kind\":\"Template\",\"apiVersion\":\"v1\",\"objects\":[{\"metadata\":"\
-    "{\"name\":\"${NAME_PREFIX}my-service\"},\"kind\":\"Service\",\"apiVersion\":\"v1\"}],"\
-    "\"parameters\":[{\"name\":\"NAME_PREFIX\",\"value\":\"test/\"}]}"
+    req_body = '{"metadata":{"name":"my-template","namespace":"default"},' \
+      '"kind":"Template","apiVersion":"v1","objects":[{"metadata":' \
+      '{"name":"${NAME_PREFIX}my-service"},"kind":"Service","apiVersion":"v1"}],' \
+      '"parameters":[{"name":"NAME_PREFIX","value":"test/"}]}'
 
     expected_url = 'http://localhost:8080/api/v1/namespaces/default/processedtemplates'
     stub_request(:post, expected_url)

@@ -11,9 +11,10 @@ class TestService < MiniTest::Test
     our_service.metadata.labels.name = 'guestbook'
 
     our_service.spec = {}
-    our_service.spec.ports = [{ 'port' => 3000,
-                                'targetPort' => 'http-server',
-                                'protocol' => 'TCP'
+    our_service.spec.ports = [{
+      'port' => 3000,
+      'targetPort' => 'http-server',
+      'protocol' => 'TCP'
     }]
 
     assert_equal('guestbook', our_service.metadata.labels.name)

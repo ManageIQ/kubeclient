@@ -1,3 +1,5 @@
+AllCops:
+  DisplayCopNames: true
 MethodLength:
   Enabled: false
 ClassLength:
@@ -13,3 +15,5 @@ Metrics/CyclomaticComplexity:
   Max: 8
 Style/FileName:
   Exclude: [Gemfile*]
+Metrics/ModuleLength:
+  Enabled: false
