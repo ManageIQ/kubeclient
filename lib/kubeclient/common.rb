@@ -228,8 +228,9 @@ module Kubeclient
     #   :label_selector (string) - a selector to restrict the list of returned objects by labels.
     #   :field_selector (string) - a selector to restrict the list of returned objects by fields.
     #   :resource_version (string) - shows changes that occur after passed version of a resource.
-    #   Default response type will return an entity as a  RecursiveOpenStruct
-    #   (:ros) object, unless `:as` is passed with `:raw`.
+    #   :as (:raw|:ros) - defaults to :ros
+    #     :raw - return the raw response body as a string
+    #     :ros - return a collection of RecursiveOpenStruct objects
     def watch_entities(resource_name, options = {})
       ns = build_namespace_prefix(options[:namespace])
 
@@ -248,10 +249,9 @@ module Kubeclient
     #   :namespace (string) - the namespace of the entity.
     #   :label_selector (string) - a selector to restrict the list of returned objects by labels.
     #   :field_selector (string) - a selector to restrict the list of returned objects by fields.
-    #   :as (symbol) - if :raw, return the raw response body (as a string)
-    #
-    #   Default response type will return a collection RecursiveOpenStruct
-    #   (:ros) objects, unless `:as` is passed with `:raw`.
+    #   :as (:raw|:ros) - defaults to :ros
+    #     :raw - return the raw response body as a string
+    #     :ros - return a collection of RecursiveOpenStruct objects
     def get_entities(entity_type, resource_name, options = {})
       params = {}
       SEARCH_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
@@ -277,10 +277,9 @@ module Kubeclient
     end
 
     # Accepts the following options:
-    #   :as (symbol) - if :raw, return the raw response body (as a string)
-    #
-    #   Default response type will return an entity as a  RecursiveOpenStruct
-    #   (:ros) object, unless `:as` is passed with `:raw`.
+    #   :as (:raw|:ros) - defaults to :ros
+    #     :raw - return the raw response body as a string
+    #     :ros - return a collection of RecursiveOpenStruct objects
     def get_entity(resource_name, name, namespace = nil, options = {})
       ns_prefix = build_namespace_prefix(namespace)
       response = handle_exception do
