@@ -1,14 +1,15 @@
-require 'kubeclient/version'
 require 'json'
 require 'rest-client'
-require 'kubeclient/entity_list'
-require 'kubeclient/http_error'
-require 'kubeclient/resource_not_found_error'
-require 'kubeclient/watch_notice'
-require 'kubeclient/watch_stream'
+
 require 'kubeclient/common'
 require 'kubeclient/config'
+require 'kubeclient/entity_list'
+require 'kubeclient/http_error'
 require 'kubeclient/missing_kind_compatibility'
+require 'kubeclient/resource_not_found_error'
+require 'kubeclient/version'
+require 'kubeclient/watch_notice'
+require 'kubeclient/watch_stream'
 
 module Kubeclient
   # Kubernetes Client
