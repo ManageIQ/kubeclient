@@ -311,7 +311,7 @@ For example: `delete_pod "pod name"` , `delete_replication_controller "rc name"`
 Input parameter - name (string) specifying service name, pod name, replication controller name.
 
 ```ruby
-client.delete_service("redis-service")
+deleted = client.delete_service("redis-service")
 ```
 
 If you want to cascade delete, for example a deployment, you can use the `delete_options` parameter.
@@ -362,7 +362,7 @@ Input parameter - object of type `Pod`, `Service`, `ReplicationController` etc.
 The below example is for v1
 
 ```ruby
-client.update_service(service1)
+updated = client.update_service(service1)
 ```
 
 #### Patch an entity (by name)
@@ -375,7 +375,7 @@ The PATCH request should include the namespace name, except for nodes and namesp
 The below example is for v1
 
 ```ruby
-client.patch_pod("docker-registry", {metadata: {annotations: {key: 'value'}}}, "default")
+patched = client.patch_pod("docker-registry", {metadata: {annotations: {key: 'value'}}}, "default")
 ```
 
 #### Get all entities of all types : all_entities
@@ -487,6 +487,8 @@ Checking the type of a resource can be done using:
 > pod.kind
 => "Pod"
 ```
+
+update_* delete_* and patch_* now return a RecursiveOpenStruct like the get_* methods
 
 #### past version 2.6
 

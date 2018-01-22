@@ -31,10 +31,11 @@ class TestSecret < MiniTest::Test
                  status: 200)
 
     stub_request(:delete, %r{/secrets})
-      .to_return(status: 200)
+      .to_return(status: 200, body: open_test_file('created_secret.json'))
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
-    client.delete_secret('test-secret', 'dev')
+    secret = client.delete_secret('test-secret', 'dev')
+    assert_kind_of(RecursiveOpenStruct, secret)
 
     assert_requested(:delete,
                      'http://localhost:8080/api/v1/namespaces/dev/secrets/test-secret',

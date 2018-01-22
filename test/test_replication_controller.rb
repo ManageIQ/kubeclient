@@ -41,9 +41,9 @@ class TestReplicationController < MiniTest::Test
     stub_request(:delete,
                  'http://localhost:8080/api/v1/namespaces/default/replicationcontrollers/frontendController')
       .with(body: opts.to_hash.to_json)
-      .to_return(status: 200, body: '', headers: {})
-
-    client.delete_replication_controller('frontendController', 'default', delete_options: opts)
+      .to_return(status: 200, body: open_test_file('replication_controller.json'), headers: {})
+    rc = client.delete_replication_controller('frontendController', 'default', delete_options: opts)
+    assert_kind_of(RecursiveOpenStruct, rc)
 
     assert_requested(:delete,
                      'http://localhost:8080/api/v1/namespaces/default/replicationcontrollers/frontendController',

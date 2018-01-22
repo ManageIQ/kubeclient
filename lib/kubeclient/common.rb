@@ -286,17 +286,15 @@ module Kubeclient
         rest_client[ns_prefix + resource_name + "/#{name}"]
           .get(@headers)
       end
-      return response.body if options[:as] == :raw
-
-      result = JSON.parse(response)
-      Kubeclient::Resource.new(result)
+      format_response(options[:as], response)
     end
 
+    # delete_options are passed as a JSON payload in the delete request
     def delete_entity(resource_name, name, namespace = nil, delete_options: {})
       delete_options_hash = delete_options.to_hash
       ns_prefix = build_namespace_prefix(namespace)
       payload = delete_options_hash.to_json unless delete_options_hash.empty?
-      _response = handle_exception do
+      response = handle_exception do
         rs = rest_client[ns_prefix + resource_name + "/#{name}"]
         RestClient::Request.execute(
           rs.options.merge(
@@ -307,6 +305,7 @@ module Kubeclient
           )
         )
       end
+      format_response(:ros, response)
     end
 
     def create_entity(entity_type, resource_name, entity_config)
@@ -327,28 +326,29 @@ module Kubeclient
         rest_client[ns_prefix + resource_name]
           .post(hash.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
       end
-      result = JSON.parse(response)
-      Kubeclient::Resource.new(result)
+      format_response(:ros, response)
     end
 
     def update_entity(resource_name, entity_config)
       name      = entity_config[:metadata][:name]
       ns_prefix = build_namespace_prefix(entity_config[:metadata][:namespace])
-      handle_exception do
+      response = handle_exception do
         rest_client[ns_prefix + resource_name + "/#{name}"]
           .put(entity_config.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
       end
+      format_response(:ros, response)
     end
 
     def patch_entity(resource_name, name, patch, namespace = nil)
       ns_prefix = build_namespace_prefix(namespace)
-      handle_exception do
+      response = handle_exception do
         rest_client[ns_prefix + resource_name + "/#{name}"]
           .patch(
             patch.to_json,
             { 'Content-Type' => 'application/strategic-merge-patch+json' }.merge(@headers)
           )
       end
+      format_response(:ros, response)
     end
 
     def all_entities(options = {})
@@ -431,6 +431,13 @@ module Kubeclient
     end
 
     private
+
+    def format_response(as, response)
+      return response.body if as == :raw
+
+      result = JSON.parse(response)
+      Kubeclient::Resource.new(result)
+    end
 
     def load_entities
       @entities = {}
