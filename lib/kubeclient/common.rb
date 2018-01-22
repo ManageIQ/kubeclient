@@ -190,9 +190,8 @@ module Kubeclient
         end
 
         # get a single entity of a specific type by name
-        define_singleton_method("get_#{entity.method_names[0]}") \
-            do |name, namespace = nil, opts = {}|
-          get_entity(klass, entity.resource_name, name, namespace, opts)
+        define_singleton_method("get_#{entity.method_names[0]}") do |name, ns = nil, opts = {}|
+          get_entity(klass, entity.resource_name, name, ns, opts)
         end
 
         define_singleton_method("delete_#{entity.method_names[0]}") do |name, namespace = nil|

@@ -62,11 +62,11 @@ class TestNode < MiniTest::Test
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
 
-    exception = assert_raises(KubeException) do
+    exception = assert_raises(Kubeclient::HttpError) do
       client.get_node('127.0.0.1', nil, as: :raw)
     end
 
-    assert_instance_of(KubeException, exception)
+    assert_instance_of(Kubeclient::HttpError, exception)
     assert_equal('500 Internal Server Error', exception.message)
   end
 end

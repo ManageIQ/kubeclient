@@ -201,7 +201,7 @@ class KubeclientTest < MiniTest::Test
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
 
-    exception = assert_raises(KubeException) do
+    exception = assert_raises(Kubeclient::ResourceNotFoundError) do
       client.get_services(as: :raw)
     end
 
@@ -251,7 +251,7 @@ class KubeclientTest < MiniTest::Test
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
 
-    exception = assert_raises(KubeException) { client.get_services(as: :raw) }
+    exception = assert_raises(Kubeclient::HttpError) { client.get_services(as: :raw) }
     assert_equal('500 Internal Server Error', exception.message)
     assert_equal(500, exception.error_code)
   end
@@ -444,11 +444,11 @@ class KubeclientTest < MiniTest::Test
     result = client.all_entities(as: :raw)
     assert_equal(16, result.keys.size)
 
-    %w(
+    %w[
       component_status config_map endpoint event limit_range namespace node
       persistent_volume persistent_volume_claim pod replication_controller
       resource_quota secret service service_account
-    ).each do |entity|
+    ].each do |entity|
       assert_equal(open_test_file("#{entity}_list.json").read, result[entity])
     end
   end
@@ -523,14 +523,14 @@ class KubeclientTest < MiniTest::Test
 
     stub_request(:get, 'http://localhost:8080/api/v1')
       .with(headers: { Authorization: 'Bearer invalid_token' })
-      .to_raise(KubeException.new(403, error_message, response))
+      .to_raise(Kubeclient::HttpError.new(403, error_message, response))
 
     client = Kubeclient::Client.new(
       'http://localhost:8080/api/',
       auth_options: { bearer_token: 'invalid_token' }
     )
 
-    exception = assert_raises(KubeException) { client.get_pods(as: :raw) }
+    exception = assert_raises(Kubeclient::HttpError) { client.get_pods(as: :raw) }
     assert_equal(403, exception.error_code)
     assert_equal(error_message, exception.message)
     assert_equal(response, exception.response)
@@ -604,22 +604,21 @@ class KubeclientTest < MiniTest::Test
     error_message = 'HTTP status code 401, 401 Unauthorized'
     response = OpenStruct.new(code: 401, message: '401 Unauthorized')
 
-    stub_request(:get, 'http://username:password@localhost:8080/api/v1')
-      .to_raise(KubeException.new(401, error_message, response))
+    stub_request(:get, 'http://localhost:8080/api/v1')
+      .with(basic_auth: %w[username password])
+      .to_raise(Kubeclient::HttpError.new(401, error_message, response))
 
     client = Kubeclient::Client.new(
       'http://localhost:8080/api/',
       auth_options: { username: 'username', password: 'password' }
     )
 
-    exception = assert_raises(KubeException) { client.get_pods(as: :raw) }
+    exception = assert_raises(Kubeclient::HttpError) { client.get_pods(as: :raw) }
     assert_equal(401, exception.error_code)
     assert_equal(error_message, exception.message)
     assert_equal(response, exception.response)
 
-    assert_requested(:get,
-                     'http://username:password@localhost:8080/api/v1',
-                     times: 1)
+    assert_requested(:get, 'http://localhost:8080/api/v1', times: 1)
   end
 
   def test_init_username_no_password
