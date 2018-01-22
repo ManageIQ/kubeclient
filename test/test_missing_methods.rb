@@ -31,11 +31,11 @@ class TestMissingMethods < MiniTest::Test
       status: 404
     ) # If discovery fails we expect the below raise an exception
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
-    assert_raises(KubeException) do
+    assert_raises(Kubeclient::HttpError) do
       client.method(:get_pods)
     end
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
-    assert_raises(KubeException) do
+    assert_raises(Kubeclient::HttpError) do
       client.respond_to?(:get_pods)
     end
   end

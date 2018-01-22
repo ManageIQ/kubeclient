@@ -154,7 +154,7 @@ You can find information about tokens in [this guide](http://kubernetes.io/docs/
 
 ### Non-blocking IO
 
-You can also use kubeclient with non-blocking sockets such as Celluloid::IO, see [here](https://github.com/httprb/http/wiki/Parallel-requests-with-Celluloid%3A%3AIO) 
+You can also use kubeclient with non-blocking sockets such as Celluloid::IO, see [here](https://github.com/httprb/http/wiki/Parallel-requests-with-Celluloid%3A%3AIO)
 for details. For example:
 
 ```ruby
@@ -459,6 +459,10 @@ client.process_template template
 ```
 
 ## Upgrading
+
+#### past version 2.0
+
+Replace `KubeException` with `Kubeclient::HttpException`
 
 #### past version 1.2.0
 Replace Specific Entity class references:

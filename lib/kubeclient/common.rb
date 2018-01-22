@@ -114,7 +114,7 @@ module Kubeclient
         {}
       end
       err_message = json_error_msg['message'] || e.message
-      raise KubeException.new(e.http_code, err_message, e.response)
+      raise Kubeclient::HttpError.new(e.http_code, err_message, e.response)
     end
 
     def discover
@@ -370,7 +370,7 @@ module Kubeclient
         method_name = "get_#{entity.method_names[1]}"
         begin
           result_hash[entity.method_names[0]] = send(method_name, options)
-        rescue KubeException
+        rescue Kubeclient::HttpError
           next # do not fail due to resources not supporting get
         end
       end

@@ -17,7 +17,7 @@ module Kubeclient
         @http_client = build_client
         response = @http_client.request(:get, @uri, build_client_options)
         unless response.code < 300
-          raise KubeException.new(response.code, response.reason, response)
+          raise Kubeclient::HttpError.new(response.code, response.reason, response)
         end
 
         buffer = ''
