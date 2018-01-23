@@ -12,7 +12,7 @@ class TestLimitRange < MiniTest::Test
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     limit_range = client.get_limit_range('limits', 'quota-example')
 
-    assert_instance_of(Kubeclient::LimitRange, limit_range)
+    assert_instance_of(Kubeclient::Resource, limit_range)
     assert_equal('limits', limit_range.metadata.name)
     assert_equal('Container', limit_range.spec.limits[0].type)
     assert_equal('100m', limit_range.spec.limits[0].default.cpu)

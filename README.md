@@ -480,9 +480,19 @@ client.process_template template
 
 Ruby versions < 2.2 are no longer supported
 
+Specific entity classes mentioned in [past version 1.2.0](#past_version_1.2.0) have been dropped.
+Return values and expected classes are always Kubeclient::Resource.
+Checking the type of a resource can be done using:
+```
+> pod.kind
+=> "Pod"
+```
+
 #### past version 2.6
 
 The gem raises Kubeclient::HttpError or subclasses now. Catching KubeException still works but is deprecated.
+
+<a name="past_version_1.2.0">
 
 #### past version 1.2.0
 Replace Specific Entity class references:

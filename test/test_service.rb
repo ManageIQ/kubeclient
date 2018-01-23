@@ -35,7 +35,7 @@ class TestService < MiniTest::Test
     client = Kubeclient::Client.new('http://localhost:8080/api/')
     created = client.create_service(our_service)
 
-    assert_instance_of(Kubeclient::Service, created)
+    assert_instance_of(Kubeclient::Resource, created)
     assert_equal(created.metadata.name, our_service.metadata.name)
     assert_equal(created.spec.ports.size, our_service.spec.ports.size)
 
@@ -132,7 +132,7 @@ class TestService < MiniTest::Test
     client = Kubeclient::Client.new('http://localhost:8080/api/')
     service = client.get_service('redis-slave', 'development')
 
-    assert_instance_of(Kubeclient::Service, service)
+    assert_instance_of(Kubeclient::Resource, service)
     assert_equal('2015-04-05T13:00:31Z',
                  service.metadata.creationTimestamp)
     assert_equal('bdb80a8f-db93-11e4-b293-f8b156af4ae1', service.metadata.uid)

@@ -11,7 +11,7 @@ class TestPersistentVolumeClaim < MiniTest::Test
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     claim = client.get_persistent_volume_claim('myclaim-1', 'default')
 
-    assert_instance_of(Kubeclient::PersistentVolumeClaim, claim)
+    assert_instance_of(Kubeclient::Resource, claim)
     assert_equal('myclaim-1', claim.metadata.name)
     assert_equal('3Gi', claim.spec.resources.requests.storage)
     assert_equal('pv0001', claim.spec.volumeName)

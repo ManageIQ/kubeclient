@@ -11,7 +11,7 @@ class TestPod < MiniTest::Test
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     pod = client.get_pod('redis-master-pod', 'default')
 
-    assert_instance_of(Kubeclient::Pod, pod)
+    assert_instance_of(Kubeclient::Resource, pod)
     assert_equal('redis-master3', pod.metadata.name)
     assert_equal('dockerfile/redis', pod.spec.containers[0]['image'])
 
