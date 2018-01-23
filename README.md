@@ -476,6 +476,10 @@ client.process_template template
 
 ## Upgrading
 
+### past version 3.0
+
+Deprecated KubeException has been dropped, use `Kubeclient::HttpError` instead.
+
 #### past version 2.0
 
 Replace `KubeException` with `Kubeclient::HttpException`
