@@ -4,7 +4,7 @@ module Kubeclient
   # Common methods
   # this is mixed in by other gems
   module ClientMixin
-    ENTITY_METHODS = %w(get watch delete create update patch)
+    ENTITY_METHODS = %w(get watch delete create update patch).freeze
 
     DEFAULT_SSL_OPTIONS = {
       client_cert: nil,
@@ -73,7 +73,7 @@ module Kubeclient
       # Allow passing partial timeouts hash, without unspecified
       # @timeouts[:foo] == nil resulting in infinite timeout.
       @timeouts = DEFAULT_TIMEOUTS.merge(timeouts)
-      @http_proxy_uri = http_proxy_uri.to_s if http_proxy_uri
+      @http_proxy_uri = http_proxy_uri ? http_proxy_uri.to_s : nil
 
       if auth_options[:bearer_token]
         bearer_token(@auth_options[:bearer_token])
@@ -114,7 +114,8 @@ module Kubeclient
         {}
       end
       err_message = json_error_msg['message'] || e.message
-      raise KubeException.new(e.http_code, err_message, e.response)
+      error_klass = e.http_code == 404 ? ResourceNotFoundError : HttpError
+      raise error_klass.new(e.http_code, err_message, e.response)
     end
 
     def discover
@@ -126,9 +127,9 @@ module Kubeclient
     def self.parse_definition(kind, name)
       # "name": "componentstatuses", networkpolicies, endpoints
       # "kind": "ComponentStatus" NetworkPolicy, Endpoints
-      # maintain pre group api compatibility for endpoints.
+      # maintain pre group api compatibility for endpoints and securitycontextconstraints.
       # See: https://github.com/kubernetes/kubernetes/issues/8115
-      kind = 'Endpoint' if kind == 'Endpoints'
+      kind = kind[0..-2] if %w[Endpoints SecurityContextConstraints].include?(kind)
 
       prefix = kind[0..kind.rindex(/[A-Z]/)] # NetworkP
       m = name.match(/^#{prefix.downcase}(.*)$/)
@@ -143,10 +144,10 @@ module Kubeclient
     end
 
     def handle_uri(uri, path)
-      fail ArgumentError, 'Missing uri' unless uri
+      raise ArgumentError, 'Missing uri' unless uri
       @api_endpoint = (uri.is_a?(URI) ? uri : URI.parse(uri))
       @api_endpoint.path = path if @api_endpoint.path.empty?
-      @api_endpoint.path = @api_endpoint.path.chop if @api_endpoint.path.end_with? '/'
+      @api_endpoint.path = @api_endpoint.path.chop if @api_endpoint.path.end_with?('/')
       components = @api_endpoint.path.to_s.split('/') # ["", "api"] or ["", "apis", batch]
       @api_group = components.length > 2 ? components[2] + '/' : ''
     end
@@ -190,12 +191,13 @@ module Kubeclient
 
         # get a single entity of a specific type by name
         define_singleton_method("get_#{entity.method_names[0]}") \
-            do |name, namespace = nil, opts = {}|
+        do |name, namespace = nil, opts = {}|
           get_entity(klass, entity.resource_name, name, namespace, opts)
         end
 
-        define_singleton_method("delete_#{entity.method_names[0]}") do |name, namespace = nil|
-          delete_entity(entity.resource_name, name, namespace)
+        define_singleton_method("delete_#{entity.method_names[0]}") \
+        do |name, namespace = nil, opts = {}|
+          delete_entity(entity.resource_name, name, namespace, opts)
         end
 
         define_singleton_method("create_#{entity.method_names[0]}") do |entity_config|
@@ -245,6 +247,8 @@ module Kubeclient
     #   :label_selector (string) - a selector to restrict the list of returned objects by labels.
     #   :field_selector (string) - a selector to restrict the list of returned objects by fields.
     #   :resource_version (string) - shows changes that occur after passed version of a resource.
+    #   Default response type will return an entity as a  RecursiveOpenStruct
+    #   (:ros) object, unless `:as` is passed with `:raw`.
     def watch_entities(resource_name, options = {})
       ns = build_namespace_prefix(options[:namespace])
 
@@ -256,7 +260,7 @@ module Kubeclient
       WATCH_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
       uri.query = URI.encode_www_form(params) if params.any?
 
-      Kubeclient::Common::WatchStream.new(uri, http_options(uri))
+      Kubeclient::Common::WatchStream.new(uri, http_options(uri), as: options[:as] || :ros)
     end
 
     # Accepts the following options:
@@ -274,17 +278,16 @@ module Kubeclient
       ns_prefix = build_namespace_prefix(options[:namespace])
       response = handle_exception do
         rest_client[ns_prefix + resource_name]
-        .get({ 'params' => params }.merge(@headers))
+          .get({ 'params' => params }.merge(@headers))
       end
       return response.body if options[:as] == :raw
 
       result = JSON.parse(response)
 
-      resource_version = result.fetch('resourceVersion', nil)
-      if resource_version.nil?
-        resource_version =
-            result.fetch('metadata', {}).fetch('resourceVersion', nil)
-      end
+      resource_version =
+        result.fetch('resourceVersion') do
+          result.fetch('metadata', {}).fetch('resourceVersion', nil)
+        end
 
       # result['items'] might be nil due to https://github.com/kubernetes/kubernetes/issues/13096
       collection = result['items'].to_a.map { |item| new_entity(item, klass) }
@@ -301,7 +304,7 @@ module Kubeclient
       ns_prefix = build_namespace_prefix(namespace)
       response = handle_exception do
         rest_client[ns_prefix + resource_name + "/#{name}"]
-        .get(@headers)
+          .get(@headers)
       end
       return response.body if options[:as] == :raw
 
@@ -309,11 +312,20 @@ module Kubeclient
       new_entity(result, klass)
     end
 
-    def delete_entity(resource_name, name, namespace = nil)
+    def delete_entity(resource_name, name, namespace = nil, delete_options: {})
+      delete_options_hash = delete_options.to_hash
       ns_prefix = build_namespace_prefix(namespace)
-      handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
-          .delete(@headers)
+      payload = delete_options_hash.to_json unless delete_options_hash.empty?
+      _response = handle_exception do
+        rs = rest_client[ns_prefix + resource_name + "/#{name}"]
+        RestClient::Request.execute(
+          rs.options.merge(
+            method: :delete,
+            url: rs.url,
+            headers: { 'Content-Type' => 'application/json' }.merge(@headers),
+            payload: payload
+          )
+        )
       end
     end
 
@@ -329,15 +341,11 @@ module Kubeclient
       # https://github.com/GoogleCloudPlatform/kubernetes/issues/6439
       # TODO: #2 solution for
       # https://github.com/kubernetes/kubernetes/issues/8115
-      if entity_type.eql? 'Endpoint'
-        hash[:kind] = 'Endpoints'
-      else
-        hash[:kind] = entity_type
-      end
+      hash[:kind] = (entity_type.eql?('Endpoint') ? 'Endpoints' : entity_type)
       hash[:apiVersion] = @api_group + @api_version
       response = handle_exception do
         rest_client[ns_prefix + resource_name]
-        .post(hash.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
+          .post(hash.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
       end
       result = JSON.parse(response)
       new_entity(result, klass)
@@ -375,7 +383,7 @@ module Kubeclient
         method_name = "get_#{entity.method_names[1]}"
         begin
           result_hash[entity.method_names[0]] = send(method_name, options)
-        rescue KubeException
+        rescue Kubeclient::HttpError
           next # do not fail due to resources not supporting get
         end
       end
@@ -405,16 +413,17 @@ module Kubeclient
       uri.path += "/#{@api_version}/#{ns}pods/#{pod_name}/log"
       uri.query = URI.encode_www_form(params)
 
-      Kubeclient::Common::WatchStream.new(uri, http_options(uri), format: :text)
+      Kubeclient::Common::WatchStream.new(uri, http_options(uri), as: :raw)
     end
 
     def proxy_url(kind, name, port, namespace = '')
       discover unless @discovered
-      entity_name_plural = if %w(services pods nodes).include?(kind.to_s)
-                             kind.to_s
-                           else
-                             @entities[kind.to_s].resource_name
-                           end
+      entity_name_plural =
+        if %w(services pods nodes).include?(kind.to_s)
+          kind.to_s
+        else
+          @entities[kind.to_s].resource_name
+        end
       ns_prefix = build_namespace_prefix(namespace)
       # TODO: Change this once services supports the new scheme
       if entity_name_plural == 'pods'
@@ -428,7 +437,7 @@ module Kubeclient
       ns_prefix = build_namespace_prefix(template[:metadata][:namespace])
       response = handle_exception do
         rest_client[ns_prefix + 'processedtemplates']
-        .post(template.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
+          .post(template.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
       end
       JSON.parse(response)
     end
@@ -436,7 +445,7 @@ module Kubeclient
     def api_valid?
       result = api
       result.is_a?(Hash) && (result['versions'] || []).any? do |group|
-        @api_group.empty? ? group.include?(@api_version) : group['version'] == (@api_version)
+        @api_group.empty? ? group.include?(@api_version) : group['version'] == @api_version
       end
     end
 
@@ -463,8 +472,8 @@ module Kubeclient
       @entities = {}
       fetch_entities['resources'].each do |resource|
         next if resource['name'].include?('/')
-        resource['kind'] = Kubeclient::Common::MissingKindCompatibility
-                           .resource_kind(resource['name']) if resource['kind'].nil?
+        resource['kind'] ||=
+          Kubeclient::Common::MissingKindCompatibility.resource_kind(resource['name'])
         entity = ClientMixin.parse_definition(resource['kind'], resource['name'])
         @entities[entity.method_names[0]] = entity if entity
       end
@@ -484,19 +493,22 @@ module Kubeclient
       opts[:username] = opts[:user] if opts[:user]
 
       if [:bearer_token, :bearer_token_file, :username].count { |key| opts[key] } > 1
-        fail(ArgumentError, 'Invalid auth options: specify only one of username/password,' \
-             ' bearer_token or bearer_token_file')
+        raise(
+          ArgumentError,
+          'Invalid auth options: specify only one of username/password,' \
+          ' bearer_token or bearer_token_file'
+        )
       elsif [:username, :password].count { |key| opts[key] } == 1
-        fail(ArgumentError, 'Basic auth requires both username & password')
+        raise ArgumentError, 'Basic auth requires both username & password'
       end
     end
 
     def validate_bearer_token_file
       msg = "Token file #{@auth_options[:bearer_token_file]} does not exist"
-      fail ArgumentError, msg unless File.file?(@auth_options[:bearer_token_file])
+      raise ArgumentError, msg unless File.file?(@auth_options[:bearer_token_file])
 
       msg = "Cannot read token file #{@auth_options[:bearer_token_file]}"
-      fail ArgumentError, msg unless File.readable?(@auth_options[:bearer_token_file])
+      raise ArgumentError, msg unless File.readable?(@auth_options[:bearer_token_file])
     end
 
     def http_options(uri)

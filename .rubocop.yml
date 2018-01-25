@@ -1,3 +1,5 @@
+AllCops:
+  DisplayCopNames: true
 MethodLength:
   Enabled: false
 ClassLength:
@@ -13,3 +15,20 @@ Metrics/CyclomaticComplexity:
   Max: 8
 Style/FileName:
   Exclude: [Gemfile*]
+Metrics/ModuleLength:
+  Enabled: false
+Style/MethodCallWithArgsParentheses:
+  Enabled: true
+  IgnoredMethods: [require, raise, include, attr_reader, refute, assert]
+  Exclude: [Gemfile, Rakefile, kubeclient.gemspec]
+Security/MarshalLoad:
+  Exclude: [test/**/*]
+Style/MethodCallWithArgsParentheses:
+  IgnoredMethods:
+  - require_relative
+
+# disabled on [v2.x] branch
+Style/PercentLiteralDelimiters:
+  Enabled: false
+Style/SignalException:
+  Enabled: false

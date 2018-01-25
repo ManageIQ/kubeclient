@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 # Service entity tests
 class TestService < MiniTest::Test
@@ -11,17 +11,18 @@ class TestService < MiniTest::Test
     our_service.metadata.labels.name = 'guestbook'
 
     our_service.spec = {}
-    our_service.spec.ports = [{ 'port' => 3000,
-                                'targetPort' => 'http-server',
-                                'protocol' => 'TCP'
+    our_service.spec.ports = [{
+      'port' => 3000,
+      'targetPort' => 'http-server',
+      'protocol' => 'TCP'
     }]
 
     assert_equal('guestbook', our_service.metadata.labels.name)
 
     hash = our_service.to_h
 
-    assert_equal our_service.metadata.labels.name,
-                 hash[:metadata][:labels][:name]
+    assert_equal(our_service.metadata.labels.name,
+                 hash[:metadata][:labels][:name])
 
     expected_url = 'http://localhost:8080/api/v1/namespaces/staging/services'
     stub_request(:get, %r{/api/v1$})
@@ -31,15 +32,15 @@ class TestService < MiniTest::Test
     stub_request(:post, expected_url)
       .to_return(body: open_test_file('created_service.json'), status: 201)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
-    created = client.create_service our_service
+    client = Kubeclient::Client.new('http://localhost:8080/api/')
+    created = client.create_service(our_service)
 
     assert_instance_of(Kubeclient::Service, created)
     assert_equal(created.metadata.name, our_service.metadata.name)
     assert_equal(created.spec.ports.size, our_service.spec.ports.size)
 
     # Check that original entity_config is not modified by kind/apiVersion patches:
-    assert_equal(our_service.kind, nil)
+    assert_nil(our_service.kind)
 
     assert_requested(:post, expected_url, times: 1) do |req|
       data = JSON.parse(req.body)
@@ -72,8 +73,8 @@ class TestService < MiniTest::Test
     stub_request(:post, expected_url)
       .to_return(body: open_test_file('created_service.json'), status: 201)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
-    client.create_service service
+    client = Kubeclient::Client.new('http://localhost:8080/api/')
+    client.create_service(service)
 
     assert_requested(:post, expected_url, times: 1) do |req|
       data = JSON.parse(req.body)
@@ -107,8 +108,8 @@ class TestService < MiniTest::Test
     stub_request(:post, %r{namespaces/staging/services})
       .to_return(body: open_test_file('created_service.json'), status: 201)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
-    client.create_service service
+    client = Kubeclient::Client.new('http://localhost:8080/api/')
+    client.create_service(service)
 
     assert_requested(:post, expected_url, times: 1) do |req|
       data = JSON.parse(req.body)
@@ -128,8 +129,8 @@ class TestService < MiniTest::Test
       .to_return(body: open_test_file('service.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
-    service = client.get_service 'redis-slave', 'development'
+    client = Kubeclient::Client.new('http://localhost:8080/api/')
+    service = client.get_service('redis-slave', 'development')
 
     assert_instance_of(Kubeclient::Service, service)
     assert_equal('2015-04-05T13:00:31Z',
@@ -165,8 +166,8 @@ class TestService < MiniTest::Test
     stub_request(:delete, %r{/namespaces/default/services})
       .to_return(status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    client.delete_service our_service.name, 'default'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    client.delete_service(our_service.name, 'default')
 
     assert_requested(:delete,
                      'http://localhost:8080/api/v1/namespaces/default/services/redis-service',
@@ -182,10 +183,10 @@ class TestService < MiniTest::Test
     stub_request(:get, %r{/services/redis-slave})
       .to_return(status: 404)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
+    client = Kubeclient::Client.new('http://localhost:8080/api/')
 
-    exception = assert_raises(KubeException) do
-      client.get_service 'redis-slave'
+    exception = assert_raises(Kubeclient::HttpError) do
+      client.get_service('redis-slave')
     end
     assert_equal(404, exception.error_code)
   end
@@ -198,8 +199,8 @@ class TestService < MiniTest::Test
       .to_return(body: open_test_file('service.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/'
-    service = client.get_service 'redis-slave', 'development'
+    client = Kubeclient::Client.new('http://localhost:8080/api/')
+    service = client.get_service('redis-slave', 'development')
     assert_equal('redis-slave', service.metadata.name)
 
     assert_requested(:get,
@@ -222,8 +223,8 @@ class TestService < MiniTest::Test
     stub_request(:put, expected_url)
       .to_return(body: open_test_file('service_update.json'), status: 201)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    client.update_service service
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    client.update_service(service)
 
     assert_requested(:put, expected_url, times: 1) do |req|
       data = JSON.parse(req.body)
@@ -248,8 +249,8 @@ class TestService < MiniTest::Test
     stub_request(:put, expected_url)
       .to_return(body: open_test_file('service_update.json'), status: 201)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    client.update_service service
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    client.update_service(service)
 
     assert_requested(:put, expected_url, times: 1) do |req|
       data = JSON.parse(req.body)
@@ -281,8 +282,8 @@ class TestService < MiniTest::Test
       }
     }
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    client.patch_service name, patch, 'development'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    client.patch_service(name, patch, 'development')
 
     assert_requested(:patch, expected_url, times: 1) do |req|
       data = JSON.parse(req.body)

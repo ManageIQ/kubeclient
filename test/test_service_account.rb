@@ -1,4 +1,4 @@
-require 'test_helper'
+require_relative 'test_helper'
 
 # ServiceAccount tests
 class TestServiceAccount < MiniTest::Test
@@ -10,8 +10,8 @@ class TestServiceAccount < MiniTest::Test
       .to_return(body: open_test_file('core_api_resource_list.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new 'http://localhost:8080/api/', 'v1'
-    account = client.get_service_account 'default'
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    account = client.get_service_account('default')
 
     assert_instance_of(Kubeclient::ServiceAccount, account)
     assert_equal('default', account.metadata.name)

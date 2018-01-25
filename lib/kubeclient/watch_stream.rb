@@ -4,11 +4,11 @@ module Kubeclient
   module Common
     # HTTP Stream used to watch changes on entities
     class WatchStream
-      def initialize(uri, http_options, format: :json)
+      def initialize(uri, http_options, as: :ros)
         @uri = uri
         @http_client = nil
         @http_options = http_options
-        @format = format
+        @as = as
       end
 
       def each
@@ -17,17 +17,23 @@ module Kubeclient
         @http_client = build_client
         response = @http_client.request(:get, @uri, build_client_options)
         unless response.code < 300
-          fail KubeException.new(response.code, response.reason, response)
+          raise Kubeclient::HttpError.new(response.code, response.reason, response)
         end
 
         buffer = ''
         response.body.each do |chunk|
           buffer << chunk
           while (line = buffer.slice!(/.+\n/))
-            yield @format == :json ? WatchNotice.new(JSON.parse(line)) : line.chomp
+            result =
+              case @as
+              when :ros then WatchNotice.new(JSON.parse(line))
+              when :raw then line.chomp
+              else raise NotImplementedError, "Unsupported as #{@as.inspect}"
+              end
+            yield(result)
           end
         end
-      rescue IOError
+      rescue IOError, Errno::EBADF
         raise unless @finished
       end
 
@@ -40,8 +46,10 @@ module Kubeclient
 
       def build_client
         if @http_options[:basic_auth_user] && @http_options[:basic_auth_password]
-          HTTP.basic_auth(user: @http_options[:basic_auth_user],
-                          pass: @http_options[:basic_auth_password])
+          HTTP.basic_auth(
+            user: @http_options[:basic_auth_user],
+            pass: @http_options[:basic_auth_password]
+          )
         else
           HTTP::Client.new
         end
@@ -66,12 +74,11 @@ module Kubeclient
         }
         if @http_options[:ssl]
           client_options[:ssl] = @http_options[:ssl]
-          client_options[:ssl_socket_class] =
-              @http_options[:ssl_socket_class] if @http_options[:ssl_socket_class]
+          socket_option = :ssl_socket_class
         else
-          client_options[:socket_class] =
-              @http_options[:socket_class] if @http_options[:socket_class]
+          socket_option = :socket_class
         end
+        client_options[socket_option] = @http_options[socket_option] if @http_options[socket_option]
         client_options
       end
     end
