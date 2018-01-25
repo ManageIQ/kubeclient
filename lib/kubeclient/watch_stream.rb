@@ -4,7 +4,7 @@ module Kubeclient
   module Common
     # HTTP Stream used to watch changes on entities
     class WatchStream
-      def initialize(uri, http_options, as:)
+      def initialize(uri, http_options, as: :ros)
         @uri = uri
         @http_client = nil
         @http_options = http_options
