@@ -26,3 +26,9 @@ Security/MarshalLoad:
 Style/MethodCallWithArgsParentheses:
   IgnoredMethods:
   - require_relative
+
+# disabled on [v2.x] branch
+Style/PercentLiteralDelimiters:
+  Enabled: false
+Style/SignalException:
+  Enabled: false
