@@ -476,9 +476,9 @@ client.process_template template
 
 ## Upgrading
 
-#### past version 2.0
+#### past version 2.6
 
-Replace `KubeException` with `Kubeclient::HttpException`
+The gem raises Kubeclient::HttpError or subclasses now. Catching KubeException still works but is deprecated.
 
 #### past version 1.2.0
 Replace Specific Entity class references:
