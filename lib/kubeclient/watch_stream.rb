@@ -4,6 +4,7 @@ module Kubeclient
   module Common
     # HTTP Stream used to watch changes on entities
     class WatchStream
+      # Note: this IS NOT(!) a supported interface, and might change without a version bump
       def initialize(uri, http_options, as:)
         @uri = uri
         @http_client = nil
