@@ -476,6 +476,10 @@ client.process_template template
 
 ## Upgrading
 
+#### past version 3.0
+
+Ruby versions < 2.2 are no longer supported
+
 #### past version 2.6
 
 The gem raises Kubeclient::HttpError or subclasses now. Catching KubeException still works but is deprecated.
