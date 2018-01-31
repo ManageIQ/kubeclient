@@ -11,7 +11,7 @@ class TestPersistentVolume < MiniTest::Test
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     volume = client.get_persistent_volume('pv0001')
 
-    assert_instance_of(Kubeclient::PersistentVolume, volume)
+    assert_instance_of(Kubeclient::Resource, volume)
     assert_equal('pv0001', volume.metadata.name)
     assert_equal('10Gi', volume.spec.capacity.storage)
     assert_equal('/tmp/data01', volume.spec.hostPath.path)

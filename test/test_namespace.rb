@@ -11,7 +11,7 @@ class TestNamespace < MiniTest::Test
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     namespace = client.get_namespace('staging')
 
-    assert_instance_of(Kubeclient::Namespace, namespace)
+    assert_instance_of(Kubeclient::Resource, namespace)
     assert_equal('e388bc10-c021-11e4-a514-3c970e4a436a', namespace.metadata.uid)
     assert_equal('staging', namespace.metadata.name)
     assert_equal('1168', namespace.metadata.resourceVersion)
@@ -55,7 +55,7 @@ class TestNamespace < MiniTest::Test
 
     client = Kubeclient::Client.new('http://localhost:8080/api/')
     created_namespace = client.create_namespace(namespace)
-    assert_instance_of(Kubeclient::Namespace, created_namespace)
+    assert_instance_of(Kubeclient::Resource, created_namespace)
     assert_equal(namespace.metadata.name, created_namespace.metadata.name)
   end
 end

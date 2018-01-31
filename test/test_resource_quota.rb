@@ -13,7 +13,7 @@ class TestResourceQuota < MiniTest::Test
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     quota = client.get_resource_quota('quota', 'quota-example')
 
-    assert_instance_of(Kubeclient::ResourceQuota, quota)
+    assert_instance_of(Kubeclient::Resource, quota)
     assert_equal('quota', quota.metadata.name)
     assert_equal('20', quota.spec.hard.cpu)
     assert_equal('10', quota.spec.hard.secrets)

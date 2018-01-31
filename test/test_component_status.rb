@@ -11,7 +11,7 @@ class TestComponentStatus < MiniTest::Test
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     component_status = client.get_component_status('etcd-0', 'default')
 
-    assert_instance_of(Kubeclient::ComponentStatus, component_status)
+    assert_instance_of(Kubeclient::Resource, component_status)
     assert_equal('etcd-0', component_status.metadata.name)
     assert_equal('Healthy', component_status.conditions[0].type)
     assert_equal('True', component_status.conditions[0].status)

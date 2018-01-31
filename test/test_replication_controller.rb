@@ -13,7 +13,7 @@ class TestReplicationController < MiniTest::Test
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     rc = client.get_replication_controller('frontendController', 'default')
 
-    assert_instance_of(Kubeclient::ReplicationController, rc)
+    assert_instance_of(Kubeclient::Resource, rc)
     assert_equal('guestbook-controller', rc.metadata.name)
     assert_equal('c71aa4c0-a240-11e4-a265-3c970e4a436a', rc.metadata.uid)
     assert_equal('default', rc.metadata.namespace)

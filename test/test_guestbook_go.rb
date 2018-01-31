@@ -82,7 +82,7 @@ class CreateGuestbookGo < MiniTest::Test
     # if the entity is not found, no need to fail the test
     services.each do |service|
       begin
-        if service.instance_of?(Kubeclient::Service)
+        if service.instance_of?(Kubeclient::Resource)
           client.delete_service(service.metadata.name, namespace)
         else
           # it's just a string - service name
@@ -98,7 +98,7 @@ class CreateGuestbookGo < MiniTest::Test
     # if the entity is not found, no need to fail the test
     replication_controllers.each do |rc|
       begin
-        if rc.instance_of?(Kubeclient::ReplicationController)
+        if rc.instance_of?(Kubeclient::Resource)
           client.delete_replication_controller(rc.metadata.name, namespace)
         else
           # it's just a string - rc name
@@ -113,7 +113,7 @@ class CreateGuestbookGo < MiniTest::Test
   private
 
   def construct_base_rc(namespace)
-    rc = Kubeclient::ReplicationController.new
+    rc = Kubeclient::Resource.new
     rc.metadata = {}
     rc.metadata.namespace = namespace
     rc.metadata.labels = {}
@@ -192,7 +192,7 @@ class CreateGuestbookGo < MiniTest::Test
   end
 
   def base_service(namespace)
-    our_service = Kubeclient::Service.new
+    our_service = Kubeclient::Resource.new
     our_service.metadata = {}
     our_service.metadata.namespace = namespace
     our_service.metadata.labels = {}

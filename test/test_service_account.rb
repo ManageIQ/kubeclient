@@ -13,7 +13,7 @@ class TestServiceAccount < MiniTest::Test
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     account = client.get_service_account('default')
 
-    assert_instance_of(Kubeclient::ServiceAccount, account)
+    assert_instance_of(Kubeclient::Resource, account)
     assert_equal('default', account.metadata.name)
     assert_equal('default-token-6s23q', account.secrets[0].name)
     assert_equal('default-dockercfg-62tf3', account.secrets[1].name)

@@ -49,7 +49,6 @@ module Kubeclient
     attr_reader :discovered
 
     def initialize_client(
-      class_owner,
       uri,
       path,
       version,
@@ -62,7 +61,6 @@ module Kubeclient
       validate_auth_options(auth_options)
       handle_uri(uri, path)
 
-      @class_owner = class_owner
       @entities = {}
       @discovered = false
       @api_version = version
@@ -156,28 +154,11 @@ module Kubeclient
       namespace.to_s.empty? ? '' : "namespaces/#{namespace}/"
     end
 
-    def self.resource_class(class_owner, entity_type)
-      if class_owner.const_defined?(entity_type, false)
-        class_owner.const_get(entity_type, false)
-      else
-        class_owner.const_set(
-          entity_type,
-          Class.new(RecursiveOpenStruct) do
-            def initialize(hash = nil, args = {})
-              args[:recurse_over_arrays] = true
-              super(hash, args)
-            end
-          end
-        )
-      end
-    end
-
     def define_entity_methods
       @entities.values.each do |entity|
-        klass = ClientMixin.resource_class(@class_owner, entity.entity_type)
         # get all entities of a type e.g. get_nodes, get_pods, etc.
         define_singleton_method("get_#{entity.method_names[1]}") do |options = {}|
-          get_entities(entity.entity_type, klass, entity.resource_name, options)
+          get_entities(entity.entity_type, entity.resource_name, options)
         end
 
         # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
@@ -192,7 +173,7 @@ module Kubeclient
         # get a single entity of a specific type by name
         define_singleton_method("get_#{entity.method_names[0]}") \
         do |name, namespace = nil, opts = {}|
-          get_entity(klass, entity.resource_name, name, namespace, opts)
+          get_entity(entity.resource_name, name, namespace, opts)
         end
 
         define_singleton_method("delete_#{entity.method_names[0]}") \
@@ -201,7 +182,7 @@ module Kubeclient
         end
 
         define_singleton_method("create_#{entity.method_names[0]}") do |entity_config|
-          create_entity(entity.entity_type, entity.resource_name, entity_config, klass)
+          create_entity(entity.entity_type, entity.resource_name, entity_config)
         end
 
         define_singleton_method("update_#{entity.method_names[0]}") do |entity_config|
@@ -271,7 +252,7 @@ module Kubeclient
     #
     #   Default response type will return a collection RecursiveOpenStruct
     #   (:ros) objects, unless `:as` is passed with `:raw`.
-    def get_entities(entity_type, klass, resource_name, options = {})
+    def get_entities(entity_type, resource_name, options = {})
       params = {}
       SEARCH_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
 
@@ -290,7 +271,7 @@ module Kubeclient
         end
 
       # result['items'] might be nil due to https://github.com/kubernetes/kubernetes/issues/13096
-      collection = result['items'].to_a.map { |item| new_entity(item, klass) }
+      collection = result['items'].to_a.map { |item| Kubeclient::Resource.new(item) }
 
       Kubeclient::Common::EntityList.new(entity_type, resource_version, collection)
     end
@@ -300,7 +281,7 @@ module Kubeclient
     #
     #   Default response type will return an entity as a  RecursiveOpenStruct
     #   (:ros) object, unless `:as` is passed with `:raw`.
-    def get_entity(klass, resource_name, name, namespace = nil, options = {})
+    def get_entity(resource_name, name, namespace = nil, options = {})
       ns_prefix = build_namespace_prefix(namespace)
       response = handle_exception do
         rest_client[ns_prefix + resource_name + "/#{name}"]
@@ -309,7 +290,7 @@ module Kubeclient
       return response.body if options[:as] == :raw
 
       result = JSON.parse(response)
-      new_entity(result, klass)
+      Kubeclient::Resource.new(result)
     end
 
     def delete_entity(resource_name, name, namespace = nil, delete_options: {})
@@ -329,7 +310,7 @@ module Kubeclient
       end
     end
 
-    def create_entity(entity_type, resource_name, entity_config, klass)
+    def create_entity(entity_type, resource_name, entity_config)
       # Duplicate the entity_config to a hash so that when we assign
       # kind and apiVersion, this does not mutate original entity_config obj.
       hash = entity_config.to_hash
@@ -348,7 +329,7 @@ module Kubeclient
           .post(hash.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
       end
       result = JSON.parse(response)
-      new_entity(result, klass)
+      Kubeclient::Resource.new(result)
     end
 
     def update_entity(resource_name, entity_config)
@@ -369,10 +350,6 @@ module Kubeclient
             { 'Content-Type' => 'application/strategic-merge-patch+json' }.merge(@headers)
           )
       end
-    end
-
-    def new_entity(hash, klass)
-      klass.new(hash)
     end
 
     def all_entities(options = {})

@@ -14,7 +14,7 @@ class TestSecret < MiniTest::Test
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     secret = client.get_secret('test-secret', 'dev')
 
-    assert_instance_of(Kubeclient::Secret, secret)
+    assert_instance_of(Kubeclient::Resource, secret)
     assert_equal('4e38a198-2bcb-11e5-a483-0e840567604d', secret.metadata.uid)
     assert_equal('test-secret', secret.metadata.name)
     assert_equal('v1', secret.apiVersion)
@@ -59,7 +59,7 @@ class TestSecret < MiniTest::Test
 
     client = Kubeclient::Client.new('http://localhost:8080/api/')
     created_secret = client.create_secret(secret)
-    assert_instance_of(Kubeclient::Secret, created_secret)
+    assert_instance_of(Kubeclient::Resource, created_secret)
     assert_equal(secret.metadata.name, created_secret.metadata.name)
     assert_equal(secret.metadata.namespace, created_secret.metadata.namespace)
     assert_equal(
