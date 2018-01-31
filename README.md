@@ -249,7 +249,7 @@ You can also load your JSONified config in from an ENV variable (e.g. `KUBE_CONF
 Kubeclient::Config.new(JSON.parse(ENV['KUBE_CONFIG']), nil)
 ```
 
-###Supported kubernetes versions
+### Supported kubernetes versions
 
 For 1.1 only the core api v1 is supported, all api groups are supported in later versions.
 
