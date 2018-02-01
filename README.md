@@ -476,6 +476,8 @@ client.process_template template
 
 ## Upgrading
 
+See [CHANGELOG.md](CHANGELOG.md) for full changelog.
+
 #### past version 3.0
 
 Ruby versions < 2.2 are no longer supported
@@ -490,9 +492,9 @@ Checking the type of a resource can be done using:
 
 update_* delete_* and patch_* now return a RecursiveOpenStruct like the get_* methods
 
-#### past version 2.6
-
 The gem raises Kubeclient::HttpError or subclasses now. Catching KubeException still works but is deprecated.
+
+`Kubeclient::Config#context` raises KeyError instead of RuntimeError for non-existent context name.
 
 <a name="past_version_1.2.0">
 
