@@ -164,10 +164,11 @@ class TestService < MiniTest::Test
       .to_return(body: open_test_file('core_api_resource_list.json'),
                  status: 200)
     stub_request(:delete, %r{/namespaces/default/services})
-      .to_return(status: 200)
+      .to_return(body: open_test_file('service.json'), status: 200)
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
-    client.delete_service(our_service.name, 'default')
+    our_service = client.delete_service(our_service.name, 'default')
+    assert_kind_of(RecursiveOpenStruct, our_service)
 
     assert_requested(:delete,
                      'http://localhost:8080/api/v1/namespaces/default/services/redis-service',
@@ -224,7 +225,8 @@ class TestService < MiniTest::Test
       .to_return(body: open_test_file('service_update.json'), status: 201)
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
-    client.update_service(service)
+    service = client.update_service(service)
+    assert_kind_of(RecursiveOpenStruct, service)
 
     assert_requested(:put, expected_url, times: 1) do |req|
       data = JSON.parse(req.body)
@@ -250,7 +252,8 @@ class TestService < MiniTest::Test
       .to_return(body: open_test_file('service_update.json'), status: 201)
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
-    client.update_service(service)
+    service = client.update_service(service)
+    assert_kind_of(RecursiveOpenStruct, service)
 
     assert_requested(:put, expected_url, times: 1) do |req|
       data = JSON.parse(req.body)
@@ -283,7 +286,8 @@ class TestService < MiniTest::Test
     }
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
-    client.patch_service(name, patch, 'development')
+    service = client.patch_service(name, patch, 'development')
+    assert_kind_of(RecursiveOpenStruct, service)
 
     assert_requested(:patch, expected_url, times: 1) do |req|
       data = JSON.parse(req.body)
