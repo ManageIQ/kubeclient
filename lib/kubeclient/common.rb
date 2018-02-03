@@ -56,7 +56,8 @@ module Kubeclient
       auth_options: DEFAULT_AUTH_OPTIONS,
       socket_options: DEFAULT_SOCKET_OPTIONS,
       timeouts: DEFAULT_TIMEOUTS,
-      http_proxy_uri: DEFAULT_HTTP_PROXY_URI
+      http_proxy_uri: DEFAULT_HTTP_PROXY_URI,
+      as: :ros
     )
       validate_auth_options(auth_options)
       handle_uri(uri, path)
@@ -72,6 +73,7 @@ module Kubeclient
       # @timeouts[:foo] == nil resulting in infinite timeout.
       @timeouts = DEFAULT_TIMEOUTS.merge(timeouts)
       @http_proxy_uri = http_proxy_uri ? http_proxy_uri.to_s : nil
+      @as = as
 
       if auth_options[:bearer_token]
         bearer_token(@auth_options[:bearer_token])
@@ -242,7 +244,11 @@ module Kubeclient
       WATCH_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
       uri.query = URI.encode_www_form(params) if params.any?
 
-      Kubeclient::Common::WatchStream.new(uri, http_options(uri), as: options[:as] || :ros)
+      Kubeclient::Common::WatchStream.new(
+        uri,
+        http_options(uri),
+        formatter: ->(value) { format_response(options[:as] || @as, value) }
+      )
     end
 
     # Accepts the following options:
@@ -261,19 +267,7 @@ module Kubeclient
         rest_client[ns_prefix + resource_name]
           .get({ 'params' => params }.merge(@headers))
       end
-      return response.body if options[:as] == :raw
-
-      result = JSON.parse(response)
-
-      resource_version =
-        result.fetch('resourceVersion') do
-          result.fetch('metadata', {}).fetch('resourceVersion', nil)
-        end
-
-      # result['items'] might be nil due to https://github.com/kubernetes/kubernetes/issues/13096
-      collection = result['items'].to_a.map { |item| Kubeclient::Resource.new(item) }
-
-      Kubeclient::Common::EntityList.new(entity_type, resource_version, collection)
+      format_response(options[:as] || @as, response.body, entity_type)
     end
 
     # Accepts the following options:
@@ -286,7 +280,7 @@ module Kubeclient
         rest_client[ns_prefix + resource_name + "/#{name}"]
           .get(@headers)
       end
-      format_response(options[:as], response)
+      format_response(options[:as] || @as, response.body)
     end
 
     # delete_options are passed as a JSON payload in the delete request
@@ -305,7 +299,7 @@ module Kubeclient
           )
         )
       end
-      format_response(:ros, response)
+      format_response(@as, response.body)
     end
 
     def create_entity(entity_type, resource_name, entity_config)
@@ -326,7 +320,7 @@ module Kubeclient
         rest_client[ns_prefix + resource_name]
           .post(hash.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
       end
-      format_response(:ros, response)
+      format_response(@as, response.body)
     end
 
     def update_entity(resource_name, entity_config)
@@ -336,7 +330,7 @@ module Kubeclient
         rest_client[ns_prefix + resource_name + "/#{name}"]
           .put(entity_config.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
       end
-      format_response(:ros, response)
+      format_response(@as, response.body)
     end
 
     def patch_entity(resource_name, name, patch, namespace = nil)
@@ -348,7 +342,7 @@ module Kubeclient
             { 'Content-Type' => 'application/strategic-merge-patch+json' }.merge(@headers)
           )
       end
-      format_response(:ros, response)
+      format_response(@as, response.body)
     end
 
     def all_entities(options = {})
@@ -389,7 +383,7 @@ module Kubeclient
       uri.path += "/#{@api_version}/#{ns}pods/#{pod_name}/log"
       uri.query = URI.encode_www_form(params)
 
-      Kubeclient::Common::WatchStream.new(uri, http_options(uri), as: :raw)
+      Kubeclient::Common::WatchStream.new(uri, http_options(uri), formatter: ->(value) { value })
     end
 
     def proxy_url(kind, name, port, namespace = '')
@@ -432,11 +426,24 @@ module Kubeclient
 
     private
 
-    def format_response(as, response)
-      return response.body if as == :raw
+    def format_response(as, body, list_type = nil)
+      return body if as == :raw
 
-      result = JSON.parse(response)
-      Kubeclient::Resource.new(result)
+      result = JSON.parse(body)
+
+      if list_type
+        resource_version =
+          result.fetch('resourceVersion') do
+            result.fetch('metadata', {}).fetch('resourceVersion', nil)
+          end
+
+        # result['items'] might be nil due to https://github.com/kubernetes/kubernetes/issues/13096
+        collection = result['items'].to_a.map { |item| Kubeclient::Resource.new(item) }
+
+        Kubeclient::Common::EntityList.new(list_type, resource_version, collection)
+      else
+        Kubeclient::Resource.new(result)
+      end
     end
 
     def load_entities
