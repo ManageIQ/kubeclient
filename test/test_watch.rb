@@ -116,4 +116,25 @@ class TestWatch < MiniTest::Test
                      "#{api_host}/v1/watch/events?fieldSelector=#{selector}",
                      times: 1)
   end
+
+  def test_watch_with_finish_and_ebadf
+    api_host = 'http://localhost:8080/api'
+
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'),
+                 status: 200)
+    stub_request(:get, %r{.*\/watch/events})
+      .to_return(body: open_test_file('watch_stream.json'), status: 200)
+
+    client = Kubeclient::Client.new(api_host, 'v1')
+    watcher = client.watch_events
+
+    # explodes when Errno::EBADF is not caught
+    watcher.each do
+      watcher.finish
+      raise Errno::EBADF
+    end
+
+    assert_requested(:get, "#{api_host}/v1/watch/events", times: 1)
+  end
 end
