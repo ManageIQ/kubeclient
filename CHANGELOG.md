@@ -9,8 +9,6 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - Ruby 2.0, 2.1 no longer supported (#253, #291).
 
 ### Fixed
-- Watch results are now `RecursiveOpenStruct` inside arrays too (#279).
-- Fixed watch `.finish` sometimes caused `Errno::EBADF` exception from the reading loop (#280).
 - Added missing singular `get_security_context_constraint`, fixed `get_security_context_constraints` to mean plural (#261).
 - Fixed `@http_proxy_uri` undefined warning (#261).
 - Documentation fixes & improvements (#225, #229, #243, #296).
@@ -27,6 +25,11 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 - `Kubeclient::Config#context(nonexistent_context_name)` raises `KeyError` instead of `RuntimeError`.
 - `update_*`, `delete_*`, `patch_*` now all return `RecursiveOpenStruct` consistently (#290).
 - Many dependencies bumped (#204, #231, #253, #269).
+
+## 2.5.2 - 2018-02-04
+- Watch results are now `RecursiveOpenStruct` inside arrays too (#279).
+- Fixed watch `.finish` sometimes caused `Errno::EBADF` exception from the reading loop (#280).
+- Easing dependency version (#287, #301)
 
 ## 2.5.1 - 2017-10-12
 No changes since 2.5.0, fixed packaging mistake.
