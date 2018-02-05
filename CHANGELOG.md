@@ -3,7 +3,7 @@
 Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 
-## 3.0.0 - 2018-02-01
+## 3.0.0 - 2018-02-04
 ### Removed
 - Dropped entity classes (`Kubeclient::Pod` etc.), only `Kubeclient::Resource` exists now (#292, #288).
 - Ruby 2.0, 2.1 no longer supported (#253, #291).
