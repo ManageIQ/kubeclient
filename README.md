@@ -297,7 +297,15 @@ Note - Kubernetes doesn't work with the uid, but rather with the 'name' property
 Querying with uid causes 404.
 
 #### Getting raw responses
-By passing `as: :raw`, the response from the client is given as a string, which is the raw JSON body from openshift:
+
+To avoid overhead from parsing and building `RecursiveOpenStruct` objects for each reply, pass the `as: :raw` option when initializing `Kubeclient::Client` or when calling `get_` / `watch_` methods.
+The result can then be printed, or searched with a regex, or parsed via `JSON.parse(r)`.
+
+```ruby
+client = Kubeclient::Client.new(as: :raw)
+```
+
+or
 
 ```ruby
 pods = client.get_pods as: :raw
@@ -401,8 +409,6 @@ It is possible to interrupt the watcher from another thread with:
 ```ruby
 watcher.finish
 ```
-
-Pass `as: :raw` to `watch_*` get raw replies.
 
 #### Watch events for a particular object
 You can use the `field_selector` option as part of the watch methods.
