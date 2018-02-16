@@ -427,22 +427,31 @@ module Kubeclient
     private
 
     def format_response(as, body, list_type = nil)
-      return body if as == :raw
+      case as
+      when :raw
+        body
+      when :parsed
+        JSON.parse(body)
+      when :parsed_symbolized
+        JSON.parse(body, symbolize_names: true)
+      when :ros
+        result = JSON.parse(body)
 
-      result = JSON.parse(body)
+        if list_type
+          resource_version =
+            result.fetch('resourceVersion') do
+              result.fetch('metadata', {}).fetch('resourceVersion', nil)
+            end
 
-      if list_type
-        resource_version =
-          result.fetch('resourceVersion') do
-            result.fetch('metadata', {}).fetch('resourceVersion', nil)
-          end
+          # result['items'] might be nil due to https://github.com/kubernetes/kubernetes/issues/13096
+          collection = result['items'].to_a.map { |item| Kubeclient::Resource.new(item) }
 
-        # result['items'] might be nil due to https://github.com/kubernetes/kubernetes/issues/13096
-        collection = result['items'].to_a.map { |item| Kubeclient::Resource.new(item) }
-
-        Kubeclient::Common::EntityList.new(list_type, resource_version, collection)
+          Kubeclient::Common::EntityList.new(list_type, resource_version, collection)
+        else
+          Kubeclient::Resource.new(result)
+        end
       else
-        Kubeclient::Resource.new(result)
+        raise ArgumentError, "Unsupported format #{as.inspect}"
       end
     end
 
