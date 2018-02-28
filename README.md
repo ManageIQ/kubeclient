@@ -324,6 +324,11 @@ pods = client.get_pods as: :raw
 node = client.get_node "127.0.0.1", as: :raw
 ```
 
+Other formats are:
+ - `:ros` (default) for `RecursiveOpenStruct`  
+ - `:parsed` for `JSON.parse` 
+ - `:parsed_symbolized` for `JSON.parse(..., symbolize_names: true)`
+
 #### Delete an entity (by name)
 
 For example: `delete_pod "pod name"` , `delete_replication_controller "rc name"`, `delete_node "node name"`, `delete_secret "secret name"`

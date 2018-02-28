@@ -43,8 +43,7 @@ class KubeclientTest < MiniTest::Test
   def test_pass_proxy
     uri = URI::HTTP.build(host: 'localhost', port: 8080)
     proxy_uri = URI::HTTP.build(host: 'myproxyhost', port: 8888)
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+    stub_core_api_list
 
     client = Kubeclient::Client.new(uri, http_proxy_uri: proxy_uri)
     rest_client = client.rest_client
@@ -56,8 +55,7 @@ class KubeclientTest < MiniTest::Test
   end
 
   def test_exception
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+    stub_core_api_list
     stub_request(:post, %r{/services})
       .to_return(body: open_test_file('namespace_exception.json'), status: 409)
 
@@ -99,7 +97,6 @@ class KubeclientTest < MiniTest::Test
     stub_request(:get, 'http://localhost:8080/api')
       .to_return(status: 200, body: open_test_file('versions_list.json'))
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     response = client.api
     assert_includes(response, 'versions')
   end
@@ -178,12 +175,9 @@ class KubeclientTest < MiniTest::Test
   end
 
   def test_nonjson_exception
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+    stub_core_api_list
     stub_request(:get, %r{/servic})
       .to_return(body: open_test_file('service_illegal_json_404.json'), status: 404)
-
-    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
 
     exception = assert_raises(Kubeclient::ResourceNotFoundError) do
       client.get_services
@@ -194,12 +188,9 @@ class KubeclientTest < MiniTest::Test
   end
 
   def test_nonjson_exception_raw
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+    stub_core_api_list
     stub_request(:get, %r{/servic})
       .to_return(body: open_test_file('service_illegal_json_404.json'), status: 404)
-
-    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
 
     exception = assert_raises(Kubeclient::ResourceNotFoundError) do
       client.get_services(as: :raw)
@@ -210,12 +201,9 @@ class KubeclientTest < MiniTest::Test
   end
 
   def test_entity_list
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
-    stub_request(:get, %r{/services})
-      .to_return(body: open_test_file('entity_list.json'), status: 200)
+    stub_core_api_list
+    stub_get_services
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     services = client.get_services
 
     refute_empty(services)
@@ -229,12 +217,9 @@ class KubeclientTest < MiniTest::Test
   end
 
   def test_entity_list_raw
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
-    stub_request(:get, %r{/services})
-      .to_return(body: open_test_file('entity_list.json'), status: 200)
+    stub_core_api_list
+    stub_get_services
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     response = client.get_services(as: :raw)
 
     refute_empty(response)
@@ -243,13 +228,36 @@ class KubeclientTest < MiniTest::Test
     assert_requested(:get, 'http://localhost:8080/api/v1/services', times: 1)
   end
 
+  def test_entity_list_parsed
+    stub_core_api_list
+    stub_get_services
+
+    response = client.get_services(as: :parsed)
+    assert_equal Hash, response.class
+    assert_equal %w[metadata spec status], response['items'].first.keys
+  end
+
+  def test_entity_list_parsed_symbolized
+    stub_core_api_list
+    stub_get_services
+
+    response = client.get_services(as: :parsed_symbolized)
+    assert_equal Hash, response.class
+    assert_equal %i[metadata spec status], response[:items].first.keys
+  end
+
+  def test_entity_list_unknown
+    stub_core_api_list
+    stub_get_services
+
+    e = assert_raises(ArgumentError) { client.get_services(as: :whoops) }
+    assert_equal 'Unsupported format :whoops', e.message
+  end
+
   def test_entity_list_raw_failure
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+    stub_core_api_list
     stub_request(:get, %r{/services})
       .to_return(body: open_test_file('entity_list.json'), status: 500)
-
-    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
 
     exception = assert_raises(Kubeclient::HttpError) { client.get_services(as: :raw) }
     assert_equal('500 Internal Server Error', exception.message)
@@ -259,12 +267,9 @@ class KubeclientTest < MiniTest::Test
   def test_entities_with_label_selector
     selector = 'component=apiserver'
 
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
-    stub_request(:get, %r{/services})
-      .to_return(body: open_test_file('entity_list.json'), status: 200)
+    stub_core_api_list
+    stub_get_services
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     services = client.get_services(label_selector: selector)
 
     assert_instance_of(Kubeclient::Common::EntityList, services)
@@ -278,12 +283,9 @@ class KubeclientTest < MiniTest::Test
   def test_entities_with_field_selector
     selector = 'involvedObject.name=redis-master'
 
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
-    stub_request(:get, %r{/services})
-      .to_return(body: open_test_file('entity_list.json'), status: 200)
+    stub_core_api_list
+    stub_get_services
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     services = client.get_services(field_selector: selector)
 
     assert_instance_of(Kubeclient::Common::EntityList, services)
@@ -295,20 +297,17 @@ class KubeclientTest < MiniTest::Test
   end
 
   def test_empty_list
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+    stub_core_api_list
     stub_request(:get, %r{/pods})
       .to_return(body: open_test_file('empty_pod_list.json'), status: 200)
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     pods = client.get_pods
     assert_instance_of(Kubeclient::Common::EntityList, pods)
     assert_equal(0, pods.size)
   end
 
   def test_get_all
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+    stub_core_api_list
 
     stub_request(:get, %r{/bindings})
       .to_return(body: open_test_file('bindings_list.json'), status: 404)
@@ -361,7 +360,6 @@ class KubeclientTest < MiniTest::Test
     stub_request(:get, %r{/serviceaccounts})
       .to_return(body: open_test_file('service_account_list.json'), status: 200)
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     result = client.all_entities
     assert_equal(16, result.keys.size)
     assert_instance_of(Kubeclient::Common::EntityList, result['node'])
@@ -386,8 +384,7 @@ class KubeclientTest < MiniTest::Test
   end
 
   def test_get_all_raw
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+    stub_core_api_list
 
     stub_request(:get, %r{/bindings})
       .to_return(body: open_test_file('bindings_list.json'), status: 404)
@@ -440,7 +437,6 @@ class KubeclientTest < MiniTest::Test
     stub_request(:get, %r{/serviceaccounts})
       .to_return(body: open_test_file('service_account_list.json'), status: 200)
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     result = client.all_entities(as: :raw)
     assert_equal(16, result.keys.size)
 
@@ -692,8 +688,7 @@ class KubeclientTest < MiniTest::Test
   end
 
   def test_api_bearer_token_file_success
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+    stub_core_api_list
     stub_request(:get, 'http://localhost:8080/api/v1/pods')
       .with(headers: { Authorization: 'Bearer valid_token' })
       .to_return(body: open_test_file('pod_list.json'), status: 200)
@@ -711,8 +706,7 @@ class KubeclientTest < MiniTest::Test
   end
 
   def test_proxy_url
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+    stub_core_api_list
 
     client = Kubeclient::Client.new('http://host:8080', 'v1')
     assert_equal(
@@ -772,12 +766,10 @@ class KubeclientTest < MiniTest::Test
 
   def test_nil_items
     # handle https://github.com/kubernetes/kubernetes/issues/13096
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+    stub_core_api_list
     stub_request(:get, %r{/persistentvolumeclaims})
       .to_return(body: open_test_file('persistent_volume_claims_nil_items.json'), status: 200)
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     client.get_persistent_volume_claims
   end
 
@@ -841,6 +833,20 @@ class KubeclientTest < MiniTest::Test
   end
 
   private
+
+  def stub_get_services
+    stub_request(:get, %r{/services})
+      .to_return(body: open_test_file('entity_list.json'), status: 200)
+  end
+
+  def stub_core_api_list
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+  end
+
+  def client
+    @client ||= Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+  end
 
   # dup method creates a shallow copy which is not good in this case
   # since rename_keys changes the input hash
