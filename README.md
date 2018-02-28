@@ -249,6 +249,18 @@ You can also load your JSONified config in from an ENV variable (e.g. `KUBE_CONF
 Kubeclient::Config.new(JSON.parse(ENV['KUBE_CONFIG']), nil)
 ```
 
+#### namespace
+
+Additionally, the `config.context` object will contain a `namespace` attribute, if it was defined in the file.
+It is recommended that you use this namespace when issuing API commands below.
+This is the same behavior that is implemented by `kubectl` command.
+
+You can read it as follows:
+
+```ruby
+puts config.context.namespace
+```
+
 ### Supported kubernetes versions
 
 For 1.1 only the core api v1 is supported, all api groups are supported in later versions.
