@@ -44,6 +44,7 @@ class KubeclientConfigTest < MiniTest::Test
   def check_context(context, ssl: true)
     assert_equal('https://localhost:8443', context.api_endpoint)
     assert_equal('v1', context.api_version)
+    assert_equal('default', context.namespace)
     if ssl
       assert_equal(OpenSSL::SSL::VERIFY_PEER, context.ssl_options[:verify_ssl])
       assert_kind_of(OpenSSL::X509::Store, context.ssl_options[:cert_store])

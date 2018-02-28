@@ -7,13 +7,14 @@ module Kubeclient
   class Config
     # Kubernetes client configuration context class
     class Context
-      attr_reader :api_endpoint, :api_version, :ssl_options, :auth_options
+      attr_reader :api_endpoint, :api_version, :ssl_options, :auth_options, :namespace
 
-      def initialize(api_endpoint, api_version, ssl_options, auth_options)
+      def initialize(api_endpoint, api_version, ssl_options, auth_options, namespace)
         @api_endpoint = api_endpoint
         @api_version = api_version
         @ssl_options = ssl_options
         @auth_options = auth_options
+        @namespace = namespace
       end
     end
 
@@ -32,7 +33,7 @@ module Kubeclient
     end
 
     def context(context_name = nil)
-      cluster, user = fetch_context(context_name || @kcfg['current-context'])
+      cluster, user, namespace = fetch_context(context_name || @kcfg['current-context'])
 
       ca_cert_data     = fetch_cluster_ca_data(cluster)
       client_cert_data = fetch_user_cert_data(user)
@@ -58,7 +59,7 @@ module Kubeclient
         ssl_options[:client_key] = OpenSSL::PKey.read(client_key_data)
       end
 
-      Context.new(cluster['server'], @kcfg['apiVersion'], ssl_options, auth_options)
+      Context.new(cluster['server'], @kcfg['apiVersion'], ssl_options, auth_options, namespace)
     end
 
     private
@@ -84,7 +85,9 @@ module Kubeclient
         break x['user'] if x['name'] == context['user']
       end || {}
 
-      [cluster, user]
+      namespace = context['namespace']
+
+      [cluster, user, namespace]
     end
 
     def fetch_cluster_ca_data(cluster)
