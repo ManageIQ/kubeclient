@@ -132,10 +132,10 @@ class TestWatch < MiniTest::Test
     client = Kubeclient::Client.new(api_host, 'v1')
     watcher = client.watch_events
 
-    # explodes when Errno::EBADF is not caught
+    # explodes when StandardError is not caught
     watcher.each do
       watcher.finish
-      raise Errno::EBADF
+      raise StandardError
     end
 
     assert_requested(:get, "#{api_host}/v1/watch/events", times: 1)
