@@ -27,7 +27,7 @@ module Kubeclient
             yield @formatter.call(line.chomp)
           end
         end
-      rescue IOError, Errno::EBADF
+      rescue StandardError
         raise unless @finished
       end
 
