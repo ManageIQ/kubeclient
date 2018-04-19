@@ -485,6 +485,34 @@ watcher.each do |line|
 end
 ```
 
+You can specify the beginning conditions of the log stream with the `:tailLines` or  `:sinceSeconds` options:
+
+```ruby
+watcher = client.watch_pod_log('pod-name', 'default', container: 'ruby', tailLines: 50)
+watcher.each do |line|
+  puts line
+end
+```
+
+```ruby
+watcher = client.watch_pod_log('pod-name', 'default', container: 'ruby', sinceSeconds: 3600)
+watcher.each do |line|
+  puts line
+end
+```
+
+You can include log timestamps for both `get_pod_log` and `watch_pod_log` with the `:timestamps` option:
+
+```ruby
+client.get_pod_log('pod-name', 'default', previous: true, timestamps: true)
+# => "..."
+```
+
+```ruby
+client.watch_pod_log('pod-name', 'default', previous: true, timestamps: true, tailLines: 100)
+# => "..."
+```
+
 #### Process a template
 Returns a processed template containing a list of objects to create.
 Input parameter - template (hash)

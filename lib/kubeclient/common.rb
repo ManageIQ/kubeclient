@@ -359,10 +359,11 @@ module Kubeclient
       end
     end
 
-    def get_pod_log(pod_name, namespace, container: nil, previous: false)
+    def get_pod_log(pod_name, namespace, container: nil, previous: false, timestamps: false)
       params = {}
       params[:previous] = true if previous
       params[:container] = container if container
+      params[:timestamps] = true if timestamps
 
       ns = build_namespace_prefix(namespace)
       handle_exception do
@@ -371,11 +372,15 @@ module Kubeclient
       end
     end
 
-    def watch_pod_log(pod_name, namespace, container: nil)
+    def watch_pod_log(pod_name, namespace,
+                      container: nil, timestamps: false, tailLines: nil, sinceSeconds: nil)
       # Adding the "follow=true" query param tells the Kubernetes API to keep
       # the connection open and stream updates to the log.
       params = { follow: true }
       params[:container] = container if container
+      params[:timestamps] = true if timestamps
+      params[:sinceSeconds] = sinceSeconds if sinceSeconds
+      params[:tailLines] = tailLines if tailLines
 
       ns = build_namespace_prefix(namespace)
 
