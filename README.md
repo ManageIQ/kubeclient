@@ -134,23 +134,35 @@ client = Kubeclient::Client.new(
 )
 ```
 
-If you are running your app using kubeclient inside a Kubernetes cluster, then you can have a bearer token file
-mounted inside your pod by using a
-[Service Account](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/design/service_accounts.md). This
-will mount a bearer token [secret](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/design/secrets.md)
-a/ `/var/run/secrets/kubernetes.io/serviceaccount/token` (see [here](https://github.com/GoogleCloudPlatform/kubernetes/pull/7101)
-for more details). For example:
+#### Inside a Kubernetes cluster
+
+The recommended way to locate the apiserver within the pod is with the `kubernetes` DNS name, which resolves to a Service IP which in turn will be routed to an apiserver.
+
+The recommended way to authenticate to the apiserver is with a [service account](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/). kube-system associates a pod with a service account and a bearer token for that service account is placed into the filesystem tree of each container in that pod at `/var/run/secrets/kubernetes.io/serviceaccount/token`.
+
+If available, a certificate bundle is placed into the filesystem tree of each container at `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`, and should be used to verify the serving certificate of the apiserver.
+
+For example:
 
 ```ruby
 auth_options = {
   bearer_token_file: '/var/run/secrets/kubernetes.io/serviceaccount/token'
 }
+ssl_options = {}
+if File.exist?("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
+  ssl_options[:ca_file] = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
+end
 client = Kubeclient::Client.new(
-  'https://localhost:8443/api/', 'v1', auth_options: auth_options
+  'https://kubernetes', 'v1', auth_options: auth_options, ssl_options: ssl_options
 )
 ```
 
-You can find information about tokens in [this guide](http://kubernetes.io/docs/user-guide/accessing-the-cluster/) and in [this reference](http://kubernetes.io/docs/admin/authentication/).
+Finally, the default namespace to be used for namespaced API operations is placed in a file at `/var/run/secrets/kubernetes.io/serviceaccount/namespace` in each container. It is recommended that you use this namespace when issuing API commands below.
+
+```ruby
+namespace = File.read('/var/run/secrets/kubernetes.io/serviceaccount/namespace')
+```
+You can find information about tokens in [this guide](https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/#accessing-the-api-from-a-pod) and in [this reference](http://kubernetes.io/docs/admin/authentication/).
 
 ### Non-blocking IO
 
