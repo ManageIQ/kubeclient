@@ -136,11 +136,11 @@ client = Kubeclient::Client.new(
 
 #### Inside a Kubernetes cluster
 
-The recommended way to locate the apiserver within the pod is with the `kubernetes` DNS name, which resolves to a Service IP which in turn will be routed to an apiserver.
+The [recommended way to locate the API server](https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/#accessing-the-api-from-a-pod) within the pod is with the `kubernetes.default.svc` DNS name, which resolves to a Service IP which in turn will be routed to an API server.
 
-The recommended way to authenticate to the apiserver is with a [service account](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/). kube-system associates a pod with a service account and a bearer token for that service account is placed into the filesystem tree of each container in that pod at `/var/run/secrets/kubernetes.io/serviceaccount/token`.
+The recommended way to authenticate to the API server is with a [service account](https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/). kube-system associates a pod with a service account and a bearer token for that service account is placed into the filesystem tree of each container in that pod at `/var/run/secrets/kubernetes.io/serviceaccount/token`.
 
-If available, a certificate bundle is placed into the filesystem tree of each container at `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`, and should be used to verify the serving certificate of the apiserver.
+If available, a certificate bundle is placed into the filesystem tree of each container at `/var/run/secrets/kubernetes.io/serviceaccount/ca.crt`, and should be used to verify the serving certificate of the API server.
 
 For example:
 
@@ -153,7 +153,10 @@ if File.exist?("/var/run/secrets/kubernetes.io/serviceaccount/ca.crt")
   ssl_options[:ca_file] = "/var/run/secrets/kubernetes.io/serviceaccount/ca.crt"
 end
 client = Kubeclient::Client.new(
-  'https://kubernetes', 'v1', auth_options: auth_options, ssl_options: ssl_options
+  'https://kubernetes.default.svc',
+  'v1',
+  auth_options: auth_options,
+  ssl_options:  ssl_options
 )
 ```
 
