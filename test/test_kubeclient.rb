@@ -651,13 +651,13 @@ class KubeclientTest < MiniTest::Test
     assert_equal(expected_msg, exception.message)
   end
 
-  def test_init_user_and_bearer_token
+  def test_init_username_and_bearer_token_file
     expected_msg = 'Invalid auth options: specify only one of username/password,' \
       ' bearer_token or bearer_token_file'
     exception = assert_raises(ArgumentError) do
       Kubeclient::Client.new(
         'http://localhost:8080',
-        auth_options: { username: 'username', bearer_token: 'token' }
+        auth_options: { username: 'username', bearer_token_file: 'token-file' }
       )
     end
     assert_equal(expected_msg, exception.message)
