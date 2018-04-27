@@ -360,10 +360,13 @@ module Kubeclient
       end
     end
 
-    def get_pod_log(pod_name, namespace, container: nil, previous: false)
+    def get_pod_log(pod_name, namespace,
+                    container: nil, previous: false, timestamps: false, since_time: nil)
       params = {}
       params[:previous] = true if previous
       params[:container] = container if container
+      params[:timestamps] = timestamps if timestamps
+      params[:sinceTime] = format_datetime(since_time) if since_time
 
       ns = build_namespace_prefix(namespace)
       handle_exception do
@@ -426,6 +429,18 @@ module Kubeclient
     end
 
     private
+
+    # Format ditetime according to RFC3339
+    def format_datetime(value)
+      case value
+      when DateTime, Time
+        value.strftime('%FT%T.%9N%:z')
+      when String
+        value
+      else
+        raise ArgumentError, "unsupported type '#{value.class}' of time value '#{value}'"
+      end
+    end
 
     def format_response(as, body, list_type = nil)
       case as

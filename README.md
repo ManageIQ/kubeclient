@@ -514,6 +514,13 @@ client.get_pod_log('pod-name', 'default', previous: true)
 # => "..."
 ```
 
+Kubernetes can add timestamps to every log line or filter by lines time:
+```ruby
+client.get_pod_log('pod-name', 'default', timestamps: true, since_time: '2018-04-27T18:30:17.480321984Z')
+# => "..."
+```
+`since_time` can be a a `Time`, `DateTime` or `String` formatted according to RFC3339
+
 You can also watch the logs of a pod to get a stream of data:
 
 ```ruby
