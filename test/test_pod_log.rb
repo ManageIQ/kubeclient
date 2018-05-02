@@ -32,6 +32,24 @@ class TestPodLog < MiniTest::Test
                      times: 1)
   end
 
+  def test_get_pod_log_since_time
+    stub_request(:get, %r{/namespaces/default/pods/[a-z0-9-]+/log})
+      .to_return(body: open_test_file('pod_log.txt'),
+                 status: 200)
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    retrieved_log = client.get_pod_log('redis-master-pod',
+                                       'default',
+                                       timestamps: true,
+                                       since_time: '2018-04-27T18:30:17.480321984Z')
+
+    assert_equal(open_test_file('pod_log.txt').read, retrieved_log)
+
+    assert_requested(:get,
+                     'http://localhost:8080/api/v1/namespaces/default/pods/redis-master-pod/log?sinceTime=2018-04-27T18:30:17.480321984Z&timestamps=true',
+                     times: 1)
+  end
+
   def test_watch_pod_log
     expected_lines = open_test_file('pod_log.txt').read.split("\n")
 

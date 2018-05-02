@@ -2,6 +2,14 @@ require_relative 'test_helper'
 
 # Unit tests for the common module
 class CommonTest < MiniTest::Test
+  class ClientStub
+    include Kubeclient::ClientMixin
+  end
+
+  def client
+    @client ||= ClientStub.new
+  end
+
   def test_underscore_entity
     %w[
       Pod pod
@@ -28,5 +36,23 @@ class CommonTest < MiniTest::Test
     ].each_slice(2) do |singular, plural|
       assert_equal(Kubeclient::ClientMixin.underscore_entity(singular), plural)
     end
+  end
+
+  def test_format_datetime_with_string
+    value = '2018-04-27T18:30:17.480321984Z'
+    formatted = client.send(:format_datetime, value)
+    assert_equal(formatted, value)
+  end
+
+  def test_format_datetime_with_datetime
+    value = DateTime.new(2018, 4, 30, 19, 20, 33)
+    formatted = client.send(:format_datetime, value)
+    assert_equal(formatted, '2018-04-30T19:20:33.000000000+00:00')
+  end
+
+  def test_format_datetime_with_time
+    value = Time.new(2018, 4, 30, 19, 20, 33, 0)
+    formatted = client.send(:format_datetime, value)
+    assert_equal(formatted, '2018-04-30T19:20:33.000000000+00:00')
   end
 end
