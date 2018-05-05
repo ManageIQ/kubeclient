@@ -31,5 +31,5 @@ Gem::Specification.new do |spec|
 
   spec.add_dependency 'rest-client', '~> 2.0'
   spec.add_dependency 'recursive-open-struct', '~> 1.0', '>= 1.0.4'
-  spec.add_dependency 'http', '~> 2.2.2'
+  spec.add_dependency 'http', '~> 3.0'
 end
