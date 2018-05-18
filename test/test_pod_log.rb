@@ -50,6 +50,25 @@ class TestPodLog < MiniTest::Test
                      times: 1)
   end
 
+  def test_get_pod_log_tail_lines
+    selected_lines = open_test_file('pod_log.txt').to_a[-2..1].join
+
+    stub_request(:get, %r{/namespaces/default/pods/[a-z0-9-]+/log})
+      .to_return(body: selected_lines,
+                 status: 200)
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    retrieved_log = client.get_pod_log('redis-master-pod',
+                                       'default',
+                                       tail_lines: 2)
+
+    assert_equal(selected_lines, retrieved_log)
+
+    assert_requested(:get,
+                     'http://localhost:8080/api/v1/namespaces/default/pods/redis-master-pod/log?tailLines=2',
+                     times: 1)
+  end
+
   def test_watch_pod_log
     expected_lines = open_test_file('pod_log.txt').read.split("\n")
 

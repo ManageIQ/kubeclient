@@ -521,6 +521,12 @@ client.get_pod_log('pod-name', 'default', timestamps: true, since_time: '2018-04
 ```
 `since_time` can be a a `Time`, `DateTime` or `String` formatted according to RFC3339
 
+Kubernetes can fetch a specific number of lines from the end of the logs:
+```ruby
+client.get_pod_log('pod-name', 'default', tail_lines: 10)
+# => "..."
+```
+
 You can also watch the logs of a pod to get a stream of data:
 
 ```ruby

@@ -361,12 +361,14 @@ module Kubeclient
     end
 
     def get_pod_log(pod_name, namespace,
-                    container: nil, previous: false, timestamps: false, since_time: nil)
+                    container: nil, previous: false,
+                    timestamps: false, since_time: nil, tail_lines: nil)
       params = {}
       params[:previous] = true if previous
       params[:container] = container if container
       params[:timestamps] = timestamps if timestamps
       params[:sinceTime] = format_datetime(since_time) if since_time
+      params[:tailLines] = tail_lines if tail_lines
 
       ns = build_namespace_prefix(namespace)
       handle_exception do
