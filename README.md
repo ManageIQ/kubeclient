@@ -301,7 +301,7 @@ puts config.context.namespace
 
 ### Supported kubernetes versions
 
-The last 3 minor versions are supported, although older versions may also work. This matches the [official support policy for Kubernetes](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/release/versioning.md#supported-releases-and-component-skew).
+We try to support the last 3 minor versions, matching the [official support policy for Kubernetes](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/release/versioning.md#supported-releases-and-component-skew). Kubernetes 1.2 and below have known issues and are unsupported.
 
 ## Examples:
 
