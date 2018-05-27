@@ -2,6 +2,21 @@
 
 Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
+Kubeclient release versioning follows [SemVer](https://semver.org/).
+
+## 3.1.0 - 2018-05-27
+
+### Fixed
+- Fixed watch `.finish` sometimes caused `HTTP::ConnectionError` exception from the reading loop (#315).
+
+### Added
+- `get_pod_log` now has `timestamps`, `since_time` (#319) and `tail_lines` (#326) params.
+- `Kubeclient::Config::Context#namespace` now set, if present in kubeconfig file (#308).
+- Improved README directions for authenticating within a kubernetes cluster (#316).
+- `Kubeclient::GoogleApplicationDefaultCredentials` helper for Google application default credentials (#213). Needs `googleauth` gem.
+- New `as: :parsed` and `as: :parsed_symbolized` formats (#306).
+- Allow setting default `as:` format for the whole client (#299, #305).
+- Relaxed `recursive-open-struct` dependency to allow 1.1+ as well (#313).
 
 ## 3.0.0 - 2018-02-04
 ### Removed

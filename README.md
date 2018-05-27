@@ -550,6 +550,7 @@ client.process_template template
 
 ## Upgrading
 
+Kubeclient release versioning follows [SemVer](https://semver.org/).
 See [CHANGELOG.md](CHANGELOG.md) for full changelog.
 
 #### past version 3.0
