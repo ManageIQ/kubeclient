@@ -262,30 +262,44 @@ end
 
 ### Kubeclient::Config
 
-If you've been using `kubectl` and have a `.kube/config` file, you can auto-populate a config object using `Kubeclient::Config`:
+If you've been using `kubectl` and have a `.kube/config` file (possibly referencing other files in fields such as `client-certificate`), you can auto-populate a config object using `Kubeclient::Config`:
 
 ```ruby
-config = Kubeclient::Config.read('/path/to/.kube/config')
+# assuming $KUBECONFIG is one file, won't merge multiple like kubectl
+config = Kubeclient::Config.read(ENV['KUBECONFIG'] || '/path/to/.kube/config')
 ```
 
-...and then pass that object to `Kubeclient::Client`:
+You can also construct `Config` directly from nested data. For example if you have JSON or YAML config data in a variable:
 
+```ruby
+config = Kubeclient::Config.new(YAML.safe_load(yaml_text), nil)
+# or
+config = Kubeclient::Config.new(JSON.parse(json_text), nil)
 ```
+
+The 2nd argument is a base directory for finding external files, if config refers to them with relative path.
+Setting it to `nil` disables file lookups.  (A config can be self-contained by using inline fields such as `client-certificate-data`.)
+
+To create a client based on a Config object:
+
+```ruby
+# default context according to `current-context` field:
+context = config.context
+# or to use a specific context, by name:
+context = config.context('default/192-168-99-100:8443/system:admin')
+
 Kubeclient::Client.new(
-  config.context.api_endpoint,
-    config.context.api_version,
-    {
-      ssl_options: config.context.ssl_options,
-      auth_options: config.context.auth_options
-    }
+  context.api_endpoint,
+  context.api_version,
+  ssl_options: context.ssl_options,
+  auth_options: context.auth_options
 )
 ```
 
-You can also load your JSONified config in from an ENV variable (e.g. `KUBE_CONFIG`) like so:
+#### Security: Don't use config from untrusted sources
 
-```ruby
-Kubeclient::Config.new(JSON.parse(ENV['KUBE_CONFIG']), nil)
-```
+Kubeclient was never reviewed for behaving safely with malicious / malformed config.
+It might crash / misbehave in unexpected ways...
 
 #### namespace
 
