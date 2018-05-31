@@ -4,6 +4,15 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
+## Unreleased
+
+### Security
+- Fixed `Kubeclient::Config.read` to use `YAML.safe_load` (#334).
+
+  Previously, could deserialize arbitrary ruby classes.  The risk depends on ruby classes available in the application; sometimes a class may have side effects - up to arbitrary code execution - when instantiated and/or built up with `x[key] = value` during YAML parsing.
+
+  Despite this fix, using config from untrusted sources is not recommended.
+
 ## 3.1.0 - 2018-05-27
 
 ### Fixed
