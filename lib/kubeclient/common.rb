@@ -306,17 +306,11 @@ module Kubeclient
     def create_entity(entity_type, resource_name, entity_config)
       # Duplicate the entity_config to a hash so that when we assign
       # kind and apiVersion, this does not mutate original entity_config obj.
+      # TODO: skip?
       hash = entity_config.to_hash
 
       ns_prefix = build_namespace_prefix(hash[:metadata][:namespace])
 
-      # TODO: temporary solution to add "kind" and apiVersion to request
-      # until this issue is solved
-      # https://github.com/GoogleCloudPlatform/kubernetes/issues/6439
-      # TODO: #2 solution for
-      # https://github.com/kubernetes/kubernetes/issues/8115
-      hash[:kind] = (entity_type.eql?('Endpoint') ? 'Endpoints' : entity_type)
-      hash[:apiVersion] = @api_group + @api_version
       response = handle_exception do
         rest_client[ns_prefix + resource_name]
           .post(hash.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
