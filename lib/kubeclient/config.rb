@@ -25,7 +25,7 @@ module Kubeclient
     end
 
     def self.read(filename)
-      Config.new(YAML.load_file(filename), File.dirname(filename))
+      Config.new(YAML.safe_load(File.read(filename)), File.dirname(filename))
     end
 
     def contexts

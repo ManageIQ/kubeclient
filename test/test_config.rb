@@ -1,4 +1,5 @@
 require_relative 'test_helper'
+require 'yaml'
 
 # Testing Kubernetes client configuration
 class KubeclientConfigTest < MiniTest::Test
@@ -12,6 +13,34 @@ class KubeclientConfigTest < MiniTest::Test
     config = Kubeclient::Config.read(config_file('external.kubeconfig'))
     assert_equal(['default/localhost:8443/system:admin'], config.contexts)
     check_context(config.context, ssl: true)
+  end
+
+  def test_allinone_nopath
+    yaml = File.read(config_file('allinone.kubeconfig'))
+    # A self-contained config shouldn't depend on kcfg_path.
+    config = Kubeclient::Config.new(YAML.safe_load(yaml), nil)
+    assert_equal(['default/localhost:8443/system:admin'], config.contexts)
+    check_context(config.context, ssl: true)
+  end
+
+  def test_external_nopath
+    yaml = File.read(config_file('external.kubeconfig'))
+    # kcfg_path = nil should prevent file access
+    config = Kubeclient::Config.new(YAML.safe_load(yaml), nil)
+    assert_raises(StandardError) do
+      config.context.ssl_options
+    end
+  end
+
+  def test_external_nopath_absolute
+    yaml = File.read(config_file('external.kubeconfig'))
+    # kcfg_path = nil should prevent file access, even if absolute path specified
+    ca_absolute_path = File.absolute_path(config_file('external.kubeconfig').path)
+    yaml = yaml.gsub('external-ca.pem', ca_absolute_path)
+    config = Kubeclient::Config.new(YAML.safe_load(yaml), nil)
+    assert_raises(StandardError) do
+      config.context.ssl_options
+    end
   end
 
   def test_nouser
