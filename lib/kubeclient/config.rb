@@ -25,7 +25,8 @@ module Kubeclient
     end
 
     def self.read(filename)
-      Config.new(YAML.safe_load(File.read(filename)), File.dirname(filename))
+      parsed = YAML.safe_load(File.read(filename), [Date, Time])
+      Config.new(parsed, File.dirname(filename))
     end
 
     def contexts

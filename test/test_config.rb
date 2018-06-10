@@ -68,6 +68,11 @@ class KubeclientConfigTest < MiniTest::Test
     assert_equal('pAssw0rd123', context.auth_options[:password])
   end
 
+  def test_timestamps
+    # Test YAML parsing doesn't crash on YAML timestamp syntax.
+    Kubeclient::Config.read(config_file('timestamps.kubeconfig'))
+  end
+
   private
 
   def check_context(context, ssl: true)

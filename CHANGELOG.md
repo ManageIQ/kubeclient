@@ -4,10 +4,17 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
-## 3.1.1 - 2018-06-01
+## Unreleased
+
+### Fixed
+- Fixed `Kubeclient::Config.read` regression, no longer crashes on YAML timestamps (#338).
+
+## 3.1.1 - 2018-06-01 — REGRESSION
+
+In this version `Kubeclient::Config.read` raises Psych::DisallowedClass on legal yaml configs containing a timestamp, for example gcp access-token expiry (#337).
 
 ### Security
-- Fixed `Kubeclient::Config.read` to use `YAML.safe_load` (#334).
+- Changed `Kubeclient::Config.read` to use `YAML.safe_load` (#334).
 
   Previously, could deserialize arbitrary ruby classes.  The risk depends on ruby classes available in the application; sometimes a class may have side effects - up to arbitrary code execution - when instantiated and/or built up with `x[key] = value` during YAML parsing.
 
