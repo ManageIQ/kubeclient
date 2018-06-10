@@ -4,7 +4,7 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
-## Unreleased
+## 3.1.2 — 2018-06-11
 
 ### Fixed
 - Fixed `Kubeclient::Config.read` regression, no longer crashes on YAML timestamps (#338).
