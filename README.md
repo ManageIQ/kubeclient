@@ -3,7 +3,6 @@
 [![Gem Version](https://badge.fury.io/rb/kubeclient.svg)](http://badge.fury.io/rb/kubeclient)
 [![Build Status](https://travis-ci.org/abonas/kubeclient.svg?branch=master)](https://travis-ci.org/abonas/kubeclient)
 [![Code Climate](http://img.shields.io/codeclimate/github/abonas/kubeclient.svg)](https://codeclimate.com/github/abonas/kubeclient)
-[![Dependency Status](https://gemnasium.com/abonas/kubeclient.svg)](https://gemnasium.com/abonas/kubeclient)
 
 A Ruby client for Kubernetes REST api.
 The client supports GET, POST, PUT, DELETE on all the entities available in kubernetes in both the core and group apis.
@@ -170,10 +169,10 @@ You can find information about tokens in [this guide](https://kubernetes.io/docs
 #### Google's Application Default Credentials
 
 On Google Compute Engine, Google App Engine, or Google Cloud Functions, as well as `gcloud`-configured systems
-with [application default credentials](https://developers.google.com/identity/protocols/application-default-credentials), 
+with [application default credentials](https://developers.google.com/identity/protocols/application-default-credentials),
 you can use the token provider to authorize `kubeclient`.
 
-This requires the [`googleauth` gem](https://github.com/google/google-auth-library-ruby) that is _not_ included in 
+This requires the [`googleauth` gem](https://github.com/google/google-auth-library-ruby) that is _not_ included in
 `kubeclient` dependencies so you should add it to your bundle.
 
 ```ruby
@@ -187,7 +186,7 @@ client = Kubeclient::Client.new(
 )
 ```
 
-Note that this token is good for one hour. If your code runs for longer than that, you should plan to 
+Note that this token is good for one hour. If your code runs for longer than that, you should plan to
 acquire a new one.
 
 ### Non-blocking IO
@@ -377,8 +376,8 @@ node = client.get_node "127.0.0.1", as: :raw
 ```
 
 Other formats are:
- - `:ros` (default) for `RecursiveOpenStruct`  
- - `:parsed` for `JSON.parse` 
+ - `:ros` (default) for `RecursiveOpenStruct`
+ - `:parsed` for `JSON.parse`
  - `:parsed_symbolized` for `JSON.parse(..., symbolize_names: true)`
 
 #### Delete an entity (by name)
