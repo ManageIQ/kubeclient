@@ -401,12 +401,7 @@ module Kubeclient
           @entities[kind.to_s].resource_name
         end
       ns_prefix = build_namespace_prefix(namespace)
-      # TODO: Change this once services supports the new scheme
-      if entity_name_plural == 'pods'
-        rest_client["#{ns_prefix}#{entity_name_plural}/#{name}:#{port}/proxy"].url
-      else
-        rest_client["proxy/#{ns_prefix}#{entity_name_plural}/#{name}:#{port}"].url
-      end
+      rest_client["#{ns_prefix}#{entity_name_plural}/#{name}:#{port}/proxy"].url
     end
 
     def process_template(template)

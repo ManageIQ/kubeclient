@@ -315,7 +315,7 @@ puts config.context.namespace
 
 ### Supported kubernetes versions
 
-For 1.1 only the core api v1 is supported, all api groups are supported in later versions.
+We try to support the last 3 minor versions, matching the [official support policy for Kubernetes](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/release/versioning.md#supported-releases-and-component-skew). Kubernetes 1.2 and below have known issues and are unsupported.
 
 ## Examples:
 
