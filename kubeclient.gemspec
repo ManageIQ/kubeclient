@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rake', '~> 12.0'
   spec.add_development_dependency 'minitest'
   spec.add_development_dependency 'minitest-rg'
-  spec.add_development_dependency 'webmock', '~> 3.0.1'
+  spec.add_development_dependency 'webmock', '~> 3.0'
   spec.add_development_dependency 'vcr'
   spec.add_development_dependency 'rubocop', '= 0.49.1'
   spec.add_development_dependency 'googleauth', '~> 0.5.1'
