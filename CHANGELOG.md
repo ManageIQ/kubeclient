@@ -4,6 +4,18 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
+## 4.0.0 — 2018-07-23
+
+### Removed
+- Bumped officially supported kubernetes versions to >= 1.3.
+- Specifically `proxy_url` no longer works for <= 1.2 (#323).
+
+### Fixed
+- `proxy_url` now works for kubernetes 1.10 and later (#323).
+
+### Changed
+- Switched `http` gem dependency from 2.y to 3.y (#321).
+
 ## 3.1.2 — 2018-06-11
 
 ### Fixed
