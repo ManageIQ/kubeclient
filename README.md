@@ -314,7 +314,9 @@ puts config.context.namespace
 
 ### Supported kubernetes versions
 
-We try to support the last 3 minor versions, matching the [official support policy for Kubernetes](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/release/versioning.md#supported-releases-and-component-skew). Kubernetes 1.2 and below have known issues and are unsupported.
+We try to support the last 3 minor versions, matching the [official support policy for Kubernetes](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/release/versioning.md#supported-releases-and-component-skew).
+Kubernetes 1.2 and below have known issues and are unsupported.
+Kubernetes 1.3 presumed to still work although nobody is really testing on such old versions...
 
 ## Examples:
 
@@ -565,6 +567,10 @@ client.process_template template
 
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 See [CHANGELOG.md](CHANGELOG.md) for full changelog.
+
+#### past version 4.0
+
+Old kubernetes versions < 1.3 no longer supported.
 
 #### past version 3.0
 
