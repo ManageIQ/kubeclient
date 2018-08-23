@@ -3,62 +3,55 @@
 ## Versioning
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 At some point in time it is decided to release version x.y.z.
-Prerequisite: A [changelog](CHANGELOG.md) is generated & merged into the release branch.
 
 ```bash
-RUBYGEMS_USERNAME=bob
 RELEASE_BRANCH="master"
-RELEASE_VERSION="x.y.z"
-GIT_REMOTE="origin"
-GIT_UPSTREAM="upstream"
+```
 
-#
-# Install the release gem
-#At this point Open & merge a PR in github.
-gem install gem-release
+## 1. PR(s) for changelog & bump
 
-#
-# Checking out the release branch
-#
-git fetch $GIT_UPSTREAM
-git checkout $GIT_UPSTREAM/$RELEASE_BRANCH -b $RELEASE_BRANCH
-git status # Make sure there are no local changes
+Edit `CHANGELOG.md` as necessary.  Even if all included changes remembered to update it, you should replace "Unreleased" section header with appropriate "x.y.z — 20yy-mm-dd" header.
 
-#
-# Preparing to release
-#
-bundle install
-bundle exec rake test rubocop
+Bump `lib/kubeclient/version.rb` manually, or by using:
+```bash
+gem bump --version $RELEASE_VERSION
+git show # View version bump change.
+```
 
-#
-# Grabbing an authentication token for rubygems.org api
-#
+Open a PR with target branch $RELEASE_BRANCH and get it reviewed & merged (if open for long, remember to update date in CHANGELOG to actual day of release).
+
+## 2. (once) Grabbing an authentication token for rubygems.org api
+```bash
+RUBYGEMS_USERNAME=bob
 curl -u $RUBYGEMS_USERNAME https://rubygems.org/api/v1/api_key.yaml > ~/.gem/credentials; chmod 0600 ~/.gem/credentials
 
 cat ~/.gem/credentials
----
+# Should look like this:
 :rubygems_api_key: ****
+```
 
-#
-# Bumping the gem's version can be done manually, or by using
-#
-gem bump --version $RELEASE_VERSION
-git show # View version bump change.
+## 3. Actual release
 
-git push $GIT_REMOTE $RELEASE_BRANCH
+Make sure we're locally after the bump PR *merge commit*:
+```bash
+git checkout $RELEASE_BRANCH
+git status # Make sure there are no local changes
+git pull --ff-only https://github.com/abonas/kubeclient $RELEASE_BRANCH
+git log -n1
+```
 
-#
-# At this point Open & merge a PR in github.
-#
+Last sanity check:
+```bash
+bundle install
+bundle exec rake test rubocop
+```
 
-git pull --ff-only $GIT_UPSTREAM
+Create and push the tag:
+```bash
+gem tag --destination https://github.com/abonas/kubeclient
+```
 
-#
-# In github, generate a new release and make sure you have the tag locally.
-#
-
-#
-# Release the gem
-#
+Release onto rubygems.org:
+```bash
 gem release
 ```
