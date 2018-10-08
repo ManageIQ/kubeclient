@@ -35,22 +35,13 @@ class CommonTest < MiniTest::Test
       Image image
       ImageStream image_stream
       dogstatsd dogstatsd
-      lowerCamelUPPERCase lower_camel_uppercase
-      HTTPAPISpecBinding httpapispec_binding
-      APIGroup apigroup
-      APIGroupList apigroup_list
-      APIResourceList apiresource_list
-      APIService apiservice
-      APIServiceList apiservice_list
-      APIVersions apiversions
-      OAuthAccessToken oauth_access_token
-      OAuthAccessTokenList oauth_access_token_list
-      OAuthAuthorizeToken oauth_authorize_token
-      OAuthAuthorizeTokenList oauth_authorize_token_list
-      OAuthClient oauth_client
-      OAuthClientAuthorization oauth_client_authorization
-      OAuthClientAuthorizationList oauth_client_authorization_list
-      OAuthClientList oauth_client_list
+      lowerCamelUPPERCase lower_camel_upper_case
+      HTTPAPISpecBinding httpapi_spec_binding
+      APIService api_service
+      OAuthAccessToken o_auth_access_token
+      OAuthAuthorizeToken o_auth_authorize_token
+      OAuthClient o_auth_client
+      OAuthClientAuthorization o_auth_client_authorization
     ].each_slice(2) do |kind, expected_underscore|
       underscore = Kubeclient::ClientMixin.underscore_entity(kind)
       assert_equal(underscore, expected_underscore)
