@@ -345,6 +345,24 @@ You can specify multiple labels (that option will return entities which have bot
 pods = client.get_pods(label_selector: 'name=redis-master,app=redis')
 ```
 
+Get all entities of a specific type in chunks:
+
+```ruby
+continue = nil
+loop do
+  entities = client.get_pods(limit: 1_000, continue: continue)
+  continue = entities.continue
+
+  break if entities.last?
+end
+```
+
+See https://kubernetes.io/docs/reference/using-api/api-concepts/#retrieving-large-results-sets-in-chunks for more information.
+
+The continue tokens expire after a short amount of time, so similar to a watch if you don't request a subsequent page within aprox. 5 minutes of the previous page being returned the server will return a `410 Gone` error and the client must request the list from the start (i.e. omit the continue token for the next call).
+
+Support for chunking was added in v1.9 so previous versions will ignore the option and return the full collection.
+
 #### Get a specific instance of an entity (by name)
 Such as: `get_service "service name"` , `get_pod "pod name"` , `get_replication_controller "rc name"`, `get_secret "secret name"`, `get_resource_quota "resource quota name"`, `get_limit_range "limit range name"` , `get_persistent_volume "persistent volume name"` , `get_persistent_volume_claim "persistent volume claim name"`, `get_component_status "component name"`, `get_service_account "service account name"`
 

@@ -26,4 +26,59 @@ class TestPod < MiniTest::Test
       times: 1
     )
   end
+
+  def test_get_chunks
+    stub_request(:get, %r{/pods})
+      .to_return(body: open_test_file('pods_1.json'), status: 200)
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    pods = client.get_pods(limit: 2)
+
+    assert_equal(2, pods.count)
+    assert_equal('eyJ2IjoibWV0YS5rOHMua', pods.continue)
+
+    continue = pods.continue
+
+    stub_request(:get, %r{/pods})
+      .to_return(body: open_test_file('pods_2.json'), status: 200)
+
+    pods = client.get_pods(limit: 2, continue: continue)
+    assert_equal(2, pods.count)
+    assert_nil(pods.continue)
+
+    assert_requested(
+      :get,
+      'http://localhost:8080/api/v1',
+      times: 1
+    )
+    assert_requested(
+      :get,
+      'http://localhost:8080/api/v1/pods?limit=2',
+      times: 1
+    )
+    assert_requested(
+      :get,
+      "http://localhost:8080/api/v1/pods?continue=#{continue}&limit=2",
+      times: 1
+    )
+  end
+
+  def test_get_chunks_410_gone
+    stub_request(:get, %r{/pods})
+      .to_return(body: open_test_file('pods_410.json'), status: 410)
+    stub_request(:get, %r{/api/v1$})
+      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+
+    err = assert_raises Kubeclient::HttpError do
+      client.get_pods(limit: 2, continue: 'eyJ2IjoibWV0YS5')
+    end
+
+    assert_equal(err.message,
+                 "The provided from parameter is too old to display a consistent list result. \
+You must start a new list without the from.")
+  end
 end

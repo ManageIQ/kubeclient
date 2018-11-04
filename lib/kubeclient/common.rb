@@ -37,10 +37,16 @@ module Kubeclient
 
     SEARCH_ARGUMENTS = {
       'labelSelector' => :label_selector,
-      'fieldSelector' => :field_selector
+      'fieldSelector' => :field_selector,
+      'limit'         => :limit,
+      'continue'      => :continue
     }.freeze
 
-    WATCH_ARGUMENTS = { 'resourceVersion' => :resource_version }.merge!(SEARCH_ARGUMENTS).freeze
+    WATCH_ARGUMENTS = {
+      'labelSelector'   => :label_selector,
+      'fieldSelector'   => :field_selector,
+      'resourceVersion' => :resource_version
+    }.freeze
 
     attr_reader :api_endpoint
     attr_reader :ssl_options
@@ -256,6 +262,8 @@ module Kubeclient
     #   :namespace (string) - the namespace of the entity.
     #   :label_selector (string) - a selector to restrict the list of returned objects by labels.
     #   :field_selector (string) - a selector to restrict the list of returned objects by fields.
+    #   :limit (integer) - a maximum number of items to return in each response
+    #   :continue (string) - a token used to retrieve the next chunk of entities
     #   :as (:raw|:ros) - defaults to :ros
     #     :raw - return the raw response body as a string
     #     :ros - return a collection of RecursiveOpenStruct objects
@@ -456,10 +464,14 @@ module Kubeclient
               result.fetch('metadata', {}).fetch('resourceVersion', nil)
             end
 
+          # If 'limit' was passed save the continue token
+          # see https://kubernetes.io/docs/reference/using-api/api-concepts/#retrieving-large-results-sets-in-chunks
+          continue = result.fetch('metadata', {}).fetch('continue', nil)
+
           # result['items'] might be nil due to https://github.com/kubernetes/kubernetes/issues/13096
           collection = result['items'].to_a.map { |item| Kubeclient::Resource.new(item) }
 
-          Kubeclient::Common::EntityList.new(list_type, resource_version, collection)
+          Kubeclient::Common::EntityList.new(list_type, resource_version, collection, continue)
         else
           Kubeclient::Resource.new(result)
         end
