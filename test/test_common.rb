@@ -33,6 +33,8 @@ class CommonTest < MiniTest::Test
       BuildConfig build_config
       Image image
       ImageStream image_stream
+      dogstatsd dogstatsd
+      HTTPAPISpecBinding httpapispec_binding
     ].each_slice(2) do |singular, plural|
       assert_equal(Kubeclient::ClientMixin.underscore_entity(singular), plural)
     end

@@ -138,7 +138,7 @@ module Kubeclient
       # See: https://github.com/kubernetes/kubernetes/issues/8115
       kind = kind[0..-2] if %w[Endpoints SecurityContextConstraints].include?(kind)
 
-      prefix = kind[0..kind.rindex(/[A-Z]/)] # NetworkP
+      prefix = kind =~ /[A-Z]/ ? kind[0..kind.rindex(/[A-Z]/)] : kind # NetworkP
       m = name.match(/^#{prefix.downcase}(.*)$/)
       m && OpenStruct.new(
         entity_type:   kind, # ComponentStatus
