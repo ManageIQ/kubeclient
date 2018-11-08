@@ -91,10 +91,10 @@ class KubeclientConfigTest < MiniTest::Test
       #
       # At the time of this writing the files to be updated are:
       #
-      #   test/config/allinone.kubeconfig
-      #   test/config/external-ca.pem
-      #   test/config/external-cert.pem
-      #   test/config/external-key.rsa
+      #   cp openshift.local.config/master/admin.kubeconfig test/config/allinone.kubeconfig
+      #   cp openshift.local.config/master/ca.crt           test/config/external-ca.pem
+      #   cp openshift.local.config/master/admin.crt        test/config/external-cert.pem
+      #   cp openshift.local.config/master/admin.key        test/config/external-key.rsa
       assert(context.ssl_options[:cert_store].verify(context.ssl_options[:client_cert]))
     else
       assert_equal(OpenSSL::SSL::VERIFY_NONE, context.ssl_options[:verify_ssl])
