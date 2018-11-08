@@ -119,6 +119,8 @@ module Kubeclient
       options = {}
       if user.key?('token')
         options[:bearer_token] = user['token']
+      elsif user.key?('exec')
+        options[:bearer_token] = Kubeclient::ExecCredentials.token(user['exec'])
       else
         %w[username password].each do |attr|
           options[attr.to_sym] = user[attr] if user.key?(attr)
