@@ -75,12 +75,12 @@ class KubeclientConfigTest < MiniTest::Test
   end
 
   def test_user_exec
-    creds = JSON.dump({
-      "apiVersion": "client.authentication.k8s.io/v1beta1",
-      "status": {
-        "token": "0123456789ABCDEF0123456789ABCDEF"
+    creds = JSON.dump(
+      'apiVersion': 'client.authentication.k8s.io/v1beta1',
+      'status': {
+        'token': '0123456789ABCDEF0123456789ABCDEF'
       }
-    })
+    )
 
     st = Minitest::Mock.new
     st.expect(:success?, true)

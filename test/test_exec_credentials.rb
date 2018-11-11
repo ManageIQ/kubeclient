@@ -3,7 +3,6 @@ require 'open3'
 
 # Unit tests for the ExecCredentials token provider
 class ExecCredentialsTest < MiniTest::Test
-
   def test_exec_opts_missing
     expected_msg =
       'exec options are required'
@@ -23,14 +22,14 @@ class ExecCredentialsTest < MiniTest::Test
   end
 
   def test_exec_command_failure
-    err = "Error"
+    err = 'Error'
     expected_msg =
       "exec command failed: #{err}"
 
     st = Minitest::Mock.new
     st.expect(:success?, false)
 
-    opts = { "command" => "dummy" }
+    opts = { 'command' => 'dummy' }
 
     Open3.stub(:capture3, [nil, err, st]) do
       exception = assert_raises(RuntimeError) do
@@ -41,14 +40,14 @@ class ExecCredentialsTest < MiniTest::Test
   end
 
   def test_token
-    opts = { "command" => "dummy" }
-    
-    creds = JSON.dump({
-      "apiVersion": "client.authentication.k8s.io/v1alpha1",
-      "status": {
-        "token": "0123456789ABCDEF0123456789ABCDEF"
+    opts = { 'command' => 'dummy' }
+
+    creds = JSON.dump(
+      'apiVersion': 'client.authentication.k8s.io/v1alpha1',
+      'status': {
+        'token': '0123456789ABCDEF0123456789ABCDEF'
       }
-    })
+    )
 
     st = Minitest::Mock.new
     st.expect(:success?, true)
@@ -59,11 +58,9 @@ class ExecCredentialsTest < MiniTest::Test
   end
 
   def test_status_missing
-    opts = { "command" => "dummy" }
-    
-    creds = JSON.dump({
-      "apiVersion": "client.authentication.k8s.io/v1alpha1"
-    })
+    opts = { 'command' => 'dummy' }
+
+    creds = JSON.dump('apiVersion': 'client.authentication.k8s.io/v1alpha1')
 
     st = Minitest::Mock.new
     st.expect(:success?, true)
@@ -79,12 +76,12 @@ class ExecCredentialsTest < MiniTest::Test
   end
 
   def test_token_missing
-    opts = { "command" => "dummy" }
-    
-    creds = JSON.dump({
-      "apiVersion": "client.authentication.k8s.io/v1alpha1",
-      "status": {}
-    })
+    opts = { 'command' => 'dummy' }
+
+    creds = JSON.dump(
+      'apiVersion': 'client.authentication.k8s.io/v1alpha1',
+      'status': {}
+    )
 
     st = Minitest::Mock.new
     st.expect(:success?, true)
@@ -100,20 +97,23 @@ class ExecCredentialsTest < MiniTest::Test
   end
 
   def test_api_version_mismatch
+    api_version = 'client.authentication.k8s.io/v1alpha1'
+    expected_version = 'client.authentication.k8s.io/v1beta1'
+
     opts = {
-      "command" => "dummy",
-      "apiVersion" => "client.authentication.k8s.io/v1beta1"
+      'command' => 'dummy',
+      'apiVersion' => expected_version
     }
-    
-    creds = JSON.dump({
-      "apiVersion": "client.authentication.k8s.io/v1alpha1"
-    })
+
+    creds = JSON.dump(
+      'apiVersion': api_version
+    )
 
     st = Minitest::Mock.new
     st.expect(:success?, true)
 
-    expected_msg = 'exec plugin is configured to use API version client.authentication.k8s.io/v1beta1,' \
-      ' plugin returned version client.authentication.k8s.io/v1alpha1'
+    expected_msg = "exec plugin is configured to use API version #{expected_version}," \
+      " plugin returned version #{api_version}"
 
     Open3.stub(:capture3, [creds, nil, st]) do
       exception = assert_raises(RuntimeError) do
