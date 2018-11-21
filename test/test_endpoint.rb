@@ -1,6 +1,9 @@
 require_relative 'test_helper'
 
-# Endpoint entity tests
+# kind: 'Endpoints' entity tests.
+# This is one of the unusual `kind`s that are already plural (https://github.com/kubernetes/kubernetes/issues/8115).
+# We force singular in method names like 'create_endpoint',
+# but `kind` should remain plural as in kubernetes.
 class TestEndpoint < MiniTest::Test
   def test_create_endpoint
     stub_core_api_list
@@ -44,11 +47,8 @@ class TestEndpoint < MiniTest::Test
     assert_equal('EndpointsList', collection[:kind])
     assert_equal('v1', collection[:apiVersion])
 
+    # Stripping of 'List' in collection.kind RecursiveOpenStruct mode only is historic.
     collection = client.get_endpoints
-    # TODO: this is wrong.  https://github.com/abonas/kubeclient/issues/307
-    # Kubernetes for single object uses kind: "Endpoints" (!) and
-    # kind: "EndpointsList" for plural.  While we force singular in method names
-    # to distinguish `get_endpoint` vs `get_endpoints`, we should not touch .kind.
-    assert_equal('Endpoint', collection.kind)
+    assert_equal('Endpoints', collection.kind)
   end
 end

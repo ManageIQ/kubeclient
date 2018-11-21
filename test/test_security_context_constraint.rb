@@ -22,13 +22,9 @@ class TestSecurityContextConstraints < MiniTest::Test
         type: 'MustRunAs'
       }
     )
-    # TODO: kind here is wrong, this doesn't work at all!
-    # https://github.com/abonas/kubeclient/issues/367
-    #   SecurityContextConstraint in version "v1" cannot be handled as a SecurityContextConstraints:
-    #   no kind "SecurityContextConstraint" is registered for version "security.openshift.io/v1"
     req_body = '{"metadata":{"name":"teleportation"},"runAsUser":{"type":"MustRunAs"},' \
       '"seLinuxContext":{"type":"MustRunAs"},' \
-      '"kind":"SecurityContextConstraint","apiVersion":"security.openshift.io/v1"}'
+      '"kind":"SecurityContextConstraints","apiVersion":"security.openshift.io/v1"}'
 
     stub_request(:post, 'http://localhost:8080/apis/security.openshift.io/v1/securitycontextconstraints')
       .with(body: req_body)
@@ -59,8 +55,8 @@ class TestSecurityContextConstraints < MiniTest::Test
     assert_equal('SecurityContextConstraintsList', collection[:kind])
     assert_equal('security.openshift.io/v1', collection[:apiVersion])
 
-    # TODO: this is wrong.  https://github.com/abonas/kubeclient/issues/307
+    # Stripping of 'List' in collection.kind RecursiveOpenStruct mode only is historic.
     collection = client.get_security_context_constraints
-    assert_equal('SecurityContextConstraint', collection.kind)
+    assert_equal('SecurityContextConstraints', collection.kind)
   end
 end

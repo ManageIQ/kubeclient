@@ -132,21 +132,38 @@ module Kubeclient
     end
 
     def self.parse_definition(kind, name)
-      # "name": "componentstatuses", networkpolicies, endpoints
-      # "kind": "ComponentStatus" NetworkPolicy, Endpoints
-      # maintain pre group api compatibility for endpoints and securitycontextconstraints.
-      # See: https://github.com/kubernetes/kubernetes/issues/8115
-      kind = kind[0..-2] if %w[Endpoints SecurityContextConstraints].include?(kind)
+      # Kubernetes gives us have 3 inputs:
+      #   kind: "ComponentStatus"
+      #   name: "componentstatuses"
+      #   singularName: "componentstatus" (usually kind.downcase)
+      # and want to derive singular and plural method names, with underscores:
+      #   "component_status"
+      #   "component_statuses"
+      # kind's CamelCase word boundaries determine our placement of underscores.
 
-      prefix = kind =~ /[A-Z]/ ? kind[0..kind.rindex(/[A-Z]/)] : kind # NetworkP
-      m = name.match(/^#{prefix.downcase}(.*)$/)
-      m && OpenStruct.new(
-        entity_type:   kind, # ComponentStatus
-        resource_name: name, # componentstatuses
-        method_names:  [
-          ClientMixin.underscore_entity(kind),         # component_status
-          ClientMixin.underscore_entity(prefix) + m[1] # component_statuses
-        ]
+      if IRREGULAR_NAMES[kind]
+        # In a few cases, the given kind / singularName itself is still plural.
+        # We require a distinct singular method name, so force it.
+        method_names = IRREGULAR_NAMES[kind]
+      else
+        # TODO: respect singularName from discovery?
+        # But how?  If it differs from kind.downcase, kind's word boundaries don't apply.
+        singular_name = kind.downcase
+
+        if name.start_with?(kind.downcase)
+          plural_suffix = name[kind.downcase.length..-1]             # "es"
+          singular_underscores = ClientMixin.underscore_entity(kind) # "component_status"
+          method_names = [singular_underscores, singular_underscores + plural_suffix]
+        else
+          # Something weird, can't infer underscores for plural so just give them up
+          method_names = [singular_name, name]
+        end
+      end
+
+      OpenStruct.new(
+        entity_type:   kind,
+        resource_name: name,
+        method_names:  method_names
       )
     end
 
@@ -434,6 +451,14 @@ module Kubeclient
     end
 
     private
+
+    IRREGULAR_NAMES = {
+      # In a few cases, the given kind itself is still plural.
+      # https://github.com/kubernetes/kubernetes/issues/8115
+      'Endpoints'                  => %w[endpoint endpoints],
+      'SecurityContextConstraints' => %w[security_context_constraint
+                                         security_context_constraints]
+    }.freeze
 
     # Format datetime according to RFC3339
     def format_datetime(value)
