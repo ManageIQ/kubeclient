@@ -469,10 +469,7 @@ class KubeclientTest < MiniTest::Test
   end
 
   def test_api_bearer_token_success
-    stub_request(:get, %r{/api/v1$})
-      .to_return(
-        body: open_test_file('core_api_resource_list.json'), status: 200
-      )
+    stub_core_api_list
     stub_request(:get, 'http://localhost:8080/api/v1/pods')
       .with(headers: { Authorization: 'Bearer valid_token' })
       .to_return(
@@ -837,11 +834,6 @@ class KubeclientTest < MiniTest::Test
   def stub_get_services
     stub_request(:get, %r{/services})
       .to_return(body: open_test_file('entity_list.json'), status: 200)
-  end
-
-  def stub_core_api_list
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
   end
 
   def client

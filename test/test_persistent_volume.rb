@@ -3,10 +3,9 @@ require_relative 'test_helper'
 # PersistentVolume tests
 class TestPersistentVolume < MiniTest::Test
   def test_get_from_json_v1
+    stub_core_api_list
     stub_request(:get, %r{/persistentvolumes})
       .to_return(body: open_test_file('persistent_volume.json'), status: 200)
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     volume = client.get_persistent_volume('pv0001')

@@ -3,12 +3,7 @@ require_relative 'test_helper'
 # Endpoint entity tests
 class TestEndpoint < MiniTest::Test
   def test_create_endpoint
-    stub_request(:get, %r{/api/v1$})
-      .to_return(
-        body: open_test_file('core_api_resource_list.json'),
-        status: 200
-      )
-
+    stub_core_api_list
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     testing_ep = Kubeclient::Resource.new
     testing_ep.metadata = {}

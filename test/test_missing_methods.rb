@@ -3,10 +3,7 @@ require_relative 'test_helper'
 # Test method_missing, respond_to? and respond_to_missing behaviour
 class TestMissingMethods < MiniTest::Test
   def test_missing
-    stub_request(:get, %r{/api/v1$}).to_return(
-      body: open_test_file('core_api_resource_list.json'),
-      status: 200
-    )
+    stub_core_api_list
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     assert_equal(true, client.respond_to?(:get_pod))
     assert_equal(true, client.respond_to?(:get_pods))

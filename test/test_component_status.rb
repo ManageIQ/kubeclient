@@ -3,10 +3,9 @@ require_relative 'test_helper'
 # ComponentStatus tests
 class TestComponentStatus < MiniTest::Test
   def test_get_from_json_v3
+    stub_core_api_list
     stub_request(:get, %r{/componentstatuses})
       .to_return(body: open_test_file('component_status.json'), status: 200)
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     component_status = client.get_component_status('etcd-0', 'default')
