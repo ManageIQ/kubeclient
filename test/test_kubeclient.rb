@@ -208,6 +208,7 @@ class KubeclientTest < MiniTest::Test
 
     refute_empty(services)
     assert_instance_of(Kubeclient::Common::EntityList, services)
+    # Stripping of 'List' in collection.kind RecursiveOpenStruct mode only is historic.
     assert_equal('Service', services.kind)
     assert_equal(2, services.size)
     assert_instance_of(Kubeclient::Resource, services[0])
@@ -234,6 +235,7 @@ class KubeclientTest < MiniTest::Test
 
     response = client.get_services(as: :parsed)
     assert_equal Hash, response.class
+    assert_equal 'ServiceList', response['kind']
     assert_equal %w[metadata spec status], response['items'].first.keys
   end
 
@@ -243,6 +245,7 @@ class KubeclientTest < MiniTest::Test
 
     response = client.get_services(as: :parsed_symbolized)
     assert_equal Hash, response.class
+    assert_equal 'ServiceList', response[:kind]
     assert_equal %i[metadata spec status], response[:items].first.keys
   end
 
