@@ -435,7 +435,7 @@ module Kubeclient
 
     private
 
-    # Format ditetime according to RFC3339
+    # Format datetime according to RFC3339
     def format_datetime(value)
       case value
       when DateTime, Time
