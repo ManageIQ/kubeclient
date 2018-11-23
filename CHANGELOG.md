@@ -8,6 +8,8 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 
 ### Fixed
 - Support custom resources with lowercase `kind` (#361).
+- `create_security_context_constraint` now works (#366).
+- `get_security_context_constraints.kind`, `get_endpoints.kind` are now plural as in kubernetes (#366).
 
 ### Added
 - Add support for retrieving large lists of objects in chunks (#356).
