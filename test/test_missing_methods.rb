@@ -55,4 +55,14 @@ class TestMissingMethods < MiniTest::Test
     assert_equal(true, client.respond_to?(:get_security_context_constraint))
     assert_equal(true, client.respond_to?(:get_security_context_constraints))
   end
+
+  def test_lowercase_kind
+    stub_request(:get, %r{/apis/config.istio.io/v1alpha2$}).to_return(
+      body: open_test_file('config.istio.io_api_resource_list.json'),
+      status: 200
+    )
+    client = Kubeclient::Client.new('http://localhost:8080/apis/config.istio.io', 'v1alpha2')
+    assert_equal(true, client.respond_to?(:get_servicecontrolreport))
+    assert_equal(true, client.respond_to?(:get_servicecontrolreports))
+  end
 end
