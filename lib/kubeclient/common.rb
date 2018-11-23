@@ -338,9 +338,7 @@ module Kubeclient
       # TODO: temporary solution to add "kind" and apiVersion to request
       # until this issue is solved
       # https://github.com/GoogleCloudPlatform/kubernetes/issues/6439
-      # TODO: #2 solution for
-      # https://github.com/kubernetes/kubernetes/issues/8115
-      hash[:kind] = (entity_type.eql?('Endpoint') ? 'Endpoints' : entity_type)
+      hash[:kind] = entity_type
       hash[:apiVersion] = @api_group + @api_version
       response = handle_exception do
         rest_client[ns_prefix + resource_name]
