@@ -3,10 +3,9 @@ require_relative 'test_helper'
 # Node entity tests
 class TestNode < MiniTest::Test
   def test_get_from_json_v1
+    stub_core_api_list
     stub_request(:get, %r{/nodes})
       .to_return(body: open_test_file('node.json'), status: 200)
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     node = client.get_node('127.0.0.1')
@@ -32,10 +31,9 @@ class TestNode < MiniTest::Test
   end
 
   def test_get_from_json_v1_raw
+    stub_core_api_list
     stub_request(:get, %r{/nodes})
       .to_return(body: open_test_file('node.json'), status: 200)
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     response = client.get_node('127.0.0.1', nil, as: :raw)

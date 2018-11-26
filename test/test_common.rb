@@ -1,3 +1,4 @@
+
 require_relative 'test_helper'
 
 # Unit tests for the common module
@@ -34,9 +35,25 @@ class CommonTest < MiniTest::Test
       Image image
       ImageStream image_stream
       dogstatsd dogstatsd
+      lowerCamelUPPERCase lower_camel_uppercase
       HTTPAPISpecBinding httpapispec_binding
-    ].each_slice(2) do |singular, plural|
-      assert_equal(Kubeclient::ClientMixin.underscore_entity(singular), plural)
+      APIGroup apigroup
+      APIGroupList apigroup_list
+      APIResourceList apiresource_list
+      APIService apiservice
+      APIServiceList apiservice_list
+      APIVersions apiversions
+      OAuthAccessToken oauth_access_token
+      OAuthAccessTokenList oauth_access_token_list
+      OAuthAuthorizeToken oauth_authorize_token
+      OAuthAuthorizeTokenList oauth_authorize_token_list
+      OAuthClient oauth_client
+      OAuthClientAuthorization oauth_client_authorization
+      OAuthClientAuthorizationList oauth_client_authorization_list
+      OAuthClientList oauth_client_list
+    ].each_slice(2) do |kind, expected_underscore|
+      underscore = Kubeclient::ClientMixin.underscore_entity(kind)
+      assert_equal(underscore, expected_underscore)
     end
   end
 

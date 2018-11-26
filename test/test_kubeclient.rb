@@ -208,6 +208,7 @@ class KubeclientTest < MiniTest::Test
 
     refute_empty(services)
     assert_instance_of(Kubeclient::Common::EntityList, services)
+    # Stripping of 'List' in collection.kind RecursiveOpenStruct mode only is historic.
     assert_equal('Service', services.kind)
     assert_equal(2, services.size)
     assert_instance_of(Kubeclient::Resource, services[0])
@@ -234,6 +235,7 @@ class KubeclientTest < MiniTest::Test
 
     response = client.get_services(as: :parsed)
     assert_equal Hash, response.class
+    assert_equal 'ServiceList', response['kind']
     assert_equal %w[metadata spec status], response['items'].first.keys
   end
 
@@ -243,6 +245,7 @@ class KubeclientTest < MiniTest::Test
 
     response = client.get_services(as: :parsed_symbolized)
     assert_equal Hash, response.class
+    assert_equal 'ServiceList', response[:kind]
     assert_equal %i[metadata spec status], response[:items].first.keys
   end
 
@@ -469,10 +472,7 @@ class KubeclientTest < MiniTest::Test
   end
 
   def test_api_bearer_token_success
-    stub_request(:get, %r{/api/v1$})
-      .to_return(
-        body: open_test_file('core_api_resource_list.json'), status: 200
-      )
+    stub_core_api_list
     stub_request(:get, 'http://localhost:8080/api/v1/pods')
       .with(headers: { Authorization: 'Bearer valid_token' })
       .to_return(
@@ -837,11 +837,6 @@ class KubeclientTest < MiniTest::Test
   def stub_get_services
     stub_request(:get, %r{/services})
       .to_return(body: open_test_file('entity_list.json'), status: 200)
-  end
-
-  def stub_core_api_list
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
   end
 
   def client

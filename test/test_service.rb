@@ -25,10 +25,7 @@ class TestService < MiniTest::Test
                  hash[:metadata][:labels][:name])
 
     expected_url = 'http://localhost:8080/api/v1/namespaces/staging/services'
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
-
+    stub_core_api_list
     stub_request(:post, expected_url)
       .to_return(body: open_test_file('created_service.json'), status: 201)
 
@@ -67,9 +64,7 @@ class TestService < MiniTest::Test
     }
 
     expected_url = 'http://localhost:8080/api/v1/namespaces/staging/services'
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
+    stub_core_api_list
     stub_request(:post, expected_url)
       .to_return(body: open_test_file('created_service.json'), status: 201)
 
@@ -101,9 +96,7 @@ class TestService < MiniTest::Test
       }]
     }
 
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
+    stub_core_api_list
     expected_url = 'http://localhost:8080/api/v1/namespaces/staging/services'
     stub_request(:post, %r{namespaces/staging/services})
       .to_return(body: open_test_file('created_service.json'), status: 201)
@@ -122,9 +115,7 @@ class TestService < MiniTest::Test
   end
 
   def test_conversion_from_json_v1
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
+    stub_core_api_list
     stub_request(:get, %r{/services})
       .to_return(body: open_test_file('service.json'),
                  status: 200)
@@ -160,9 +151,7 @@ class TestService < MiniTest::Test
     our_service.labels.component = 'apiserver'
     our_service.labels.provider = 'kubernetes'
 
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
+    stub_core_api_list
     stub_request(:delete, %r{/namespaces/default/services})
       .to_return(body: open_test_file('service.json'), status: 200)
 
@@ -176,9 +165,7 @@ class TestService < MiniTest::Test
   end
 
   def test_get_service_no_ns
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
+    stub_core_api_list
     # when not specifying namespace for entities which
     # are not node or namespace, the request will fail
     stub_request(:get, %r{/services/redis-slave})
@@ -193,9 +180,7 @@ class TestService < MiniTest::Test
   end
 
   def test_get_service
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
+    stub_core_api_list
     stub_request(:get, %r{/namespaces/development/services/redis-slave})
       .to_return(body: open_test_file('service.json'),
                  status: 200)
@@ -217,9 +202,7 @@ class TestService < MiniTest::Test
     service.metadata.name      = name
     service.metadata.namespace = 'development'
 
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
+    stub_core_api_list
     expected_url = "http://localhost:8080/api/v1/namespaces/development/services/#{name}"
     stub_request(:put, expected_url)
       .to_return(body: open_test_file('service_update.json'), status: 201)
@@ -244,9 +227,7 @@ class TestService < MiniTest::Test
       'namespace' => 'development'
     }
 
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
+    stub_core_api_list
     expected_url = "http://localhost:8080/api/v1/namespaces/development/services/#{name}"
     stub_request(:put, expected_url)
       .to_return(body: open_test_file('service_update.json'), status: 201)
@@ -270,9 +251,7 @@ class TestService < MiniTest::Test
     service.metadata.name      = name
     service.metadata.namespace = 'development'
 
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'),
-                 status: 200)
+    stub_core_api_list
     expected_url = "http://localhost:8080/api/v1/namespaces/development/services/#{name}"
     stub_request(:patch, expected_url)
       .to_return(body: open_test_file('service_patch.json'), status: 200)

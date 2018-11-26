@@ -3,9 +3,7 @@ require_relative 'test_helper'
 # LimitRange tests
 class TestLimitRange < MiniTest::Test
   def test_get_from_json_v1
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
-
+    stub_core_api_list
     stub_request(:get, %r{/limitranges})
       .to_return(body: open_test_file('limit_range.json'), status: 200)
 
