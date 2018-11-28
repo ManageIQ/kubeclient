@@ -8,12 +8,19 @@ At some point in time it is decided to release version x.y.z.
 RELEASE_BRANCH="master"
 ```
 
+## 0. (once) Install gem-release, needed for several commands here:
+
+```bash
+gem install gem-release
+```
+
 ## 1. PR(s) for changelog & bump
 
 Edit `CHANGELOG.md` as necessary.  Even if all included changes remembered to update it, you should replace "Unreleased" section header with appropriate "x.y.z — 20yy-mm-dd" header.
 
 Bump `lib/kubeclient/version.rb` manually, or by using:
 ```bash
+git checkout -b release-$RELEASE_VERSION
 gem bump --version $RELEASE_VERSION
 git show # View version bump change.
 ```
