@@ -55,7 +55,9 @@ bundle exec rake test rubocop
 
 Create and push the tag:
 ```bash
-gem tag --destination https://github.com/abonas/kubeclient
+gem tag --no-push
+git push --tags --dry-run https://github.com/abonas/kubeclient  # Check for unexpected tags
+git push --tags https://github.com/abonas/kubeclient
 ```
 
 Release onto rubygems.org:
