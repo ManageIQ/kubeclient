@@ -35,7 +35,7 @@ class KubeclientConfigTest < MiniTest::Test
   def test_external_nopath_absolute
     yaml = File.read(config_file('external.kubeconfig'))
     # kcfg_path = nil should prevent file access, even if absolute path specified
-    ca_absolute_path = File.absolute_path(config_file('external.kubeconfig').path)
+    ca_absolute_path = File.absolute_path(config_file('external-ca.pem'))
     yaml = yaml.gsub('external-ca.pem', ca_absolute_path)
     config = Kubeclient::Config.new(YAML.safe_load(yaml), nil)
     assert_raises(StandardError) do
@@ -102,6 +102,6 @@ class KubeclientConfigTest < MiniTest::Test
   end
 
   def config_file(name)
-    File.new(File.join(File.dirname(__FILE__), 'config', name))
+    File.join(File.dirname(__FILE__), 'config', name)
   end
 end
