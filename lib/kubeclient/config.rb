@@ -18,12 +18,17 @@ module Kubeclient
       end
     end
 
-    def initialize(kcfg, kcfg_path)
-      @kcfg = kcfg
+    # data (Hash) - Parsed kubeconfig data.
+    # kcfg_path (string) - Base directory for resolving relative references to external files.
+    #   If set to nil, all external lookups are disabled (even for absolute paths).
+    # See also the more convenient Config.read
+    def initialize(data, kcfg_path)
+      @kcfg = data
       @kcfg_path = kcfg_path
       raise 'Unknown kubeconfig version' if @kcfg['apiVersion'] != 'v1'
     end
 
+    # Builds Config instance by parsing given file, with lookups relative to file's directory.
     def self.read(filename)
       parsed = YAML.safe_load(File.read(filename), [Date, Time])
       Config.new(parsed, File.dirname(filename))
@@ -65,8 +70,12 @@ module Kubeclient
 
     private
 
+    def allow_external_lookups?
+      @kcfg_path != nil
+    end
+
     def ext_file_path(path)
-      if @kcfg_path.nil?
+      unless allow_external_lookups?
         raise "Kubeclient::Config: external lookups disabled, can't load '#{path}'"
       end
       Pathname(path).absolute? ? path : File.join(@kcfg_path, path)
