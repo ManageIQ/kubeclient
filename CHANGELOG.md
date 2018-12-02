@@ -4,6 +4,12 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
+## Unreleased
+
+### Security
+- Really made `Kubeclient::Config.new(data, nil)` prevent external file lookups.
+  README documented this since 3.1.1 (#334) but alas that was a lie — absolute paths always worked.
+
 ## 4.1.0 — 2018-11-28
 
 ### Fixed
