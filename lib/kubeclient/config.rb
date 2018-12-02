@@ -66,6 +66,9 @@ module Kubeclient
     private
 
     def ext_file_path(path)
+      if @kcfg_path.nil?
+        raise "Kubeclient::Config: external lookups disabled, can't load '#{path}'"
+      end
       Pathname(path).absolute? ? path : File.join(@kcfg_path, path)
     end
 
