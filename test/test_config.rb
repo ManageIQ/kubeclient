@@ -75,23 +75,51 @@ class KubeclientConfigTest < MiniTest::Test
   end
 
   def test_user_exec
-    creds = JSON.dump(
+    token = '0123456789ABCDEF0123456789ABCDEF'
+    creds = {
       'apiVersion': 'client.authentication.k8s.io/v1beta1',
       'status': {
-        'token': '0123456789ABCDEF0123456789ABCDEF'
+        'token': token
       }
-    )
+    }
 
-    st = Minitest::Mock.new
-    st.expect(:success?, true)
+    config = Kubeclient::Config.read(config_file('execauth.kubeconfig'))
+    assert_equal(['localhost/system:admin:exec-search-path',
+                  'localhost/system:admin:exec-relative-path',
+                  'localhost/system:admin:exec-absolute-path'],
+                 config.contexts)
 
-    Open3.stub(:capture3, [creds, nil, st]) do
-      config = Kubeclient::Config.read(config_file('execauth.kubeconfig'))
-      assert_equal(['localhost/system:admin:exec'], config.contexts)
-      context = config.context('localhost/system:admin:exec')
+    # A bare command name in config means search PATH, so it's executed as bare command.
+    stub_exec(%r{^example-exec-plugin$}, creds) do
+      context = config.context('localhost/system:admin:exec-search-path')
       check_context(context, ssl: false)
+      assert_equal(token, context.auth_options[:bearer_token])
+    end
 
-      assert_equal('0123456789ABCDEF0123456789ABCDEF', context.auth_options[:bearer_token])
+    # A relative path is taken relative to the dir of the kubeconfig.
+    stub_exec(%r{.*config/dir/example-exec-plugin$}, creds) do
+      context = config.context('localhost/system:admin:exec-relative-path')
+      check_context(context, ssl: false)
+      assert_equal(token, context.auth_options[:bearer_token])
+    end
+
+    # An absolute path is taken as-is.
+    stub_exec(%r{^/abs/path/example-exec-plugin$}, creds) do
+      context = config.context('localhost/system:admin:exec-absolute-path')
+      check_context(context, ssl: false)
+      assert_equal(token, context.auth_options[:bearer_token])
+    end
+  end
+
+  def test_user_exec_nopath
+    yaml = File.read(config_file('execauth.kubeconfig'))
+    config = Kubeclient::Config.new(YAML.safe_load(yaml), nil)
+    config.contexts.each do |context_name|
+      Open3.stub(:capture3, proc { flunk 'should not execute command' }) do
+        assert_raises(StandardError) do
+          config.context(context_name)
+        end
+      end
     end
   end
 
@@ -125,5 +153,19 @@ class KubeclientConfigTest < MiniTest::Test
 
   def config_file(name)
     File.join(File.dirname(__FILE__), 'config', name)
+  end
+
+  def stub_exec(command_regexp, creds)
+    st = Minitest::Mock.new
+    st.expect(:success?, true)
+
+    capture3_stub = lambda do |_env, command, *_args|
+      assert_match command_regexp, command
+      [JSON.dump(creds), nil, st]
+    end
+
+    Open3.stub(:capture3, capture3_stub) do
+      yield
+    end
   end
 end

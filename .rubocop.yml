@@ -25,3 +25,5 @@ Security/MarshalLoad:
 Style/MethodCallWithArgsParentheses:
   IgnoredMethods:
   - require_relative
+Style/RegexpLiteral:
+  Enabled: false
