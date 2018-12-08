@@ -163,8 +163,7 @@ module Kubeclient
             method_names = [prefix_underscores + singular_suffix,      # "network_policy"
                             prefix_underscores + plural_suffix]        # "network_policies"
           else
-            # Something weird, can't infer underscores for plural so just give them up
-            method_names = [singular_name, name]
+            method_names = resolve_unconventional_method_names(name, kind, singular_name)
           end
         end
       end
@@ -174,6 +173,17 @@ module Kubeclient
         resource_name: name,
         method_names:  method_names
       )
+    end
+
+    def self.resolve_unconventional_method_names(name, kind, singular_name)
+      underscored_name = name.tr('-', '_')
+      singular_underscores = ClientMixin.underscore_entity(kind)
+      if underscored_name.start_with?(singular_underscores)
+        [singular_underscores, underscored_name]
+      else
+        # fallback to lowercase, no separators for both names
+        [singular_name, underscored_name.tr('_', '')]
+      end
     end
 
     def handle_uri(uri, path)
