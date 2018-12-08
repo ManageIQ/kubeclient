@@ -6,6 +6,8 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 
 ## Unreleased
 
+- For resources that contain dashes in name, the generated method names will replace the dash in names with underscores.
+
 ### Security
 - Really made `Kubeclient::Config.new(data, nil)` prevent external file lookups.
   README documented this since 3.1.1 (#334) but alas that was a lie — absolute paths always worked.

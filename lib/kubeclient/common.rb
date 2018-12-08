@@ -150,13 +150,19 @@ module Kubeclient
         # But how?  If it differs from kind.downcase, kind's word boundaries don't apply.
         singular_name = kind.downcase
 
-        if name.start_with?(kind.downcase)
+        if name.start_with?(singular_name)
           plural_suffix = name[kind.downcase.length..-1]             # "es"
           singular_underscores = ClientMixin.underscore_entity(kind) # "component_status"
           method_names = [singular_underscores, singular_underscores + plural_suffix]
         else
-          # Something weird, can't infer underscores for plural so just give them up
-          method_names = [singular_name, name]
+          underscored_name = name.tr('-', '_')
+          singular_underscores = ClientMixin.underscore_entity(kind)
+          method_names = if underscored_name.start_with?(singular_underscores)
+                           [singular_underscores, underscored_name]
+                         else
+                           # fallback to lowercase, no separators for both names
+                           [singular_name, underscored_name.tr('_', '')]
+                         end
         end
       end
 

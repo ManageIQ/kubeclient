@@ -74,4 +74,19 @@ class CommonTest < MiniTest::Test
     formatted = client.send(:format_datetime, value)
     assert_equal(formatted, '2018-04-30T19:20:33.000000000+00:00')
   end
+
+  def test_parse_definition_with_unconventional_names
+    %w[
+      TestWithDash test-with-dashes test_with_dash test_with_dashes
+      TestUnderscore test_underscores test_underscore test_underscores
+      TestMismatch other-odd-name testmismatch otheroddname
+      MixedDashMinus mixed-dash_minuses mixed_dash_minus mixed_dash_minuses
+      Noseparator noseparators noseparator noseparators
+      SameUptoWordboundary sameup-toword-boundarys sameuptowordboundary sameuptowordboundarys
+    ].each_slice(4) do |kind, plural, expected_single, expected_plural|
+      method_names = Kubeclient::ClientMixin.parse_definition(kind, plural).method_names
+      assert_equal(method_names[0], expected_single)
+      assert_equal(method_names[1], expected_plural)
+    end
+  end
 end
