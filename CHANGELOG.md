@@ -6,9 +6,15 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 
 ## Unreleased
 
+### Added
+- Support `user: exec: ...` credential plugins like in Go client (#363, #375).
+
 ### Security
-- Really made `Kubeclient::Config.new(data, nil)` prevent external file lookups.
+- Really made `Kubeclient::Config.new(data, nil)` prevent external file lookups. (#372)
   README documented this since 3.1.1 (#334) but alas that was a lie — absolute paths always worked.
+  Now this also prevents credential plugin execution.
+
+  Even in this mode, using config from untrusted sources is not recommended.
 
 ## 4.1.0 — 2018-11-28
 
