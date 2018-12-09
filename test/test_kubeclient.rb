@@ -54,6 +54,19 @@ class KubeclientTest < MiniTest::Test
     assert_equal(watch_client.send(:build_client_options)[:proxy][:proxy_port], proxy_uri.port)
   end
 
+  def test_pass_max_redirects
+    max_redirects = 0
+    client = Kubeclient::Client.new('http://localhost:8080/api/', http_max_redirects: max_redirects)
+    rest_client = client.rest_client
+    assert_equal(max_redirects, rest_client.options[:max_redirects])
+
+    stub_request(:get, 'http://localhost:8080/api')
+      .to_return(status: 302, headers: { location: 'http://localhost:1234/api' })
+
+    exception = assert_raises(Kubeclient::HttpError) { client.api }
+    assert_equal(302, exception.error_code)
+  end
+
   def test_exception
     stub_core_api_list
     stub_request(:post, %r{/services})
