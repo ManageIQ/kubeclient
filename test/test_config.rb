@@ -1,5 +1,6 @@
 require_relative 'test_helper'
 require 'yaml'
+require 'open3'
 
 # Testing Kubernetes client configuration
 class KubeclientConfigTest < MiniTest::Test
@@ -71,6 +72,27 @@ class KubeclientConfigTest < MiniTest::Test
   def test_timestamps
     # Test YAML parsing doesn't crash on YAML timestamp syntax.
     Kubeclient::Config.read(config_file('timestamps.kubeconfig'))
+  end
+
+  def test_user_exec
+    creds = JSON.dump(
+      'apiVersion': 'client.authentication.k8s.io/v1beta1',
+      'status': {
+        'token': '0123456789ABCDEF0123456789ABCDEF'
+      }
+    )
+
+    st = Minitest::Mock.new
+    st.expect(:success?, true)
+
+    Open3.stub(:capture3, [creds, nil, st]) do
+      config = Kubeclient::Config.read(config_file('execauth.kubeconfig'))
+      assert_equal(['localhost/system:admin:exec'], config.contexts)
+      context = config.context('localhost/system:admin:exec')
+      check_context(context, ssl: false)
+
+      assert_equal('0123456789ABCDEF0123456789ABCDEF', context.auth_options[:bearer_token])
+    end
   end
 
   private
