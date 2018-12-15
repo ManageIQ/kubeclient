@@ -41,6 +41,18 @@ class TestMissingMethods < MiniTest::Test
     end
   end
 
+  def test_nonsuffix_plurals
+    stub_request(:get, %r{/apis/extensions/v1beta1$}).to_return(
+      body: open_test_file('extensions_v1beta1_api_resource_list.json'),
+      status: 200
+    )
+    client = Kubeclient::Client.new('http://localhost:8080/apis/extensions', 'v1beta1')
+    assert_equal(true, client.respond_to?(:get_network_policy))
+    assert_equal(true, client.respond_to?(:get_network_policies))
+    assert_equal(true, client.respond_to?(:get_pod_security_policy))
+    assert_equal(true, client.respond_to?(:get_pod_security_policies))
+  end
+
   def test_irregular_names
     stub_core_api_list
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
