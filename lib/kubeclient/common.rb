@@ -516,6 +516,9 @@ module Kubeclient
       @entities = {}
       fetch_entities['resources'].each do |resource|
         next if resource['name'].include?('/')
+        # Not a regular entity, special functionality covered by `process_template`.
+        # https://github.com/openshift/origin/issues/21668
+        next if resource['kind'] == 'Template' && resource['name'] == 'processedtemplates'
         resource['kind'] ||=
           Kubeclient::Common::MissingKindCompatibility.resource_kind(resource['name'])
         entity = ClientMixin.parse_definition(resource['kind'], resource['name'])
