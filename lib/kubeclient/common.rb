@@ -132,13 +132,13 @@ module Kubeclient
     end
 
     def self.parse_definition(kind, name)
-      # Kubernetes gives us have 3 inputs:
-      #   kind: "ComponentStatus"
-      #   name: "componentstatuses"
-      #   singularName: "componentstatus" (usually kind.downcase)
+      # Kubernetes gives us 3 inputs:
+      #   kind: "ComponentStatus", "NetworkPolicy", "Endpoints"
+      #   name: "componentstatuses", "networkpolicies", "endpoints"
+      #   singularName: "componentstatus" etc (usually omitted, defaults to kind.downcase)
       # and want to derive singular and plural method names, with underscores:
-      #   "component_status"
-      #   "component_statuses"
+      #   "network_policy"
+      #   "network_policies"
       # kind's CamelCase word boundaries determine our placement of underscores.
 
       if IRREGULAR_NAMES[kind]
@@ -150,13 +150,22 @@ module Kubeclient
         # But how?  If it differs from kind.downcase, kind's word boundaries don't apply.
         singular_name = kind.downcase
 
-        if name.start_with?(kind.downcase)
-          plural_suffix = name[kind.downcase.length..-1]             # "es"
-          singular_underscores = ClientMixin.underscore_entity(kind) # "component_status"
-          method_names = [singular_underscores, singular_underscores + plural_suffix]
-        else
-          # Something weird, can't infer underscores for plural so just give them up
+        if !(/[A-Z]/ =~ kind)
+          # Some custom resources have a fully lowercase kind - can't infer underscores.
           method_names = [singular_name, name]
+        else
+          # Some plurals are not exact suffixes, e.g. NetworkPolicy -> networkpolicies.
+          # So don't expect full last word to match.
+          /^(?<prefix>(.*[A-Z]))(?<singular_suffix>[^A-Z]*)$/ =~ kind  # "NetworkP", "olicy"
+          if name.start_with?(prefix.downcase)
+            plural_suffix = name[prefix.length..-1]                    # "olicies"
+            prefix_underscores = ClientMixin.underscore_entity(prefix) # "network_p"
+            method_names = [prefix_underscores + singular_suffix,      # "network_policy"
+                            prefix_underscores + plural_suffix]        # "network_policies"
+          else
+            # Something weird, can't infer underscores for plural so just give them up
+            method_names = [singular_name, name]
+          end
         end
       end
 
@@ -507,6 +516,9 @@ module Kubeclient
       @entities = {}
       fetch_entities['resources'].each do |resource|
         next if resource['name'].include?('/')
+        # Not a regular entity, special functionality covered by `process_template`.
+        # https://github.com/openshift/origin/issues/21668
+        next if resource['kind'] == 'Template' && resource['name'] == 'processedtemplates'
         resource['kind'] ||=
           Kubeclient::Common::MissingKindCompatibility.resource_kind(resource['name'])
         entity = ClientMixin.parse_definition(resource['kind'], resource['name'])
