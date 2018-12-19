@@ -10,7 +10,15 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 - Really made `Kubeclient::Config.new(data, nil)` prevent external file lookups.
   README documented this since 3.1.1 (#334) but alas that was a lie — absolute paths always worked.
 
-## 4.1.0 — 2018-11-28
+## 4.1.1 — 2018-12-17
+
+### Fixed
+
+- Fixed method names for non-suffix plurals such as y -> ies  (#377).
+
+## 4.1.0 — 2018-11-28 — REGRESSION
+
+This version broke method names where plural is not just adding a suffix, notably y -> ies (bug #376).
 
 ### Fixed
 - Support custom resources with lowercase `kind` (#361).
@@ -39,7 +47,7 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 
 ## 3.1.1 - 2018-06-01 — REGRESSION
 
-In this version `Kubeclient::Config.read` raises Psych::DisallowedClass on legal yaml configs containing a timestamp, for example gcp access-token expiry (#337).
+In this version `Kubeclient::Config.read` raises Psych::DisallowedClass on legal yaml configs containing a timestamp, for example gcp access-token expiry (bug #337).
 
 ### Security
 - Changed `Kubeclient::Config.read` to use `YAML.safe_load` (#334).
