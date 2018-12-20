@@ -20,7 +20,7 @@ module Kubeclient
 
     # data (Hash) - Parsed kubeconfig data.
     # kcfg_path (string) - Base directory for resolving relative references to external files.
-    #   If set to nil, all external lookups are disabled (even for absolute paths).
+    #   If set to nil, all external lookups & commands are disabled (even for absolute paths).
     # See also the more convenient Config.read
     def initialize(data, kcfg_path)
       @kcfg = data
@@ -81,6 +81,24 @@ module Kubeclient
       Pathname(path).absolute? ? path : File.join(@kcfg_path, path)
     end
 
+    def ext_command_path(path)
+      unless allow_external_lookups?
+        raise "Kubeclient::Config: external lookups disabled, can't execute '#{path}'"
+      end
+      # Like go client https://github.com/kubernetes/kubernetes/pull/59495#discussion_r171138995,
+      # distinguish 3 cases:
+      # - absolute (e.g. /path/to/foo)
+      # - $PATH-based (e.g. curl)
+      # - relative to config file's dir (e.g. ./foo)
+      if Pathname(path).absolute?
+        path
+      elsif File.basename(path) == path
+        path
+      else
+        File.join(@kcfg_path, path)
+      end
+    end
+
     def fetch_context(context_name)
       context = @kcfg['contexts'].detect do |x|
         break x['context'] if x['name'] == context_name
@@ -132,7 +150,9 @@ module Kubeclient
       if user.key?('token')
         options[:bearer_token] = user['token']
       elsif user.key?('exec')
-        options[:bearer_token] = Kubeclient::ExecCredentials.token(user['exec'])
+        exec_opts = user['exec'].dup
+        exec_opts['command'] = ext_command_path(exec_opts['command']) if exec_opts['command']
+        options[:bearer_token] = Kubeclient::ExecCredentials.token(exec_opts)
       else
         %w[username password].each do |attr|
           options[attr.to_sym] = user[attr] if user.key?(attr)

@@ -268,6 +268,11 @@ If you've been using `kubectl` and have a `.kube/config` file (possibly referenc
 config = Kubeclient::Config.read(ENV['KUBECONFIG'] || '/path/to/.kube/config')
 ```
 
+This will lookup external files; relative paths will be resolved relative to the file's directory, if config refers to them with relative path.
+This includes external [`exec:` credential plugins][exec] to be executed.
+
+[exec]: https://kubernetes.io/docs/reference/access-authn-authz/authentication/#client-go-credential-plugins
+
 You can also construct `Config` directly from nested data. For example if you have JSON or YAML config data in a variable:
 
 ```ruby
@@ -277,7 +282,7 @@ config = Kubeclient::Config.new(JSON.parse(json_text), nil)
 ```
 
 The 2nd argument is a base directory for finding external files, if config refers to them with relative path.
-Setting it to `nil` disables file lookups.  (A config can be self-contained by using inline fields such as `client-certificate-data`.)
+Setting it to `nil` disables file lookups, and `exec:` execution - such configs will raise an exception.  (A config can be self-contained by using inline fields such as `client-certificate-data`.)
 
 To create a client based on a Config object:
 
@@ -297,7 +302,9 @@ Kubeclient::Client.new(
 
 #### Security: Don't use config from untrusted sources
 
-Kubeclient was never reviewed for behaving safely with malicious / malformed config.
+`Config.read` is catastrophically unsafe — it will execute arbitrary command lines specified by the config!
+
+`Config.new(data, nil)` is better but Kubeclient was never reviewed for behaving safely with malicious / malformed config.
 It might crash / misbehave in unexpected ways...
 
 #### namespace
@@ -604,9 +611,9 @@ Checking the type of a resource can be done using:
 
 update_* delete_* and patch_* now return a RecursiveOpenStruct like the get_* methods
 
-The gem raises Kubeclient::HttpError or subclasses now. Catching KubeException still works but is deprecated.
+The `Kubeclient::Client` class raises `Kubeclient::HttpError` or subclasses now. Catching `KubeException` still works but is deprecated.
 
-`Kubeclient::Config#context` raises KeyError instead of RuntimeError for non-existent context name.
+`Kubeclient::Config#context` raises `KeyError` instead of `RuntimeError` for non-existent context name.
 
 <a name="past_version_1.2.0">
 
