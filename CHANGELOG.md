@@ -4,10 +4,10 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
-## Unreleased
+## 4.1.2 — 2018-12-26
 
 ### Fixed
-- For resources that contain dashes in name, there will be an attempt to resolve the method name based on singular name prefix or by replacing the dash in names with underscores.
+- For resources that contain dashes in name, there will be an attempt to resolve the method name based on singular name prefix or by replacing the dash in names with underscores (#382).
 
 ## 4.1.1 — 2018-12-17
 
