@@ -81,6 +81,11 @@ class CommonTest < MiniTest::Test
       LatinDatum latindata latin_datum latin_data
       Noseparator noseparators noseparator noseparators
       lowercase lowercases lowercase lowercases
+      TestWithDash test-with-dashes test_with_dash test_with_dashes
+      TestUnderscore test_underscores test_underscore test_underscores
+      TestMismatch other-odd-name testmismatch otheroddname
+      MixedDashMinus mixed-dash_minuses mixed_dash_minus mixed_dash_minuses
+      SameUptoWordboundary sameup-toword-boundarys sameuptowordboundary sameuptowordboundarys
     ].each_slice(4) do |kind, plural, expected_single, expected_plural|
       method_names = Kubeclient::ClientMixin.parse_definition(kind, plural).method_names
       assert_equal(method_names[0], expected_single)
