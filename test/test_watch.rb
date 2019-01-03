@@ -53,6 +53,45 @@ class TestWatch < MiniTest::Test
     end
   end
 
+  def test_watch_pod_follow_redirect
+    stub_core_api_list
+
+    redirect = 'http://localhost:1234/api/v1/watch/pods'
+    stub_request(:get, %r{/watch/pods})
+      .to_return(status: 302, headers: { location: redirect })
+
+    stub_request(:get, redirect).to_return(
+      body: open_test_file('watch_stream.json'),
+      status: 200
+    )
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+
+    got = nil
+    client.watch_pods.each { |notice| got = notice }
+    assert_equal('DELETED', got.type)
+  end
+
+  def test_watch_pod_max_redirect
+    stub_core_api_list
+
+    redirect = 'http://localhost:1234/api/v1/watcher/pods'
+    stub_request(:get, %r{/watch/pods})
+      .to_return(status: 302, headers: { location: redirect })
+
+    stub_request(:get, redirect).to_return(
+      body: open_test_file('watch_stream.json'),
+      status: 200
+    )
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1', http_max_redirects: 0)
+
+    assert_raises(Kubeclient::HttpError) do
+      client.watch_pods.each do
+      end
+    end
+  end
+
   # Ensure that WatchStream respects a format that's not JSON
   def test_watch_stream_text
     url = 'http://www.example.com/foobar'

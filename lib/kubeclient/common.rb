@@ -556,7 +556,8 @@ module Kubeclient
         basic_auth_user: @auth_options[:username],
         basic_auth_password: @auth_options[:password],
         headers: @headers,
-        http_proxy_uri: @http_proxy_uri
+        http_proxy_uri: @http_proxy_uri,
+        http_max_redirects: http_max_redirects
       }
 
       if uri.scheme == 'https'
