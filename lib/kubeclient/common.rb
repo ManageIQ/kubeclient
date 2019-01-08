@@ -34,6 +34,7 @@ module Kubeclient
     }.freeze
 
     DEFAULT_HTTP_PROXY_URI = nil
+    DEFAULT_HTTP_MAX_REDIRECTS = 10
 
     SEARCH_ARGUMENTS = {
       'labelSelector' => :label_selector,
@@ -52,6 +53,7 @@ module Kubeclient
     attr_reader :ssl_options
     attr_reader :auth_options
     attr_reader :http_proxy_uri
+    attr_reader :http_max_redirects
     attr_reader :headers
     attr_reader :discovered
 
@@ -64,6 +66,7 @@ module Kubeclient
       socket_options: DEFAULT_SOCKET_OPTIONS,
       timeouts: DEFAULT_TIMEOUTS,
       http_proxy_uri: DEFAULT_HTTP_PROXY_URI,
+      http_max_redirects: DEFAULT_HTTP_MAX_REDIRECTS,
       as: :ros
     )
       validate_auth_options(auth_options)
@@ -80,6 +83,7 @@ module Kubeclient
       # @timeouts[:foo] == nil resulting in infinite timeout.
       @timeouts = DEFAULT_TIMEOUTS.merge(timeouts)
       @http_proxy_uri = http_proxy_uri ? http_proxy_uri.to_s : nil
+      @http_max_redirects = http_max_redirects
       @as = as
 
       if auth_options[:bearer_token]
@@ -253,6 +257,7 @@ module Kubeclient
         ssl_client_cert: @ssl_options[:client_cert],
         ssl_client_key: @ssl_options[:client_key],
         proxy: @http_proxy_uri,
+        max_redirects: @http_max_redirects,
         user: @auth_options[:username],
         password: @auth_options[:password],
         open_timeout: @timeouts[:open],
@@ -573,7 +578,8 @@ module Kubeclient
         basic_auth_user: @auth_options[:username],
         basic_auth_password: @auth_options[:password],
         headers: @headers,
-        http_proxy_uri: @http_proxy_uri
+        http_proxy_uri: @http_proxy_uri,
+        http_max_redirects: http_max_redirects
       }
 
       if uri.scheme == 'https'

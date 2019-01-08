@@ -218,6 +218,15 @@ client = Kubeclient::Client.new(
 )
 ```
 
+### Redirects
+
+You can optionally not allow redirection with kubeclient. For example:
+
+```ruby
+client = Kubeclient::Client.new(
+  'https://localhost:8443/api/', http_max_redirects: 0
+)
+```
 
 ### Timeouts
 

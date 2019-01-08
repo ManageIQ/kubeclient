@@ -8,6 +8,7 @@ module Kubeclient
         @uri = uri
         @http_client = nil
         @http_options = http_options
+        @http_options[:http_max_redirects] ||= Kubeclient::Client::DEFAULT_HTTP_MAX_REDIRECTS
         @formatter = formatter
       end
 
@@ -38,15 +39,31 @@ module Kubeclient
 
       private
 
+      def max_hops
+        @http_options[:http_max_redirects] + 1
+      end
+
+      def follow_option
+        if max_hops > 1
+          { max_hops: max_hops }
+        else
+          # i.e. Do not follow redirects as we have set http_max_redirects to 0
+          # Setting `{ max_hops: 1 }` does not work FWIW
+          false
+        end
+      end
+
       def build_client
+        client = HTTP::Client.new(follow: follow_option)
+
         if @http_options[:basic_auth_user] && @http_options[:basic_auth_password]
-          HTTP.basic_auth(
+          client = client.basic_auth(
             user: @http_options[:basic_auth_user],
             pass: @http_options[:basic_auth_password]
           )
-        else
-          HTTP::Client.new
         end
+
+        client
       end
 
       def using_proxy

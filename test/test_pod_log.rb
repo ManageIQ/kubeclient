@@ -84,4 +84,40 @@ class TestPodLog < MiniTest::Test
       assert_equal(expected_lines[index], notice)
     end
   end
+
+  def test_watch_pod_log_follow_redirect
+    expected_lines = open_test_file('pod_log.txt').read.split("\n")
+    redirect = 'http://localhost:1234/api/namespaces/default/pods/redis-master-pod/log'
+
+    stub_request(:get, %r{/namespaces/default/pods/[a-z0-9-]+/log\?.*follow})
+      .to_return(status: 302, headers: { location: redirect })
+
+    stub_request(:get, redirect)
+      .to_return(body: open_test_file('pod_log.txt'),
+                 status: 200)
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    stream = client.watch_pod_log('redis-master-pod', 'default')
+    stream.to_enum.with_index do |notice, index|
+      assert_instance_of(String, notice)
+      assert_equal(expected_lines[index], notice)
+    end
+  end
+
+  def test_watch_pod_log_max_redirect
+    redirect = 'http://localhost:1234/api/namespaces/default/pods/redis-master-pod/log'
+
+    stub_request(:get, %r{/namespaces/default/pods/[a-z0-9-]+/log\?.*follow})
+      .to_return(status: 302, headers: { location: redirect })
+
+    stub_request(:get, redirect)
+      .to_return(body: open_test_file('pod_log.txt'),
+                 status: 200)
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1', http_max_redirects: 0)
+    assert_raises(Kubeclient::HttpError) do
+      client.watch_pod_log('redis-master-pod', 'default').each do
+      end
+    end
+  end
 end
