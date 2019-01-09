@@ -4,6 +4,14 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
+## 4.2.2 — 2019-01-09
+
+### Added
+- New `http_max_redirects` option (#374).
+
+### Changed
+- Default max redirects for watch increased from 4 to 10, to match other verbs (#374).
+
 ## 4.2.1 — 2018-12-26
 
 ### Fixed
