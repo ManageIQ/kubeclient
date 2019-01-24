@@ -273,4 +273,58 @@ class TestService < MiniTest::Test
       data['metadata']['annotations']['key'] == 'value'
     end
   end
+
+  def test_json_patch_service
+    service = Kubeclient::Resource.new
+    name = 'my-service'
+
+    service.metadata = {}
+    service.metadata.name      = name
+    service.metadata.namespace = 'development'
+
+    stub_core_api_list
+    expected_url = "http://localhost:8080/api/v1/namespaces/development/services/#{name}"
+    stub_request(:patch, expected_url)
+      .to_return(body: open_test_file('service_json_patch.json'), status: 200)
+
+    patch = [
+      { 'op' => 'add', 'path' => '/spec/type', 'value' => 'LoadBalancer' }
+    ]
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    service = client.json_patch_service(name, patch, 'development')
+    assert_kind_of(RecursiveOpenStruct, service)
+
+    assert_requested(:patch, expected_url, times: 1) do |req|
+      data = JSON.parse(req.body)
+      req.headers['Content-Type'] == 'application/json-patch+json' &&
+        data == patch
+    end
+  end
+
+  def test_merge_patch_service
+    service = Kubeclient::Resource.new
+    name = 'my-service'
+
+    service.metadata = {}
+    service.metadata.name      = name
+    service.metadata.namespace = 'development'
+
+    stub_core_api_list
+    expected_url = "http://localhost:8080/api/v1/namespaces/development/services/#{name}"
+    stub_request(:patch, expected_url)
+      .to_return(body: open_test_file('service_merge_patch.json'), status: 200)
+
+    patch = { spec: { type: 'NodePort' } }
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    service = client.merge_patch_service(name, patch, 'development')
+    assert_kind_of(RecursiveOpenStruct, service)
+
+    assert_requested(:patch, expected_url, times: 1) do |req|
+      data = JSON.parse(req.body)
+      req.headers['Content-Type'] == 'application/merge-patch+json' &&
+        data['spec']['type'] == 'NodePort'
+    end
+  end
 end

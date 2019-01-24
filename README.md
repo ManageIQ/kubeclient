@@ -490,6 +490,8 @@ The below example is for v1
 patched = client.patch_pod("docker-registry", {metadata: {annotations: {key: 'value'}}}, "default")
 ```
 
+`patch_#{entity}` is called using a [strategic merge patch](https://kubernetes.io/docs/tasks/run-application/update-api-object-kubectl-patch/#notes-on-the-strategic-merge-patch). `json_patch_#{entity}` and `merge_patch_#{entity}` are also available that use JSON patch and JSON merge patch, respectively. These strategies are useful for resources that do not support strategic merge patch, such as Custom Resources. Consult the [Kubernetes docs](https://kubernetes.io/docs/tasks/run-application/update-api-object-kubectl-patch/#use-a-json-merge-patch-to-update-a-deployment) for more information about the different patch strategies.
+
 #### Get all entities of all types : all_entities
 Returns a hash with the following keys (node, secret, service, pod, replication_controller, namespace, resource_quota, limit_range, endpoint, event, persistent_volume, persistent_volume_claim, component_status and service_account). Each key points to an EntityList of same type.
 This method is a convenience method instead of calling each entity's get method separately.
