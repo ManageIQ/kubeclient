@@ -413,8 +413,8 @@ module Kubeclient
     def get_pod_log(pod_name = nil, namespace = nil, container: nil, **opts)
       params = {}
       params[:container] = container if container
-      params[:previous] = true if opts[:previous]
-      params[:timestamps] = opts[:timestamps] if opts[:timestamps]
+      params[:previous] = opts.include?(:previous)
+      params[:timestamps] = opts.include?(:timestamps)
       params[:sinceTime] = format_datetime(opts[:since_time]) if opts[:since_time]
       params[:tailLines] = opts[:tail_lines] if opts[:tail_lines]
 
