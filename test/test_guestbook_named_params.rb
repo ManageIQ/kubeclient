@@ -6,12 +6,16 @@ class CreateGuestbookGoNamedParams < MiniTest::Test
   def test_create_guestbook_entities
     VCR.configure do |c|
       c.cassette_library_dir = 'test/cassettes'
+      c.filter_sensitive_data("fake.host.com") do |interaction|
+        uri = interaction.request.uri
+        URI.parse(uri).host
+      end
       c.hook_into(:webmock)
     end
 
     # WebMock.allow_net_connect!
     VCR.use_cassette('kubernetes_guestbook_named_params') do # , record: :new_episodes) do
-      client = Kubeclient::Client.new('http://10.35.0.23:8080/api/', 'v1')
+      client = Kubeclient::Client.new('https://fake.host.com:8443/api/', 'v1')
 
       testing_ns = Kubeclient::Resource.new
       testing_ns.metadata = {}
