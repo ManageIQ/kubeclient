@@ -221,12 +221,12 @@ module Kubeclient
 
         # get a single entity of a specific type by name
         define_singleton_method("get_#{entity.method_names[0]}") \
-        do |name, namespace = nil, opts = {}|
+        do |name = nil, namespace = nil, **opts|
           get_entity(entity.resource_name, name, namespace, opts)
         end
 
         define_singleton_method("delete_#{entity.method_names[0]}") \
-        do |name, namespace = nil, opts = {}|
+        do |name = nil, namespace = nil, **opts|
           delete_entity(entity.resource_name, name, namespace, opts)
         end
 
@@ -238,8 +238,9 @@ module Kubeclient
           update_entity(entity.resource_name, entity_config)
         end
 
-        define_singleton_method("patch_#{entity.method_names[0]}") do |name, patch, namespace = nil|
-          patch_entity(entity.resource_name, name, patch, namespace)
+        define_singleton_method("patch_#{entity.method_names[0]}") \
+        do |name = nil, patch = nil, namespace = nil, **opts|
+          patch_entity(entity.resource_name, name, patch, namespace, opts)
         end
       end
     end
@@ -321,25 +322,27 @@ module Kubeclient
     end
 
     # Accepts the following options:
+    #   :name - name of the resource
+    #   :namespace - namespace of the resource
     #   :as (:raw|:ros) - defaults to :ros
     #     :raw - return the raw response body as a string
     #     :ros - return a collection of RecursiveOpenStruct objects
-    def get_entity(resource_name, name, namespace = nil, options = {})
-      ns_prefix = build_namespace_prefix(namespace)
+    def get_entity(resource_name, name = nil, namespace = nil, **opts)
+      ns_prefix = build_namespace_prefix(opts[:namespace] || namespace)
       response = handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
+        rest_client[ns_prefix + resource_name + "/#{opts[:name] || name}"]
           .get(@headers)
       end
-      format_response(options[:as] || @as, response.body)
+      format_response(opts[:as] || @as, response.body)
     end
 
     # delete_options are passed as a JSON payload in the delete request
-    def delete_entity(resource_name, name, namespace = nil, delete_options: {})
-      delete_options_hash = delete_options.to_hash
-      ns_prefix = build_namespace_prefix(namespace)
+    def delete_entity(resource_name, name = nil, namespace = nil, **opts)
+      delete_options_hash = opts.fetch(:delete_options, {}).to_h
+      ns_prefix = build_namespace_prefix(opts[:namespace] || namespace)
       payload = delete_options_hash.to_json unless delete_options_hash.empty?
       response = handle_exception do
-        rs = rest_client[ns_prefix + resource_name + "/#{name}"]
+        rs = rest_client[ns_prefix + resource_name + "/#{opts[:name] || name}"]
         RestClient::Request.execute(
           rs.options.merge(
             method: :delete,
@@ -381,12 +384,12 @@ module Kubeclient
       format_response(@as, response.body)
     end
 
-    def patch_entity(resource_name, name, patch, namespace = nil)
-      ns_prefix = build_namespace_prefix(namespace)
+    def patch_entity(resource_name, name = nil, patch = nil, namespace = nil, **opts)
+      ns_prefix = build_namespace_prefix(opts[:namespace] || namespace)
       response = handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
+        rest_client[ns_prefix + resource_name + "/#{opts[:name] || name}"]
           .patch(
-            patch.to_json,
+            (opts[:patch] || patch).to_json,
             { 'Content-Type' => 'application/strategic-merge-patch+json' }.merge(@headers)
           )
       end
@@ -407,33 +410,31 @@ module Kubeclient
       end
     end
 
-    def get_pod_log(pod_name, namespace,
-                    container: nil, previous: false,
-                    timestamps: false, since_time: nil, tail_lines: nil)
+    def get_pod_log(pod_name = nil, namespace = nil, container: nil, **opts)
       params = {}
-      params[:previous] = true if previous
       params[:container] = container if container
-      params[:timestamps] = timestamps if timestamps
-      params[:sinceTime] = format_datetime(since_time) if since_time
-      params[:tailLines] = tail_lines if tail_lines
+      params[:previous] = true if opts[:previous]
+      params[:timestamps] = opts[:timestamps] if opts[:timestamps]
+      params[:sinceTime] = format_datetime(opts[:since_time]) if opts[:since_time]
+      params[:tailLines] = opts[:tail_lines] if opts[:tail_lines]
 
-      ns = build_namespace_prefix(namespace)
+      ns = build_namespace_prefix(opts[:namespace] || namespace)
       handle_exception do
-        rest_client[ns + "pods/#{pod_name}/log"]
+        rest_client[ns + "pods/#{opts[:name] || pod_name}/log"]
           .get({ 'params' => params }.merge(@headers))
       end
     end
 
-    def watch_pod_log(pod_name, namespace, container: nil)
+    def watch_pod_log(pod_name, namespace, container: nil, **opts)
       # Adding the "follow=true" query param tells the Kubernetes API to keep
       # the connection open and stream updates to the log.
       params = { follow: true }
       params[:container] = container if container
 
-      ns = build_namespace_prefix(namespace)
+      ns = build_namespace_prefix(opts[:namespace] || namespace)
 
       uri = @api_endpoint.dup
-      uri.path += "/#{@api_version}/#{ns}pods/#{pod_name}/log"
+      uri.path += "/#{@api_version}/#{ns}pods/#{opts[:name] || pod_name}/log"
       uri.query = URI.encode_www_form(params)
 
       Kubeclient::Common::WatchStream.new(uri, http_options(uri), formatter: ->(value) { value })
