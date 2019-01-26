@@ -1,0 +1,891 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://192.168.64.8:8443/api/v1
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:02 GMT
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: '{"kind":"APIResourceList","groupVersion":"v1","resources":[{"name":"bindings","singularName":"","namespaced":true,"kind":"Binding","verbs":["create"]},{"name":"componentstatuses","singularName":"","namespaced":false,"kind":"ComponentStatus","verbs":["get","list"],"shortNames":["cs"]},{"name":"configmaps","singularName":"","namespaced":true,"kind":"ConfigMap","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["cm"]},{"name":"endpoints","singularName":"","namespaced":true,"kind":"Endpoints","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["ep"]},{"name":"events","singularName":"","namespaced":true,"kind":"Event","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["ev"]},{"name":"limitranges","singularName":"","namespaced":true,"kind":"LimitRange","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["limits"]},{"name":"namespaces","singularName":"","namespaced":false,"kind":"Namespace","verbs":["create","delete","get","list","patch","update","watch"],"shortNames":["ns"]},{"name":"namespaces/finalize","singularName":"","namespaced":false,"kind":"Namespace","verbs":["update"]},{"name":"namespaces/status","singularName":"","namespaced":false,"kind":"Namespace","verbs":["get","patch","update"]},{"name":"nodes","singularName":"","namespaced":false,"kind":"Node","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["no"]},{"name":"nodes/proxy","singularName":"","namespaced":false,"kind":"Node","verbs":[]},{"name":"nodes/status","singularName":"","namespaced":false,"kind":"Node","verbs":["get","patch","update"]},{"name":"persistentvolumeclaims","singularName":"","namespaced":true,"kind":"PersistentVolumeClaim","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["pvc"]},{"name":"persistentvolumeclaims/status","singularName":"","namespaced":true,"kind":"PersistentVolumeClaim","verbs":["get","patch","update"]},{"name":"persistentvolumes","singularName":"","namespaced":false,"kind":"PersistentVolume","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["pv"]},{"name":"persistentvolumes/status","singularName":"","namespaced":false,"kind":"PersistentVolume","verbs":["get","patch","update"]},{"name":"pods","singularName":"","namespaced":true,"kind":"Pod","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["po"],"categories":["all"]},{"name":"pods/attach","singularName":"","namespaced":true,"kind":"Pod","verbs":[]},{"name":"pods/binding","singularName":"","namespaced":true,"kind":"Binding","verbs":["create"]},{"name":"pods/eviction","singularName":"","namespaced":true,"group":"policy","version":"v1beta1","kind":"Eviction","verbs":["create"]},{"name":"pods/exec","singularName":"","namespaced":true,"kind":"Pod","verbs":[]},{"name":"pods/log","singularName":"","namespaced":true,"kind":"Pod","verbs":["get"]},{"name":"pods/portforward","singularName":"","namespaced":true,"kind":"Pod","verbs":[]},{"name":"pods/proxy","singularName":"","namespaced":true,"kind":"Pod","verbs":[]},{"name":"pods/status","singularName":"","namespaced":true,"kind":"Pod","verbs":["get","patch","update"]},{"name":"podtemplates","singularName":"","namespaced":true,"kind":"PodTemplate","verbs":["create","delete","deletecollection","get","list","patch","update","watch"]},{"name":"replicationcontrollers","singularName":"","namespaced":true,"kind":"ReplicationController","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["rc"],"categories":["all"]},{"name":"replicationcontrollers/scale","singularName":"","namespaced":true,"group":"autoscaling","version":"v1","kind":"Scale","verbs":["get","patch","update"]},{"name":"replicationcontrollers/status","singularName":"","namespaced":true,"kind":"ReplicationController","verbs":["get","patch","update"]},{"name":"resourcequotas","singularName":"","namespaced":true,"kind":"ResourceQuota","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["quota"]},{"name":"resourcequotas/status","singularName":"","namespaced":true,"kind":"ResourceQuota","verbs":["get","patch","update"]},{"name":"secrets","singularName":"","namespaced":true,"kind":"Secret","verbs":["create","delete","deletecollection","get","list","patch","update","watch"]},{"name":"serviceaccounts","singularName":"","namespaced":true,"kind":"ServiceAccount","verbs":["create","delete","deletecollection","get","list","patch","update","watch"],"shortNames":["sa"]},{"name":"services","singularName":"","namespaced":true,"kind":"Service","verbs":["create","delete","get","list","patch","update","watch"],"shortNames":["svc"],"categories":["all"]},{"name":"services/proxy","singularName":"","namespaced":true,"kind":"Service","verbs":[]},{"name":"services/status","singularName":"","namespaced":true,"kind":"Service","verbs":["get","patch","update"]}]}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: delete
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:02 GMT
+      Content-Length:
+      - '206'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"namespaces
+        \"kubeclient-ns\" not found","reason":"NotFound","details":{"name":"kubeclient-ns","kind":"namespaces"},"code":404}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: delete
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/services/guestbook
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:02 GMT
+      Content-Length:
+      - '194'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"services
+        \"guestbook\" not found","reason":"NotFound","details":{"name":"guestbook","kind":"services"},"code":404}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: delete
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/services/redis-master
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:02 GMT
+      Content-Length:
+      - '200'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"services
+        \"redis-master\" not found","reason":"NotFound","details":{"name":"redis-master","kind":"services"},"code":404}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: delete
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/services/redis-slave
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:02 GMT
+      Content-Length:
+      - '198'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"services
+        \"redis-slave\" not found","reason":"NotFound","details":{"name":"redis-slave","kind":"services"},"code":404}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: delete
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/replicationcontrollers/guestbook
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:02 GMT
+      Content-Length:
+      - '222'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"replicationcontrollers
+        \"guestbook\" not found","reason":"NotFound","details":{"name":"guestbook","kind":"replicationcontrollers"},"code":404}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: delete
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/replicationcontrollers/redis-master
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:02 GMT
+      Content-Length:
+      - '228'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"replicationcontrollers
+        \"redis-master\" not found","reason":"NotFound","details":{"name":"redis-master","kind":"replicationcontrollers"},"code":404}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: delete
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/replicationcontrollers/redis-slave
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 404
+      message: Not Found
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:02 GMT
+      Content-Length:
+      - '226'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Failure","message":"replicationcontrollers
+        \"redis-slave\" not found","reason":"NotFound","details":{"name":"redis-slave","kind":"replicationcontrollers"},"code":404}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: post
+    uri: https://192.168.64.8:8443/api/v1/namespaces
+    body:
+      encoding: UTF-8
+      string: '{"metadata":{"name":"kubeclient-ns"},"kind":"Namespace","apiVersion":"v1"}'
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '74'
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:02 GMT
+      Content-Length:
+      - '298'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Namespace","apiVersion":"v1","metadata":{"name":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns","uid":"b03027fb-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"399","creationTimestamp":"2019-01-26T05:39:02Z"},"spec":{"finalizers":["kubernetes"]},"status":{"phase":"Active"}}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: post
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/services
+    body:
+      encoding: UTF-8
+      string: '{"metadata":{"namespace":"kubeclient-ns","labels":{"name":"guestbook"},"name":"guestbook"},"spec":{"selector":{"app":"guestbook"},"ports":[{"port":3000,"targetPort":"http-server"}]},"type":"LoadBalancer","kind":"Service","apiVersion":"v1"}'
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '239'
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:03 GMT
+      Content-Length:
+      - '512'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Service","apiVersion":"v1","metadata":{"name":"guestbook","namespace":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns/services/guestbook","uid":"b0343d4f-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"402","creationTimestamp":"2019-01-26T05:39:03Z","labels":{"name":"guestbook"}},"spec":{"ports":[{"protocol":"TCP","port":3000,"targetPort":"http-server"}],"selector":{"app":"guestbook"},"clusterIP":"10.99.140.71","type":"ClusterIP","sessionAffinity":"None"},"status":{"loadBalancer":{}}}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: post
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/services
+    body:
+      encoding: UTF-8
+      string: '{"metadata":{"namespace":"kubeclient-ns","labels":{"app":"redis","role":"master"},"name":"redis-master"},"spec":{"selector":{"app":"redis","role":"master"},"ports":[{"port":6379,"targetPort":"redis-server"}]},"kind":"Service","apiVersion":"v1"}'
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '244'
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:03 GMT
+      Content-Length:
+      - '542'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Service","apiVersion":"v1","metadata":{"name":"redis-master","namespace":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns/services/redis-master","uid":"b03a8289-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"407","creationTimestamp":"2019-01-26T05:39:03Z","labels":{"app":"redis","role":"master"}},"spec":{"ports":[{"protocol":"TCP","port":6379,"targetPort":"redis-server"}],"selector":{"app":"redis","role":"master"},"clusterIP":"10.98.204.51","type":"ClusterIP","sessionAffinity":"None"},"status":{"loadBalancer":{}}}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: post
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/services
+    body:
+      encoding: UTF-8
+      string: '{"metadata":{"namespace":"kubeclient-ns","labels":{"app":"redis","role":"slave"},"name":"redis-slave"},"spec":{"selector":{"app":"redis","role":"slave"},"ports":[{"port":6379,"targetPort":"redis-server"}]},"kind":"Service","apiVersion":"v1"}'
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '241'
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:03 GMT
+      Content-Length:
+      - '539'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Service","apiVersion":"v1","metadata":{"name":"redis-slave","namespace":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns/services/redis-slave","uid":"b03fd709-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"410","creationTimestamp":"2019-01-26T05:39:03Z","labels":{"app":"redis","role":"slave"}},"spec":{"ports":[{"protocol":"TCP","port":6379,"targetPort":"redis-server"}],"selector":{"app":"redis","role":"slave"},"clusterIP":"10.98.243.140","type":"ClusterIP","sessionAffinity":"None"},"status":{"loadBalancer":{}}}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: post
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/replicationcontrollers
+    body:
+      encoding: UTF-8
+      string: '{"metadata":{"namespace":"kubeclient-ns","labels":{"app":"guestbook","role":"slave"},"name":"guestbook"},"spec":{"selector":{"app":"guestbook"},"template":{"metadata":{"labels":{"app":"guestbook"}},"spec":{"containers":[{"name":"guestbook","image":"kubernetes/guestbook:v2","ports":[{"name":"http-server","containerPort":3000}]}]}},"replicas":3},"kind":"ReplicationController","apiVersion":"v1"}'
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '395'
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:03 GMT
+      Content-Length:
+      - '942'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"ReplicationController","apiVersion":"v1","metadata":{"name":"guestbook","namespace":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns/replicationcontrollers/guestbook","uid":"b044f4dc-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"412","generation":1,"creationTimestamp":"2019-01-26T05:39:03Z","labels":{"app":"guestbook","role":"slave"}},"spec":{"replicas":3,"selector":{"app":"guestbook"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"guestbook"}},"spec":{"containers":[{"name":"guestbook","image":"kubernetes/guestbook:v2","ports":[{"name":"http-server","containerPort":3000,"protocol":"TCP"}],"resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"replicas":0}}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: post
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/replicationcontrollers
+    body:
+      encoding: UTF-8
+      string: '{"metadata":{"namespace":"kubeclient-ns","labels":{"app":"redis","role":"master"},"name":"redis-master"},"spec":{"selector":{"app":"redis","role":"master"},"template":{"metadata":{"labels":{"app":"redis","role":"master"}},"spec":{"containers":[{"name":"redis-master","image":"redis","ports":[{"name":"redis-server","containerPort":6379}]}]}},"replicas":1},"kind":"ReplicationController","apiVersion":"v1"}'
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '405'
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:03 GMT
+      Content-Length:
+      - '949'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"ReplicationController","apiVersion":"v1","metadata":{"name":"redis-master","namespace":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns/replicationcontrollers/redis-master","uid":"b048c7ea-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"413","generation":1,"creationTimestamp":"2019-01-26T05:39:03Z","labels":{"app":"redis","role":"master"}},"spec":{"replicas":1,"selector":{"app":"redis","role":"master"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"redis","role":"master"}},"spec":{"containers":[{"name":"redis-master","image":"redis","ports":[{"name":"redis-server","containerPort":6379,"protocol":"TCP"}],"resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"Always"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"replicas":0}}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: post
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/replicationcontrollers
+    body:
+      encoding: UTF-8
+      string: '{"metadata":{"namespace":"kubeclient-ns","labels":{"app":"redis","role":"slave"},"name":"redis-slave"},"spec":{"selector":{"app":"redis","role":"slave"},"template":{"metadata":{"labels":{"app":"redis","role":"slave"}},"spec":{"containers":[{"name":"redis-slave","image":"kubernetes/redis-slave:v2","ports":[{"name":"redis-server","containerPort":6379}]}]}},"replicas":2},"kind":"ReplicationController","apiVersion":"v1"}'
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Content-Length:
+      - '420'
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 201
+      message: Created
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:03 GMT
+      Content-Length:
+      - '969'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"ReplicationController","apiVersion":"v1","metadata":{"name":"redis-slave","namespace":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns/replicationcontrollers/redis-slave","uid":"b04e59c2-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"417","generation":1,"creationTimestamp":"2019-01-26T05:39:03Z","labels":{"app":"redis","role":"slave"}},"spec":{"replicas":2,"selector":{"app":"redis","role":"slave"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"redis","role":"slave"}},"spec":{"containers":[{"name":"redis-slave","image":"kubernetes/redis-slave:v2","ports":[{"name":"redis-server","containerPort":6379,"protocol":"TCP"}],"resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"replicas":0}}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: get
+    uri: https://192.168.64.8:8443/api/v1/namespaces
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:03 GMT
+      Content-Length:
+      - '1339'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"NamespaceList","apiVersion":"v1","metadata":{"selfLink":"/api/v1/namespaces","resourceVersion":"421"},"items":[{"metadata":{"name":"default","selfLink":"/api/v1/namespaces/default","uid":"9d6ef6a7-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"11","creationTimestamp":"2019-01-26T05:38:31Z"},"spec":{"finalizers":["kubernetes"]},"status":{"phase":"Active"}},{"metadata":{"name":"kube-public","selfLink":"/api/v1/namespaces/kube-public","uid":"9fda160f-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"39","creationTimestamp":"2019-01-26T05:38:35Z"},"spec":{"finalizers":["kubernetes"]},"status":{"phase":"Active"}},{"metadata":{"name":"kube-system","selfLink":"/api/v1/namespaces/kube-system","uid":"9d74f81b-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"12","creationTimestamp":"2019-01-26T05:38:31Z","annotations":{"kubectl.kubernetes.io/last-applied-configuration":"{\"apiVersion\":\"v1\",\"kind\":\"Namespace\",\"metadata\":{\"annotations\":{},\"name\":\"kube-system\",\"namespace\":\"\"}}\n"}},"spec":{"finalizers":["kubernetes"]},"status":{"phase":"Active"}},{"metadata":{"name":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns","uid":"b03027fb-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"399","creationTimestamp":"2019-01-26T05:39:02Z"},"spec":{"finalizers":["kubernetes"]},"status":{"phase":"Active"}}]}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: get
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/services
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:03 GMT
+      Content-Length:
+      - '1631'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"ServiceList","apiVersion":"v1","metadata":{"selfLink":"/api/v1/namespaces/kubeclient-ns/services","resourceVersion":"430"},"items":[{"metadata":{"name":"guestbook","namespace":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns/services/guestbook","uid":"b0343d4f-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"402","creationTimestamp":"2019-01-26T05:39:03Z","labels":{"name":"guestbook"}},"spec":{"ports":[{"protocol":"TCP","port":3000,"targetPort":"http-server"}],"selector":{"app":"guestbook"},"clusterIP":"10.99.140.71","type":"ClusterIP","sessionAffinity":"None"},"status":{"loadBalancer":{}}},{"metadata":{"name":"redis-master","namespace":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns/services/redis-master","uid":"b03a8289-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"407","creationTimestamp":"2019-01-26T05:39:03Z","labels":{"app":"redis","role":"master"}},"spec":{"ports":[{"protocol":"TCP","port":6379,"targetPort":"redis-server"}],"selector":{"app":"redis","role":"master"},"clusterIP":"10.98.204.51","type":"ClusterIP","sessionAffinity":"None"},"status":{"loadBalancer":{}}},{"metadata":{"name":"redis-slave","namespace":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns/services/redis-slave","uid":"b03fd709-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"410","creationTimestamp":"2019-01-26T05:39:03Z","labels":{"app":"redis","role":"slave"}},"spec":{"ports":[{"protocol":"TCP","port":6379,"targetPort":"redis-server"}],"selector":{"app":"redis","role":"slave"},"clusterIP":"10.98.243.140","type":"ClusterIP","sessionAffinity":"None"},"status":{"loadBalancer":{}}}]}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: get
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/replicationcontrollers
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:03 GMT
+      Transfer-Encoding:
+      - chunked
+    body:
+      encoding: UTF-8
+      string: '{"kind":"ReplicationControllerList","apiVersion":"v1","metadata":{"selfLink":"/api/v1/namespaces/kubeclient-ns/replicationcontrollers","resourceVersion":"433"},"items":[{"metadata":{"name":"guestbook","namespace":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns/replicationcontrollers/guestbook","uid":"b044f4dc-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"428","generation":1,"creationTimestamp":"2019-01-26T05:39:03Z","labels":{"app":"guestbook","role":"slave"}},"spec":{"replicas":3,"selector":{"app":"guestbook"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"guestbook"}},"spec":{"containers":[{"name":"guestbook","image":"kubernetes/guestbook:v2","ports":[{"name":"http-server","containerPort":3000,"protocol":"TCP"}],"resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"replicas":0,"observedGeneration":1}},{"metadata":{"name":"redis-master","namespace":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns/replicationcontrollers/redis-master","uid":"b048c7ea-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"424","generation":1,"creationTimestamp":"2019-01-26T05:39:03Z","labels":{"app":"redis","role":"master"}},"spec":{"replicas":1,"selector":{"app":"redis","role":"master"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"redis","role":"master"}},"spec":{"containers":[{"name":"redis-master","image":"redis","ports":[{"name":"redis-server","containerPort":6379,"protocol":"TCP"}],"resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"Always"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"replicas":0,"observedGeneration":1}},{"metadata":{"name":"redis-slave","namespace":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns/replicationcontrollers/redis-slave","uid":"b04e59c2-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"417","generation":1,"creationTimestamp":"2019-01-26T05:39:03Z","labels":{"app":"redis","role":"slave"}},"spec":{"replicas":2,"selector":{"app":"redis","role":"slave"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"redis","role":"slave"}},"spec":{"containers":[{"name":"redis-slave","image":"kubernetes/redis-slave:v2","ports":[{"name":"redis-server","containerPort":6379,"protocol":"TCP"}],"resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"replicas":0}}]}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: delete
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/services/guestbook
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:03 GMT
+      Content-Length:
+      - '163'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Success","details":{"name":"guestbook","kind":"services","uid":"b0343d4f-212c-11e9-87ff-b2fd1d6b143f"}}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: delete
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/services/redis-master
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:03 GMT
+      Content-Length:
+      - '166'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Success","details":{"name":"redis-master","kind":"services","uid":"b03a8289-212c-11e9-87ff-b2fd1d6b143f"}}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: delete
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/services/redis-slave
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:03 GMT
+      Content-Length:
+      - '165'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Status","apiVersion":"v1","metadata":{},"status":"Success","details":{"name":"redis-slave","kind":"services","uid":"b03fd709-212c-11e9-87ff-b2fd1d6b143f"}}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:03 GMT
+- request:
+    method: delete
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/replicationcontrollers/guestbook
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:03 GMT
+      Content-Length:
+      - '1088'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"ReplicationController","apiVersion":"v1","metadata":{"name":"guestbook","namespace":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns/replicationcontrollers/guestbook","uid":"b044f4dc-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"459","generation":2,"creationTimestamp":"2019-01-26T05:39:03Z","deletionTimestamp":"2019-01-26T05:39:03Z","deletionGracePeriodSeconds":0,"labels":{"app":"guestbook","role":"slave"},"finalizers":["orphan"]},"spec":{"replicas":3,"selector":{"app":"guestbook"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"guestbook"}},"spec":{"containers":[{"name":"guestbook","image":"kubernetes/guestbook:v2","ports":[{"name":"http-server","containerPort":3000,"protocol":"TCP"}],"resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"replicas":3,"fullyLabeledReplicas":3,"observedGeneration":1}}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:04 GMT
+- request:
+    method: delete
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/replicationcontrollers/redis-master
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:03 GMT
+      Content-Length:
+      - '1095'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"ReplicationController","apiVersion":"v1","metadata":{"name":"redis-master","namespace":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns/replicationcontrollers/redis-master","uid":"b048c7ea-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"465","generation":2,"creationTimestamp":"2019-01-26T05:39:03Z","deletionTimestamp":"2019-01-26T05:39:03Z","deletionGracePeriodSeconds":0,"labels":{"app":"redis","role":"master"},"finalizers":["orphan"]},"spec":{"replicas":1,"selector":{"app":"redis","role":"master"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"redis","role":"master"}},"spec":{"containers":[{"name":"redis-master","image":"redis","ports":[{"name":"redis-server","containerPort":6379,"protocol":"TCP"}],"resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"Always"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"replicas":1,"fullyLabeledReplicas":1,"observedGeneration":1}}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:04 GMT
+- request:
+    method: delete
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns/replicationcontrollers/redis-slave
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:03 GMT
+      Content-Length:
+      - '1115'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"ReplicationController","apiVersion":"v1","metadata":{"name":"redis-slave","namespace":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns/replicationcontrollers/redis-slave","uid":"b04e59c2-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"470","generation":2,"creationTimestamp":"2019-01-26T05:39:03Z","deletionTimestamp":"2019-01-26T05:39:03Z","deletionGracePeriodSeconds":0,"labels":{"app":"redis","role":"slave"},"finalizers":["orphan"]},"spec":{"replicas":2,"selector":{"app":"redis","role":"slave"},"template":{"metadata":{"creationTimestamp":null,"labels":{"app":"redis","role":"slave"}},"spec":{"containers":[{"name":"redis-slave","image":"kubernetes/redis-slave:v2","ports":[{"name":"redis-server","containerPort":6379,"protocol":"TCP"}],"resources":{},"terminationMessagePath":"/dev/termination-log","terminationMessagePolicy":"File","imagePullPolicy":"IfNotPresent"}],"restartPolicy":"Always","terminationGracePeriodSeconds":30,"dnsPolicy":"ClusterFirst","securityContext":{},"schedulerName":"default-scheduler"}}},"status":{"replicas":2,"fullyLabeledReplicas":2,"observedGeneration":1}}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:04 GMT
+- request:
+    method: delete
+    uri: https://192.168.64.8:8443/api/v1/namespaces/kubeclient-ns
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept:
+      - "*/*"
+      Accept-Encoding:
+      - gzip, deflate
+      User-Agent:
+      - rest-client/2.0.2 (darwin17.5.0 x86_64) ruby/2.5.1p57
+      Content-Type:
+      - application/json
+      Host:
+      - 192.168.64.8:8443
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json
+      Date:
+      - Sat, 26 Jan 2019 05:39:03 GMT
+      Content-Length:
+      - '346'
+    body:
+      encoding: UTF-8
+      string: '{"kind":"Namespace","apiVersion":"v1","metadata":{"name":"kubeclient-ns","selfLink":"/api/v1/namespaces/kubeclient-ns","uid":"b03027fb-212c-11e9-87ff-b2fd1d6b143f","resourceVersion":"476","creationTimestamp":"2019-01-26T05:39:02Z","deletionTimestamp":"2019-01-26T05:39:03Z"},"spec":{"finalizers":["kubernetes"]},"status":{"phase":"Terminating"}}
+
+'
+    http_version: 
+  recorded_at: Sat, 26 Jan 2019 05:39:04 GMT
+recorded_with: VCR 4.0.0
