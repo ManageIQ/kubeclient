@@ -5,7 +5,7 @@ module Kubeclient
   # Common methods
   # this is mixed in by other gems
   module ClientMixin
-    ENTITY_METHODS = %w[get watch delete create update patch].freeze
+    ENTITY_METHODS = %w[get watch delete create update patch json_patch merge_patch].freeze
 
     DEFAULT_SSL_OPTIONS = {
       client_cert: nil,
@@ -203,6 +203,7 @@ module Kubeclient
       namespace.to_s.empty? ? '' : "namespaces/#{namespace}/"
     end
 
+    # rubocop:disable  Metrics/BlockLength
     def define_entity_methods
       @entities.values.each do |entity|
         # get all entities of a type e.g. get_nodes, get_pods, etc.
@@ -238,11 +239,23 @@ module Kubeclient
           update_entity(entity.resource_name, entity_config)
         end
 
-        define_singleton_method("patch_#{entity.method_names[0]}") do |name, patch, namespace = nil|
-          patch_entity(entity.resource_name, name, patch, namespace)
+        define_singleton_method("patch_#{entity.method_names[0]}") \
+        do |name, patch, namespace = nil|
+          patch_entity(entity.resource_name, name, patch, 'strategic-merge-patch', namespace)
+        end
+
+        define_singleton_method("json_patch_#{entity.method_names[0]}") \
+        do |name, patch, namespace = nil|
+          patch_entity(entity.resource_name, name, patch, 'json-patch', namespace)
+        end
+
+        define_singleton_method("merge_patch_#{entity.method_names[0]}") \
+        do |name, patch, namespace = nil|
+          patch_entity(entity.resource_name, name, patch, 'merge-patch', namespace)
         end
       end
     end
+    # rubocop:enable  Metrics/BlockLength
 
     def self.underscore_entity(entity_name)
       entity_name.gsub(/([a-z])([A-Z])/, '\1_\2').downcase
@@ -381,13 +394,13 @@ module Kubeclient
       format_response(@as, response.body)
     end
 
-    def patch_entity(resource_name, name, patch, namespace = nil)
+    def patch_entity(resource_name, name, patch, strategy, namespace)
       ns_prefix = build_namespace_prefix(namespace)
       response = handle_exception do
         rest_client[ns_prefix + resource_name + "/#{name}"]
           .patch(
             patch.to_json,
-            { 'Content-Type' => 'application/strategic-merge-patch+json' }.merge(@headers)
+            { 'Content-Type' => "application/#{strategy}+json" }.merge(@headers)
           )
       end
       format_response(@as, response.body)
