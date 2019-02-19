@@ -5,7 +5,13 @@ module Kubeclient
   class GoogleApplicationDefaultCredentials
     class << self
       def token
-        require 'googleauth'
+        begin
+          require 'googleauth'
+        rescue LoadError
+          puts "Gem 'googleauth' not found. Kubeclient does not include the googleauth gem, "\
+          'you must include it in your own application'
+          raise
+        end
         scopes = ['https://www.googleapis.com/auth/cloud-platform']
         authorization = Google::Auth.get_application_default(scopes)
         authorization.apply({})

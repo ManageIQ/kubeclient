@@ -123,6 +123,13 @@ class KubeclientConfigTest < MiniTest::Test
     end
   end
 
+  def test_gcp_default_auth
+    Kubeclient::GoogleApplicationDefaultCredentials.expects(:token).returns(:true).once
+    parsed = YAML.safe_load(File.read(config_file('gcpauth.kubeconfig')), [Date, Time])
+    config = Kubeclient::Config.new(parsed, nil)
+    config.context(config.contexts.first)
+  end
+
   private
 
   def check_context(context, ssl: true)

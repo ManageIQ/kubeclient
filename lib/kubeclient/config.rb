@@ -147,7 +147,9 @@ module Kubeclient
 
     def fetch_user_auth_options(user)
       options = {}
-      if user.key?('token')
+      if user.dig('auth-provider', 'name') == 'gcp'
+        options[:bearer_token] = Kubeclient::GoogleApplicationDefaultCredentials.token
+      elsif user.key?('token')
         options[:bearer_token] = user['token']
       elsif user.key?('exec')
         exec_opts = user['exec'].dup
