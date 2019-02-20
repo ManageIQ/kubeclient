@@ -6,6 +6,9 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 
 ## Unreleased
 
+### Changed
+- `GoogleApplicationDefaultCredentials` will automatically be used in `fetch_user_auth_options` if the `user[auth-provider][name] == 'gcp'` in the provided context. Note that `user[exec]` is checked first in anticipation of this functionality being added to GCP sometime in the future. Kubeclient _does not_ import the required `googleauth` gem, so you will need to import it in your calling application. (#394)
+
 ### Added
 - Support for `json_patch_#{entity}` and `merge_patch_#{entity}`. `patch_#{entity}` will continue to use strategic merge patch.
 
