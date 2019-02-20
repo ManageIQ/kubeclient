@@ -13,7 +13,7 @@ Metrics/ParameterLists:
   Max: 5
   CountKeywordArgs: false
 Metrics/CyclomaticComplexity:
-  Max: 8
+  Max: 9
 Metrics/ModuleLength:
   Enabled: false
 Style/MethodCallWithArgsParentheses:
