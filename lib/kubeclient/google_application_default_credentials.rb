@@ -3,7 +3,7 @@
 module Kubeclient
   # Get a bearer token from the Google's application default credentials.
   class GoogleApplicationDefaultCredentials
-    class GoogleDependencyError < LoadError
+    class GoogleDependencyError < LoadError # rubocop:disable Lint/InheritException
     end
 
     class << self
