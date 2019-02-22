@@ -296,7 +296,7 @@ kubeclient can use `googleauth` gem to authorize.
 This requires the [`googleauth` gem](https://github.com/google/google-auth-library-ruby) that is _not_ included in
 `kubeclient` dependencies so you should add it to your bundle.
 
-If you use `Config.context(...).auth_options` and the kubeconfig file has `user: {auth-provider: {name: gcp}}`, kubeclient will automatically try this (raising LoadError if you don't have `googleauth`).
+If you use `Config.context(...).auth_options` and the kubeconfig file has `user: {auth-provider: {name: gcp}}`, kubeclient will automatically try this (raising LoadError if you don't have `googleauth` in your bundle).
 
 Or you can obtain a token manually:
 
