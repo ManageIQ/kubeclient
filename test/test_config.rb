@@ -124,10 +124,25 @@ class KubeclientConfigTest < MiniTest::Test
   end
 
   def test_gcp_default_auth
-    Kubeclient::GoogleApplicationDefaultCredentials.expects(:token).returns(:true).once
+    Kubeclient::GoogleApplicationDefaultCredentials.expects(:token).returns('token1').once
     parsed = YAML.safe_load(File.read(config_file('gcpauth.kubeconfig')), [Date, Time])
     config = Kubeclient::Config.new(parsed, nil)
     config.context(config.contexts.first)
+  end
+
+  # Each call to .context() should obtain a new token, calling .auth_options doesn't change anything
+  def test_gcp_default_auth_renew
+    Kubeclient::GoogleApplicationDefaultCredentials.expects(:token).returns('token1').once
+    parsed = YAML.safe_load(File.read(config_file('gcpauth.kubeconfig')), [Date, Time])
+    config = Kubeclient::Config.new(parsed, nil)
+    context = config.context(config.contexts.first)
+    assert_equal({ bearer_token: 'token1' }, context.auth_options)
+    assert_equal({ bearer_token: 'token1' }, context.auth_options)
+
+    Kubeclient::GoogleApplicationDefaultCredentials.expects(:token).returns('token2').once
+    context2 = config.context(config.contexts.first)
+    assert_equal({ bearer_token: 'token2' }, context2.auth_options)
+    assert_equal({ bearer_token: 'token1' }, context.auth_options)
   end
 
   private

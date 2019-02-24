@@ -312,7 +312,7 @@ client = Kubeclient::Client.new(
 ```
 
 Note that this returns a token good for one hour. If your code requires authorization for longer than that, you should plan to
-acquire a new one.
+acquire a new one, by calling `.context()` or `GoogleApplicationDefaultCredentials.token` again.
 
 #### Security: Don't use config from untrusted sources
 
