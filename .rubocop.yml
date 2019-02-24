@@ -14,6 +14,8 @@ Metrics/ParameterLists:
   CountKeywordArgs: false
 Metrics/CyclomaticComplexity:
   Max: 8
+Metrics/PerceivedComplexity:
+  Max: 8
 Metrics/ModuleLength:
   Enabled: false
 Style/MethodCallWithArgsParentheses:

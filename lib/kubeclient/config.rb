@@ -153,6 +153,8 @@ module Kubeclient
         exec_opts = user['exec'].dup
         exec_opts['command'] = ext_command_path(exec_opts['command']) if exec_opts['command']
         options[:bearer_token] = Kubeclient::ExecCredentials.token(exec_opts)
+      elsif user.key?('auth-provider') && user['auth-provider']['name'] == 'gcp'
+        options[:bearer_token] = Kubeclient::GoogleApplicationDefaultCredentials.token
       else
         %w[username password].each do |attr|
           options[attr.to_sym] = user[attr] if user.key?(attr)

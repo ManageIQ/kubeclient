@@ -2,6 +2,7 @@ require 'bundler/setup'
 require 'minitest/autorun'
 require 'minitest/rg'
 require 'webmock/minitest'
+require 'mocha/minitest'
 require 'json'
 require 'kubeclient'
 

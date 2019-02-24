@@ -166,29 +166,6 @@ namespace = File.read('/var/run/secrets/kubernetes.io/serviceaccount/namespace')
 ```
 You can find information about tokens in [this guide](https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/#accessing-the-api-from-a-pod) and in [this reference](http://kubernetes.io/docs/admin/authentication/).
 
-#### Google's Application Default Credentials
-
-On Google Compute Engine, Google App Engine, or Google Cloud Functions, as well as `gcloud`-configured systems
-with [application default credentials](https://developers.google.com/identity/protocols/application-default-credentials),
-you can use the token provider to authorize `kubeclient`.
-
-This requires the [`googleauth` gem](https://github.com/google/google-auth-library-ruby) that is _not_ included in
-`kubeclient` dependencies so you should add it to your bundle.
-
-```ruby
-require 'googleauth'
-
-auth_options = {
-  bearer_token: Kubeclient::GoogleApplicationDefaultCredentials.token
-}
-client = Kubeclient::Client.new(
-  'https://localhost:8443/api/', 'v1', auth_options: auth_options
-)
-```
-
-Note that this token is good for one hour. If your code runs for longer than that, you should plan to
-acquire a new one.
-
 ### Non-blocking IO
 
 You can also use kubeclient with non-blocking sockets such as Celluloid::IO, see [here](https://github.com/httprb/http/wiki/Parallel-requests-with-Celluloid%3A%3AIO)
@@ -308,6 +285,34 @@ Kubeclient::Client.new(
   auth_options: context.auth_options
 )
 ```
+
+
+#### Google's Application Default Credentials
+
+On Google Compute Engine, Google App Engine, or Google Cloud Functions, as well as `gcloud`-configured systems
+with [application default credentials](https://developers.google.com/identity/protocols/application-default-credentials),
+kubeclient can use `googleauth` gem to authorize.
+
+This requires the [`googleauth` gem](https://github.com/google/google-auth-library-ruby) that is _not_ included in
+`kubeclient` dependencies so you should add it to your bundle.
+
+If you use `Config.context(...).auth_options` and the kubeconfig file has `user: {auth-provider: {name: gcp}}`, kubeclient will automatically try this (raising LoadError if you don't have `googleauth` in your bundle).
+
+Or you can obtain a token manually:
+
+```ruby
+require 'googleauth'
+
+auth_options = {
+  bearer_token: Kubeclient::GoogleApplicationDefaultCredentials.token
+}
+client = Kubeclient::Client.new(
+  'https://localhost:8443/api/', 'v1', auth_options: auth_options
+)
+```
+
+Note that this returns a token good for one hour. If your code requires authorization for longer than that, you should plan to
+acquire a new one, by calling `.context()` or `GoogleApplicationDefaultCredentials.token` again.
 
 #### Security: Don't use config from untrusted sources
 
