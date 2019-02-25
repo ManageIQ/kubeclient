@@ -29,6 +29,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rubocop', '= 0.49.1'
   spec.add_development_dependency 'googleauth', '~> 0.5.1'
   spec.add_development_dependency('mocha', '~> 1.5')
+  spec.add_development_dependency 'openid_connect', '~> 1.1'
 
   spec.add_dependency 'rest-client', '~> 2.0'
   spec.add_dependency 'recursive-open-struct', '~> 1.0', '>= 1.0.4'
