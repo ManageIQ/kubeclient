@@ -314,6 +314,26 @@ client = Kubeclient::Client.new(
 Note that this returns a token good for one hour. If your code requires authorization for longer than that, you should plan to
 acquire a new one, by calling `.context()` or `GoogleApplicationDefaultCredentials.token` again.
 
+#### OIDC Auth Provider
+
+If the cluster you are using has OIDC authentication enabled you can use the `openid_connect` gem to obtain
+id-tokens if the one in your kubeconfig has expired.
+
+This requires the [`openid_connect` gem](https://github.com/nov/openid_connect) which is not included in
+the `kubeclient` dependencies so should be added to your own applications bundle.
+
+The OIDC Auth Provider will not perform the initial setup of your `$KUBECONFIG` file. You will need to use something
+like [`dexter`](https://github.com/gini/dexter) in order to configure the auth-provider in your `$KUBECONFIG` file.
+
+If you use `Config.context(...).auth_options` and the `$KUBECONFIG` file has user: `{auth-provider: {name: oidc}}`,
+kubeclient will automatically obtain a token (or use `id-token` if still valid)
+
+Tokens are typically short-lived (e.g. 1 hour) and the expiration time is determined by the OIDC Provider (e.g. Google).
+If your code requires authentication for longer than that you should obtain a new token periodically using `.context()`
+
+Note: id-tokens retrieved via this provider are not written back to the `$KUBECONFIG` file as they would be when
+using `kubectl`.
+
 #### Security: Don't use config from untrusted sources
 
 `Config.read` is catastrophically unsafe — it will execute arbitrary command lines specified by the config!
