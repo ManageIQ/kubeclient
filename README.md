@@ -280,7 +280,7 @@ context = config.context('default/192-168-99-100:8443/system:admin')
 
 Kubeclient::Client.new(
   context.api_endpoint,
-  context.api_version,
+  'v1',
   ssl_options: context.ssl_options,
   auth_options: context.auth_options
 )
