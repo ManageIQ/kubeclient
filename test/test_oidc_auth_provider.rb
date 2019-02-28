@@ -12,16 +12,9 @@ class OIDCAuthProviderTest < MiniTest::Test
   end
 
   def test_expired_token
-    access_token = Minitest::Mock.new
-    access_token.expect(@id_token, @new_id_token)
-
-    openid_client = Minitest::Mock.new
-    openid_client.expect(:refresh_token=, nil, [@refresh_token])
-    openid_client.expect(:access_token!, access_token)
-
     OpenIDConnect::Discovery::Provider::Config.stub(:discover!, discovery_mock) do
       OpenIDConnect::ResponseObject::IdToken.stub(:decode, id_token_mock(Time.now.to_i - 7200)) do
-        OpenIDConnect::Client.stub(:new, openid_client) do
+        OpenIDConnect::Client.stub(:new, openid_client_mock) do
           retrieved_id_token = Kubeclient::OIDCAuthProvider.token(
             'client-id' => @client_id,
             'client-secret' => @client_secret,
@@ -50,7 +43,30 @@ class OIDCAuthProviderTest < MiniTest::Test
     end
   end
 
+  def test_missing_id_token
+    OpenIDConnect::Discovery::Provider::Config.stub(:discover!, discovery_mock) do
+      OpenIDConnect::Client.stub(:new, openid_client_mock) do
+        retrieved_id_token = Kubeclient::OIDCAuthProvider.token(
+          'client-id' => @client_id,
+          'client-secret' => @client_secret,
+          'idp-issuer-url' => @idp_issuer_url,
+          'refresh-token' => @refresh_token
+        )
+        assert_equal(@new_id_token, retrieved_id_token)
+      end
+    end
+  end
+
   private
+
+  def openid_client_mock
+    access_token = Minitest::Mock.new
+    access_token.expect(@id_token, @new_id_token)
+
+    openid_client = Minitest::Mock.new
+    openid_client.expect(:refresh_token=, nil, [@refresh_token])
+    openid_client.expect(:access_token!, access_token)
+  end
 
   def id_token_mock(expiry)
     id_token_mock = Minitest::Mock.new
