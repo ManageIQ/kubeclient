@@ -130,7 +130,8 @@ class KubeclientConfigTest < MiniTest::Test
     config.context(config.contexts.first)
   end
 
-  # Each call to .context() should obtain a new token, calling .auth_options doesn't change anything
+  # Each call to .context() obtains a new token, calling .auth_options doesn't change anything.
+  # NOTE: this is not a guarantee, may change, just testing current behavior.
   def test_gcp_default_auth_renew
     Kubeclient::GoogleApplicationDefaultCredentials.expects(:token).returns('token1').once
     parsed = YAML.safe_load(File.read(config_file('gcpauth.kubeconfig')), [Date, Time])
