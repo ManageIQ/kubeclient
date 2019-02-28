@@ -145,6 +145,20 @@ class KubeclientConfigTest < MiniTest::Test
     assert_equal({ bearer_token: 'token1' }, context.auth_options)
   end
 
+  def test_oidc_auth_provider
+    Kubeclient::OIDCAuthProvider.expects(:token)
+                                .with('client-id' => 'fake-client-id',
+                                      'client-secret' => 'fake-client-secret',
+                                      'id-token' => 'fake-id-token',
+                                      'idp-issuer-url' => 'https://accounts.google.com',
+                                      'refresh-token' => 'fake-refresh-token')
+                                .returns('token1')
+                                .once
+    parsed = YAML.safe_load(File.read(config_file('oidcauth.kubeconfig')))
+    config = Kubeclient::Config.new(parsed, nil)
+    config.context(config.contexts.first)
+  end
+
   private
 
   def check_context(context, ssl: true)
