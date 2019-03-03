@@ -4,13 +4,15 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
-## Unreleased
+## 4.3.0 — 2019-03-03
 
 ### Changed
 - `GoogleApplicationDefaultCredentials` will automatically be used in `fetch_user_auth_options` if the `user[auth-provider][name] == 'gcp'` in the provided context. Note that `user[exec]` is checked first in anticipation of this functionality being added to GCP sometime in the future. Kubeclient _does not_ import the required `googleauth` gem, so you will need to import it in your calling application. (#394)
 
 ### Added
-- Support for `json_patch_#{entity}` and `merge_patch_#{entity}`. `patch_#{entity}` will continue to use strategic merge patch.
+- OpenID Connect credentials will automatically be used if the `user[auth-provider][name] == 'oidc'` in the provided context. Note that `user[exec]` is checked first. Kubeclient _does not_ import the required `openid_connect` gem, so you will need to import it in your calling application. (#396)
+
+- Support for `json_patch_#{entity}` and `merge_patch_#{entity}`. `patch_#{entity}` will continue to use strategic merge patch. (#390)
 
 ## 4.2.2 — 2019-01-09
 
