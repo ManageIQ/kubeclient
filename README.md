@@ -280,7 +280,7 @@ context = config.context('default/192-168-99-100:8443/system:admin')
 
 Kubeclient::Client.new(
   context.api_endpoint,
-  context.api_version,
+  'v1',
   ssl_options: context.ssl_options,
   auth_options: context.auth_options
 )
@@ -312,7 +312,7 @@ client = Kubeclient::Client.new(
 ```
 
 Note that this returns a token good for one hour. If your code requires authorization for longer than that, you should plan to
-acquire a new one, by calling `.context()` or `GoogleApplicationDefaultCredentials.token` again.
+acquire a new one, see [How to manually renew](#how-to-manually-renew-expired-credentials) section.
 
 #### OIDC Auth Provider
 
@@ -329,10 +329,32 @@ If you use `Config.context(...).auth_options` and the `$KUBECONFIG` file has use
 kubeclient will automatically obtain a token (or use `id-token` if still valid)
 
 Tokens are typically short-lived (e.g. 1 hour) and the expiration time is determined by the OIDC Provider (e.g. Google).
-If your code requires authentication for longer than that you should obtain a new token periodically using `.context()`
+If your code requires authentication for longer than that you should obtain a new token periodically, see [How to manually renew](#how-to-manually-renew-expired-credentials) section.
 
 Note: id-tokens retrieved via this provider are not written back to the `$KUBECONFIG` file as they would be when
 using `kubectl`.
+
+#### How to manually renew expired credentials
+
+Kubeclient [does not yet](https://github.com/abonas/kubeclient/issues/393) help with this.
+
+The division of labor between `Config` and `Context` objects may change, for now please make no assumptions at which stage `exec:` and `auth-provider:` are handled and whether they're cached.
+The currently guaranteed way to renew is create a new `Config` object.
+
+The more painful part is that you'll then need to create new `Client` object(s) with the credentials from new config.
+So repeat all of this:
+```ruby
+config = Kubeclient::Config.read(ENV['KUBECONFIG'] || '/path/to/.kube/config')
+context = config.context
+ssl_options = context.ssl_options
+auth_options = context.auth_options
+
+client = Kubeclient::Client.new(
+    context.api_endpoint, 'v1',
+    ssl_options: ssl_options, auth_options: auth_options
+)
+# and additional Clients if needed...
+```
 
 #### Security: Don't use config from untrusted sources
 
