@@ -9,14 +9,13 @@ module Kubeclient
     class << self
       def token(credentials, eks_cluster)
         begin
-          require 'aws-sdk-core'
           require 'aws-sigv4'
           require 'base64'
           require 'cgi'
         rescue LoadError => e
           raise AmazonEksDependencyError,
                 'Error requiring aws gems. Kubeclient itself does not include the following ' \
-                'gems: [aws-sdk-core,aws-sigv4]. To support auth-provider eks, you must ' \
+                'gems: [aws-sigv4]. To support auth-provider eks, you must ' \
                 "include it in your calling application. Failed with: #{e.message}"
         end
         # https://github.com/aws/aws-sdk-ruby/pull/1848
