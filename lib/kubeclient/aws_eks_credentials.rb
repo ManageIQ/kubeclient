@@ -29,7 +29,7 @@ module Kubeclient
         )
 
         # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/Sigv4/Signer.html#presign_url-instance_method
-        presignedURLString = signer.presign_url(
+        presignedUrlString = signer.presign_url(
           http_method: 'GET',
           url: 'https://sts.amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15',
           body: '',
@@ -39,7 +39,7 @@ module Kubeclient
             'X-K8s-Aws-Id' => eks_cluster
           }
         )
-        kube_token = 'k8s-aws-v1.' + Base64.urlsafe_encode64(presignedURLString.to_s).chomp('==')
+        kube_token = 'k8s-aws-v1.' + Base64.urlsafe_encode64(presignedUrlString.to_s).chomp('==')
         kube_token
       end
     end
