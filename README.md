@@ -287,6 +287,37 @@ Kubeclient::Client.new(
 ```
 
 
+#### Amazon EKS Credentials
+
+On Amazon EKS, when using aws-iam-authentication, with [credentials](https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/Credentials.html),
+kubeclient can use `aws-sdk-core` gem to retrieve a token to authenticate against EKS.
+
+This requires a set of gems which are _not_ included in
+`kubeclient` dependencies (`aws-sdk-core` and `aws-sigv4`) so you should add them to your bundle.
+
+To obtain a token:
+
+```ruby
+require 'aws-sdk-core'
+
+# Use keys
+credentials = Aws::Credentials.new(access_key, secret_key)
+# Or a profile
+credentials = Aws::SharedCredentials.new(profile_name: 'default').credentials
+
+auth_options = {
+  bearer_token: Kubeclient::AmazonEksCredentials.token(credentials, eks_cluster)
+}
+client = Kubeclient::Client.new(
+  'https://localhost:8443/api/', 'v1', auth_options: auth_options
+)
+```
+
+Note that this returns a token good for one hour. If your code requires authorization for longer than that, you should plan to
+acquire a new one, see [How to manually renew](#how-to-manually-renew-expired-credentials) section.
+
+
+
 #### Google's Application Default Credentials
 
 On Google Compute Engine, Google App Engine, or Google Cloud Functions, as well as `gcloud`-configured systems
