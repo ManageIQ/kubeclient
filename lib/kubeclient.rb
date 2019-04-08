@@ -1,6 +1,7 @@
 require 'json'
 require 'rest-client'
 
+require 'kubeclient/aws_eks_credentials'
 require 'kubeclient/common'
 require 'kubeclient/config'
 require 'kubeclient/entity_list'
