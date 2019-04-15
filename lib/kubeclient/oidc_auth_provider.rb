@@ -21,9 +21,7 @@ module Kubeclient
         discovery = OpenIDConnect::Discovery::Provider::Config.discover! issuer_url
 
         if provider_config.key? 'id-token'
-          id_token = OpenIDConnect::ResponseObject::IdToken.decode provider_config['id-token'],
-                                                                   discovery.jwks
-          return provider_config['id-token'] unless expired?(id_token)
+          return provider_config['id-token'] unless expired?(provider_config['id-token'], discovery)
         end
 
         client = OpenIDConnect::Client.new(
@@ -37,9 +35,17 @@ module Kubeclient
         client.access_token!.id_token
       end
 
-      def expired?(id_token)
+      def expired?(id_token, discovery)
+        decoded_token = OpenIDConnect::ResponseObject::IdToken.decode(
+          id_token,
+          discovery.jwks
+        )
         # If token expired or expiring within 60 seconds
-        Time.now.to_i + 60 > id_token.exp.to_i
+        Time.now.to_i + 60 > decoded_token.exp.to_i
+      rescue JSON::JWK::Set::KidNotFound
+        # Token cannot be verified: the kid it was signed with is not available for discovery
+        # Consider it expired and fetch a new one.
+        true
       end
     end
   end
