@@ -155,13 +155,18 @@ class KubeclientConfigTest < MiniTest::Test
                                       'refresh-token' => 'fake-refresh-token')
                                 .returns(
                                   Kubeclient::OIDCAuthProvider::AlreadyValidAccessToken.new(
-                                    'token1'
+                                    'token1',
+                                    'new-refresh-token'
                                   )
                                 )
                                 .once
     parsed = YAML.safe_load(File.read(config_file('oidcauth.kubeconfig')))
     config = Kubeclient::Config.new(parsed, nil)
-    config.context(config.contexts.first)
+    context = config.context(config.contexts.first)
+    assert_equal(
+      { bearer_token: 'token1', refresh_token: 'new-refresh-token' },
+      context.auth_options
+    )
   end
 
   private
