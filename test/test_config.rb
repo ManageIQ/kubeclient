@@ -153,11 +153,20 @@ class KubeclientConfigTest < MiniTest::Test
                                       'id-token' => 'fake-id-token',
                                       'idp-issuer-url' => 'https://accounts.google.com',
                                       'refresh-token' => 'fake-refresh-token')
-                                .returns('token1')
+                                .returns(
+                                  Kubeclient::OIDCAuthProvider::AlreadyValidAccessToken.new(
+                                    'token1',
+                                    'new-refresh-token'
+                                  )
+                                )
                                 .once
     parsed = YAML.safe_load(File.read(config_file('oidcauth.kubeconfig')))
     config = Kubeclient::Config.new(parsed, nil)
-    config.context(config.contexts.first)
+    context = config.context(config.contexts.first)
+    assert_equal(
+      { bearer_token: 'token1', refresh_token: 'new-refresh-token' },
+      context.auth_options
+    )
   end
 
   private

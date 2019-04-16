@@ -155,12 +155,14 @@ module Kubeclient
         options[:bearer_token] = Kubeclient::ExecCredentials.token(exec_opts)
       elsif user.key?('auth-provider')
         auth_provider = user['auth-provider']
-        options[:bearer_token] = case auth_provider['name']
-                                 when 'gcp'
-                                 then Kubeclient::GoogleApplicationDefaultCredentials.token
-                                 when 'oidc'
-                                 then Kubeclient::OIDCAuthProvider.token(auth_provider['config'])
-                                 end
+        case auth_provider['name']
+        when 'gcp'
+          options[:bearer_token] = Kubeclient::GoogleApplicationDefaultCredentials.token
+        when 'oidc'
+          access_token = Kubeclient::OIDCAuthProvider.token(auth_provider['config'])
+          options[:bearer_token] = access_token.id_token
+          options[:refresh_token] = access_token.refresh_token
+        end
       else
         %w[username password].each do |attr|
           options[attr.to_sym] = user[attr] if user.key?(attr)
