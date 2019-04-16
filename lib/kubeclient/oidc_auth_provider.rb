@@ -6,6 +6,8 @@ module Kubeclient
     class OpenIDConnectDependencyError < LoadError # rubocop:disable Lint/InheritException
     end
 
+    AlreadyValidAccessToken = Struct.new(:id_token)
+
     class << self
       def token(provider_config)
         begin
@@ -21,7 +23,8 @@ module Kubeclient
         discovery = OpenIDConnect::Discovery::Provider::Config.discover! issuer_url
 
         if provider_config.key? 'id-token'
-          return provider_config['id-token'] unless expired?(provider_config['id-token'], discovery)
+          access_token = AlreadyValidAccessToken.new(provider_config['id-token'])
+          return access_token unless expired?(access_token.id_token, discovery)
         end
 
         client = OpenIDConnect::Client.new(
@@ -32,7 +35,7 @@ module Kubeclient
           userinfo_endpoint: discovery.userinfo_endpoint
         )
         client.refresh_token = provider_config['refresh-token']
-        client.access_token!.id_token
+        client.access_token!
       end
 
       def expired?(id_token, discovery)

@@ -21,7 +21,7 @@ class OIDCAuthProviderTest < MiniTest::Test
             'id-token' => @id_token,
             'idp-issuer-url' => @idp_issuer_url,
             'refresh-token' => @refresh_token
-          )
+          ).id_token
           assert_equal(@new_id_token, retrieved_id_token)
         end
       end
@@ -37,7 +37,7 @@ class OIDCAuthProviderTest < MiniTest::Test
           'id-token' => @id_token,
           'idp-issuer-url' => @idp_issuer_url,
           'refresh-token' => @refresh_token
-        )
+        ).id_token
         assert_equal(@id_token, retrieved_id_token)
       end
     end
@@ -51,7 +51,7 @@ class OIDCAuthProviderTest < MiniTest::Test
           'client-secret' => @client_secret,
           'idp-issuer-url' => @idp_issuer_url,
           'refresh-token' => @refresh_token
-        )
+        ).id_token
         assert_equal(@new_id_token, retrieved_id_token)
       end
     end
@@ -69,7 +69,7 @@ class OIDCAuthProviderTest < MiniTest::Test
             'id-token' => @id_token,
             'idp-issuer-url' => @idp_issuer_url,
             'refresh-token' => @refresh_token
-          )
+          ).id_token
           assert_equal(@new_id_token, retrieved_id_token)
         end
       end

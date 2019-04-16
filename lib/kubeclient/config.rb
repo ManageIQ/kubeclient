@@ -159,7 +159,10 @@ module Kubeclient
                                  when 'gcp'
                                  then Kubeclient::GoogleApplicationDefaultCredentials.token
                                  when 'oidc'
-                                 then Kubeclient::OIDCAuthProvider.token(auth_provider['config'])
+                                 then
+                                   Kubeclient::OIDCAuthProvider.token(
+                                     auth_provider['config']
+                                   ).id_token
                                  end
       else
         %w[username password].each do |attr|
