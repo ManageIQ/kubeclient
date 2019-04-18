@@ -4,6 +4,9 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
+### Added
+- OpenID Connect tokens which cannot be validaded because we cannot identify the key they were signed with will be considered expired and refreshed as usual. (#407)
+
 ## 4.3.0 — 2019-03-03
 
 ### Changed
