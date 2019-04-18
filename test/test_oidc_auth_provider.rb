@@ -57,6 +57,25 @@ class OIDCAuthProviderTest < MiniTest::Test
     end
   end
 
+  def test_token_with_unknown_kid
+    OpenIDConnect::Discovery::Provider::Config.stub(:discover!, discovery_mock) do
+      OpenIDConnect::ResponseObject::IdToken.stub(
+        :decode, ->(_token, _jwks) { raise JSON::JWK::Set::KidNotFound }
+      ) do
+        OpenIDConnect::Client.stub(:new, openid_client_mock) do
+          retrieved_id_token = Kubeclient::OIDCAuthProvider.token(
+            'client-id' => @client_id,
+            'client-secret' => @client_secret,
+            'id-token' => @id_token,
+            'idp-issuer-url' => @idp_issuer_url,
+            'refresh-token' => @refresh_token
+          )
+          assert_equal(@new_id_token, retrieved_id_token)
+        end
+      end
+    end
+  end
+
   private
 
   def openid_client_mock
