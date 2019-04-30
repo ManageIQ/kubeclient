@@ -146,6 +146,20 @@ class KubeclientConfigTest < MiniTest::Test
     assert_equal({ bearer_token: 'token1' }, context.auth_options)
   end
 
+  def test_gcp_command_auth
+    Kubeclient::GCPCommandCredentials.expects(:token)
+                                     .with('access-token' => '<fake_token>',
+                                           'cmd-args' => 'config config-helper --format=json',
+                                           'cmd-path' => '/path/to/gcloud',
+                                           'expiry' => '2019-04-09 19:26:18 UTC',
+                                           'expiry-key' => '{.credential.token_expiry}',
+                                           'token-key' => '{.credential.access_token}')
+                                     .returns('token1')
+                                     .once
+    config = Kubeclient::Config.read(config_file('gcpcmdauth.kubeconfig'))
+    config.context(config.contexts.first)
+  end
+
   def test_oidc_auth_provider
     Kubeclient::OIDCAuthProvider.expects(:token)
                                 .with('client-id' => 'fake-client-id',

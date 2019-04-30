@@ -150,23 +150,33 @@ module Kubeclient
       if user.key?('token')
         options[:bearer_token] = user['token']
       elsif user.key?('exec')
-        exec_opts = user['exec'].dup
-        exec_opts['command'] = ext_command_path(exec_opts['command']) if exec_opts['command']
+        exec_opts = expand_command_option(user['exec'], 'command')
         options[:bearer_token] = Kubeclient::ExecCredentials.token(exec_opts)
       elsif user.key?('auth-provider')
-        auth_provider = user['auth-provider']
-        options[:bearer_token] = case auth_provider['name']
-                                 when 'gcp'
-                                 then Kubeclient::GoogleApplicationDefaultCredentials.token
-                                 when 'oidc'
-                                 then Kubeclient::OIDCAuthProvider.token(auth_provider['config'])
-                                 end
+        options[:bearer_token] = fetch_token_from_provider(user['auth-provider'])
       else
         %w[username password].each do |attr|
           options[attr.to_sym] = user[attr] if user.key?(attr)
         end
       end
       options
+    end
+
+    def fetch_token_from_provider(auth_provider)
+      case auth_provider['name']
+      when 'gcp'
+        config = expand_command_option(auth_provider['config'], 'cmd-path')
+        Kubeclient::GCPAuthProvider.token(config)
+      when 'oidc'
+        Kubeclient::OIDCAuthProvider.token(auth_provider['config'])
+      end
+    end
+
+    def expand_command_option(config, key)
+      config = config.dup
+      config[key] = ext_command_path(config[key]) if config[key]
+
+      config
     end
   end
 end
