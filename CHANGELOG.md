@@ -4,16 +4,24 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
+## Unreleased
+
+## 4.4.0 — 2019-05-03
+
 ### Added
+- GCP configs with `user[auth-provider][name] == 'gcp'` will execute credential plugin (normally the `gcloud config config-helper` subcommand) when the config specifies it in `cmd-path`, `cmd-args` fields (similar to `exec` support).  This code path works without `googleauth` gem.  Otherwise, `GoogleApplicationDefaultCredentials` path will be tried as before. (#410)
+- `AmazonEksCredentials` helper for obtaining a token to authenticate against Amazon EKS. This is not currently integrated in `Config`, you will need to invoke it yourself.  You'll need some aws gems that Kubeclient _does not_ include. (#404, #406)
+
+### Changed
 - OpenID Connect tokens which cannot be validaded because we cannot identify the key they were signed with will be considered expired and refreshed as usual. (#407)
 
 ## 4.3.0 — 2019-03-03
 
 ### Changed
-- `GoogleApplicationDefaultCredentials` will automatically be used in `fetch_user_auth_options` if the `user[auth-provider][name] == 'gcp'` in the provided context. Note that `user[exec]` is checked first in anticipation of this functionality being added to GCP sometime in the future. Kubeclient _does not_ import the required `googleauth` gem, so you will need to import it in your calling application. (#394)
+- `GoogleApplicationDefaultCredentials` will now automatically be used by `Config` if the `user[auth-provider][name] == 'gcp'` in the provided context. Note that `user[exec]` is checked first in anticipation of this functionality being added to GCP sometime in the future. Kubeclient _does not_ include the required `googleauth` gem, so you will need to include it in your calling application. (#394)
 
 ### Added
-- OpenID Connect credentials will automatically be used if the `user[auth-provider][name] == 'oidc'` in the provided context. Note that `user[exec]` is checked first. Kubeclient _does not_ import the required `openid_connect` gem, so you will need to import it in your calling application. (#396)
+- OpenID Connect credentials will automatically be used if the `user[auth-provider][name] == 'oidc'` in the provided context. Note that `user[exec]` is checked first. Kubeclient _does not_ include the required `openid_connect` gem, so you will need to include it in your calling application. (#396)
 
 - Support for `json_patch_#{entity}` and `merge_patch_#{entity}`. `patch_#{entity}` will continue to use strategic merge patch. (#390)
 

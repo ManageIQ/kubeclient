@@ -21,6 +21,7 @@ Edit `CHANGELOG.md` as necessary.  Even if all included changes remembered to up
 Bump `lib/kubeclient/version.rb` manually, or by using:
 ```bash
 git checkout -b release-$RELEASE_VERSION
+# Won't work with uncommitted changes, you have to commit the changelog first.
 gem bump --version $RELEASE_VERSION
 git show # View version bump change.
 ```
