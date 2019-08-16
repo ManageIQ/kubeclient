@@ -54,6 +54,19 @@ class KubeclientTest < MiniTest::Test
     assert_equal(watch_client.send(:build_client_options)[:proxy][:proxy_port], proxy_uri.port)
   end
 
+  def test_pass_max_redirects
+    max_redirects = 0
+    client = Kubeclient::Client.new('http://localhost:8080/api/', http_max_redirects: max_redirects)
+    rest_client = client.rest_client
+    assert_equal(max_redirects, rest_client.options[:max_redirects])
+
+    stub_request(:get, 'http://localhost:8080/api')
+      .to_return(status: 302, headers: { location: 'http://localhost:1234/api' })
+
+    exception = assert_raises(Kubeclient::HttpError) { client.api }
+    assert_equal(302, exception.error_code)
+  end
+
   def test_exception
     stub_core_api_list
     stub_request(:post, %r{/services})
@@ -208,6 +221,7 @@ class KubeclientTest < MiniTest::Test
 
     refute_empty(services)
     assert_instance_of(Kubeclient::Common::EntityList, services)
+    # Stripping of 'List' in collection.kind RecursiveOpenStruct mode only is historic.
     assert_equal('Service', services.kind)
     assert_equal(2, services.size)
     assert_instance_of(Kubeclient::Resource, services[0])
@@ -234,6 +248,7 @@ class KubeclientTest < MiniTest::Test
 
     response = client.get_services(as: :parsed)
     assert_equal Hash, response.class
+    assert_equal 'ServiceList', response['kind']
     assert_equal %w[metadata spec status], response['items'].first.keys
   end
 
@@ -243,6 +258,7 @@ class KubeclientTest < MiniTest::Test
 
     response = client.get_services(as: :parsed_symbolized)
     assert_equal Hash, response.class
+    assert_equal 'ServiceList', response[:kind]
     assert_equal %i[metadata spec status], response[:items].first.keys
   end
 
@@ -469,10 +485,7 @@ class KubeclientTest < MiniTest::Test
   end
 
   def test_api_bearer_token_success
-    stub_request(:get, %r{/api/v1$})
-      .to_return(
-        body: open_test_file('core_api_resource_list.json'), status: 200
-      )
+    stub_core_api_list
     stub_request(:get, 'http://localhost:8080/api/v1/pods')
       .with(headers: { Authorization: 'Bearer valid_token' })
       .to_return(
@@ -710,12 +723,12 @@ class KubeclientTest < MiniTest::Test
 
     client = Kubeclient::Client.new('http://host:8080', 'v1')
     assert_equal(
-      'http://host:8080/api/v1/proxy/namespaces/ns/services/srvname:srvportname',
+      'http://host:8080/api/v1/namespaces/ns/services/srvname:srvportname/proxy',
       client.proxy_url('service', 'srvname', 'srvportname', 'ns')
     )
 
     assert_equal(
-      'http://host:8080/api/v1/proxy/namespaces/ns/services/srvname:srvportname',
+      'http://host:8080/api/v1/namespaces/ns/services/srvname:srvportname/proxy',
       client.proxy_url('services', 'srvname', 'srvportname', 'ns')
     )
 
@@ -731,23 +744,23 @@ class KubeclientTest < MiniTest::Test
 
     # Check no namespace provided
     assert_equal(
-      'http://host:8080/api/v1/proxy/nodes/srvname:srvportname',
+      'http://host:8080/api/v1/nodes/srvname:srvportname/proxy',
       client.proxy_url('nodes', 'srvname', 'srvportname')
     )
 
     assert_equal(
-      'http://host:8080/api/v1/proxy/nodes/srvname:srvportname',
+      'http://host:8080/api/v1/nodes/srvname:srvportname/proxy',
       client.proxy_url('node', 'srvname', 'srvportname')
     )
 
     # Check integer port
     assert_equal(
-      'http://host:8080/api/v1/proxy/nodes/srvname:5001',
+      'http://host:8080/api/v1/nodes/srvname:5001/proxy',
       client.proxy_url('nodes', 'srvname', 5001)
     )
 
     assert_equal(
-      'http://host:8080/api/v1/proxy/nodes/srvname:5001',
+      'http://host:8080/api/v1/nodes/srvname:5001/proxy',
       client.proxy_url('node', 'srvname', 5001)
     )
   end
@@ -837,11 +850,6 @@ class KubeclientTest < MiniTest::Test
   def stub_get_services
     stub_request(:get, %r{/services})
       .to_return(body: open_test_file('entity_list.json'), status: 200)
-  end
-
-  def stub_core_api_list
-    stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list.json'), status: 200)
   end
 
   def client

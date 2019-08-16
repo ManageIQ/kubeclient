@@ -3,7 +3,7 @@ require_relative 'test_helper'
 # Watch entity tests
 class TestWatch < MiniTest::Test
   def test_watch_pod_success
-    stub_resource_list
+    stub_core_api_list
 
     expected = [
       { 'type' => 'ADDED', 'resourceVersion' => '1389' },
@@ -28,7 +28,7 @@ class TestWatch < MiniTest::Test
   end
 
   def test_watch_pod_raw
-    stub_resource_list
+    stub_core_api_list
 
     stub_request(:get, %r{/watch/pods}).to_return(
       body: open_test_file('watch_stream.json'),
@@ -43,10 +43,49 @@ class TestWatch < MiniTest::Test
   end
 
   def test_watch_pod_failure
-    stub_resource_list
+    stub_core_api_list
     stub_request(:get, %r{/watch/pods}).to_return(status: 404)
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    assert_raises(Kubeclient::HttpError) do
+      client.watch_pods.each do
+      end
+    end
+  end
+
+  def test_watch_pod_follow_redirect
+    stub_core_api_list
+
+    redirect = 'http://localhost:1234/api/v1/watch/pods'
+    stub_request(:get, %r{/watch/pods})
+      .to_return(status: 302, headers: { location: redirect })
+
+    stub_request(:get, redirect).to_return(
+      body: open_test_file('watch_stream.json'),
+      status: 200
+    )
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+
+    got = nil
+    client.watch_pods.each { |notice| got = notice }
+    assert_equal('DELETED', got.type)
+  end
+
+  def test_watch_pod_max_redirect
+    stub_core_api_list
+
+    redirect = 'http://localhost:1234/api/v1/watcher/pods'
+    stub_request(:get, %r{/watch/pods})
+      .to_return(status: 302, headers: { location: redirect })
+
+    stub_request(:get, redirect).to_return(
+      body: open_test_file('watch_stream.json'),
+      status: 200
+    )
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1', http_max_redirects: 0)
+
     assert_raises(Kubeclient::HttpError) do
       client.watch_pods.each do
       end
@@ -72,7 +111,7 @@ class TestWatch < MiniTest::Test
   def test_watch_with_resource_version
     api_host = 'http://localhost:8080/api'
     version = '1995'
-    stub_resource_list
+    stub_core_api_list
     stub_request(:get, %r{.*\/watch/events})
       .to_return(body: open_test_file('watch_stream.json'),
                  status: 200)
@@ -90,7 +129,7 @@ class TestWatch < MiniTest::Test
     api_host = 'http://localhost:8080/api'
     selector = 'name=redis-master'
 
-    stub_resource_list
+    stub_core_api_list
     stub_request(:get, %r{.*\/watch/events})
       .to_return(body: open_test_file('watch_stream.json'),
                  status: 200)
@@ -108,7 +147,7 @@ class TestWatch < MiniTest::Test
     api_host = 'http://localhost:8080/api'
     selector = 'involvedObject.kind=Pod'
 
-    stub_resource_list
+    stub_core_api_list
     stub_request(:get, %r{.*\/watch/events})
       .to_return(body: open_test_file('watch_stream.json'),
                  status: 200)
@@ -125,7 +164,7 @@ class TestWatch < MiniTest::Test
   def test_watch_with_finish_and_ebadf
     api_host = 'http://localhost:8080/api'
 
-    stub_resource_list
+    stub_core_api_list
     stub_request(:get, %r{.*\/watch/events})
       .to_return(body: open_test_file('watch_stream.json'), status: 200)
 
@@ -139,14 +178,5 @@ class TestWatch < MiniTest::Test
     end
 
     assert_requested(:get, "#{api_host}/v1/watch/events", times: 1)
-  end
-
-  private
-
-  def stub_resource_list
-    stub_request(:get, %r{/api/v1$}).to_return(
-      body: open_test_file('core_api_resource_list.json'),
-      status: 200
-    )
   end
 end

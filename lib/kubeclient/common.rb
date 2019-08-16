@@ -5,7 +5,7 @@ module Kubeclient
   # Common methods
   # this is mixed in by other gems
   module ClientMixin
-    ENTITY_METHODS = %w[get watch delete create update patch].freeze
+    ENTITY_METHODS = %w[get watch delete create update patch json_patch merge_patch].freeze
 
     DEFAULT_SSL_OPTIONS = {
       client_cert: nil,
@@ -34,18 +34,26 @@ module Kubeclient
     }.freeze
 
     DEFAULT_HTTP_PROXY_URI = nil
+    DEFAULT_HTTP_MAX_REDIRECTS = 10
 
     SEARCH_ARGUMENTS = {
       'labelSelector' => :label_selector,
-      'fieldSelector' => :field_selector
+      'fieldSelector' => :field_selector,
+      'limit'         => :limit,
+      'continue'      => :continue
     }.freeze
 
-    WATCH_ARGUMENTS = { 'resourceVersion' => :resource_version }.merge!(SEARCH_ARGUMENTS).freeze
+    WATCH_ARGUMENTS = {
+      'labelSelector'   => :label_selector,
+      'fieldSelector'   => :field_selector,
+      'resourceVersion' => :resource_version
+    }.freeze
 
     attr_reader :api_endpoint
     attr_reader :ssl_options
     attr_reader :auth_options
     attr_reader :http_proxy_uri
+    attr_reader :http_max_redirects
     attr_reader :headers
     attr_reader :discovered
 
@@ -58,6 +66,7 @@ module Kubeclient
       socket_options: DEFAULT_SOCKET_OPTIONS,
       timeouts: DEFAULT_TIMEOUTS,
       http_proxy_uri: DEFAULT_HTTP_PROXY_URI,
+      http_max_redirects: DEFAULT_HTTP_MAX_REDIRECTS,
       as: :ros
     )
       validate_auth_options(auth_options)
@@ -74,6 +83,7 @@ module Kubeclient
       # @timeouts[:foo] == nil resulting in infinite timeout.
       @timeouts = DEFAULT_TIMEOUTS.merge(timeouts)
       @http_proxy_uri = http_proxy_uri ? http_proxy_uri.to_s : nil
+      @http_max_redirects = http_max_redirects
       @as = as
 
       if auth_options[:bearer_token]
@@ -126,22 +136,58 @@ module Kubeclient
     end
 
     def self.parse_definition(kind, name)
-      # "name": "componentstatuses", networkpolicies, endpoints
-      # "kind": "ComponentStatus" NetworkPolicy, Endpoints
-      # maintain pre group api compatibility for endpoints and securitycontextconstraints.
-      # See: https://github.com/kubernetes/kubernetes/issues/8115
-      kind = kind[0..-2] if %w[Endpoints SecurityContextConstraints].include?(kind)
+      # Kubernetes gives us 3 inputs:
+      #   kind: "ComponentStatus", "NetworkPolicy", "Endpoints"
+      #   name: "componentstatuses", "networkpolicies", "endpoints"
+      #   singularName: "componentstatus" etc (usually omitted, defaults to kind.downcase)
+      # and want to derive singular and plural method names, with underscores:
+      #   "network_policy"
+      #   "network_policies"
+      # kind's CamelCase word boundaries determine our placement of underscores.
 
-      prefix = kind[0..kind.rindex(/[A-Z]/)] # NetworkP
-      m = name.match(/^#{prefix.downcase}(.*)$/)
-      m && OpenStruct.new(
-        entity_type:   kind, # ComponentStatus
-        resource_name: name, # componentstatuses
-        method_names:  [
-          ClientMixin.underscore_entity(kind),         # component_status
-          ClientMixin.underscore_entity(prefix) + m[1] # component_statuses
-        ]
+      if IRREGULAR_NAMES[kind]
+        # In a few cases, the given kind / singularName itself is still plural.
+        # We require a distinct singular method name, so force it.
+        method_names = IRREGULAR_NAMES[kind]
+      else
+        # TODO: respect singularName from discovery?
+        # But how?  If it differs from kind.downcase, kind's word boundaries don't apply.
+        singular_name = kind.downcase
+
+        if !(/[A-Z]/ =~ kind)
+          # Some custom resources have a fully lowercase kind - can't infer underscores.
+          method_names = [singular_name, name]
+        else
+          # Some plurals are not exact suffixes, e.g. NetworkPolicy -> networkpolicies.
+          # So don't expect full last word to match.
+          /^(?<prefix>(.*[A-Z]))(?<singular_suffix>[^A-Z]*)$/ =~ kind  # "NetworkP", "olicy"
+          if name.start_with?(prefix.downcase)
+            plural_suffix = name[prefix.length..-1]                    # "olicies"
+            prefix_underscores = ClientMixin.underscore_entity(prefix) # "network_p"
+            method_names = [prefix_underscores + singular_suffix,      # "network_policy"
+                            prefix_underscores + plural_suffix]        # "network_policies"
+          else
+            method_names = resolve_unconventional_method_names(name, kind, singular_name)
+          end
+        end
+      end
+
+      OpenStruct.new(
+        entity_type:   kind,
+        resource_name: name,
+        method_names:  method_names
       )
+    end
+
+    def self.resolve_unconventional_method_names(name, kind, singular_name)
+      underscored_name = name.tr('-', '_')
+      singular_underscores = ClientMixin.underscore_entity(kind)
+      if underscored_name.start_with?(singular_underscores)
+        [singular_underscores, underscored_name]
+      else
+        # fallback to lowercase, no separators for both names
+        [singular_name, underscored_name.tr('_', '')]
+      end
     end
 
     def handle_uri(uri, path)
@@ -157,6 +203,7 @@ module Kubeclient
       namespace.to_s.empty? ? '' : "namespaces/#{namespace}/"
     end
 
+    # rubocop:disable  Metrics/BlockLength
     def define_entity_methods
       @entities.values.each do |entity|
         # get all entities of a type e.g. get_nodes, get_pods, etc.
@@ -192,11 +239,23 @@ module Kubeclient
           update_entity(entity.resource_name, entity_config)
         end
 
-        define_singleton_method("patch_#{entity.method_names[0]}") do |name, patch, namespace = nil|
-          patch_entity(entity.resource_name, name, patch, namespace)
+        define_singleton_method("patch_#{entity.method_names[0]}") \
+        do |name, patch, namespace = nil|
+          patch_entity(entity.resource_name, name, patch, 'strategic-merge-patch', namespace)
+        end
+
+        define_singleton_method("json_patch_#{entity.method_names[0]}") \
+        do |name, patch, namespace = nil|
+          patch_entity(entity.resource_name, name, patch, 'json-patch', namespace)
+        end
+
+        define_singleton_method("merge_patch_#{entity.method_names[0]}") \
+        do |name, patch, namespace = nil|
+          patch_entity(entity.resource_name, name, patch, 'merge-patch', namespace)
         end
       end
     end
+    # rubocop:enable  Metrics/BlockLength
 
     def self.underscore_entity(entity_name)
       entity_name.gsub(/([a-z])([A-Z])/, '\1_\2').downcase
@@ -211,6 +270,7 @@ module Kubeclient
         ssl_client_cert: @ssl_options[:client_cert],
         ssl_client_key: @ssl_options[:client_key],
         proxy: @http_proxy_uri,
+        max_redirects: @http_max_redirects,
         user: @auth_options[:username],
         password: @auth_options[:password],
         open_timeout: @timeouts[:open],
@@ -256,6 +316,8 @@ module Kubeclient
     #   :namespace (string) - the namespace of the entity.
     #   :label_selector (string) - a selector to restrict the list of returned objects by labels.
     #   :field_selector (string) - a selector to restrict the list of returned objects by fields.
+    #   :limit (integer) - a maximum number of items to return in each response
+    #   :continue (string) - a token used to retrieve the next chunk of entities
     #   :as (:raw|:ros) - defaults to :ros
     #     :raw - return the raw response body as a string
     #     :ros - return a collection of RecursiveOpenStruct objects
@@ -328,13 +390,13 @@ module Kubeclient
       format_response(@as, response.body)
     end
 
-    def patch_entity(resource_name, name, patch, namespace = nil)
+    def patch_entity(resource_name, name, patch, strategy, namespace)
       ns_prefix = build_namespace_prefix(namespace)
       response = handle_exception do
         rest_client[ns_prefix + resource_name + "/#{name}"]
           .patch(
             patch.to_json,
-            { 'Content-Type' => 'application/strategic-merge-patch+json' }.merge(@headers)
+            { 'Content-Type' => "application/#{strategy}+json" }.merge(@headers)
           )
       end
       format_response(@as, response.body)
@@ -395,12 +457,7 @@ module Kubeclient
           @entities[kind.to_s].resource_name
         end
       ns_prefix = build_namespace_prefix(namespace)
-      # TODO: Change this once services supports the new scheme
-      if entity_name_plural == 'pods'
-        rest_client["#{ns_prefix}#{entity_name_plural}/#{name}:#{port}/proxy"].url
-      else
-        rest_client["proxy/#{ns_prefix}#{entity_name_plural}/#{name}:#{port}"].url
-      end
+      rest_client["#{ns_prefix}#{entity_name_plural}/#{name}:#{port}/proxy"].url
     end
 
     def process_template(template)
@@ -426,7 +483,15 @@ module Kubeclient
 
     private
 
-    # Format ditetime according to RFC3339
+    IRREGULAR_NAMES = {
+      # In a few cases, the given kind itself is still plural.
+      # https://github.com/kubernetes/kubernetes/issues/8115
+      'Endpoints'                  => %w[endpoint endpoints],
+      'SecurityContextConstraints' => %w[security_context_constraint
+                                         security_context_constraints]
+    }.freeze
+
+    # Format datetime according to RFC3339
     def format_datetime(value)
       case value
       when DateTime, Time
@@ -455,10 +520,14 @@ module Kubeclient
               result.fetch('metadata', {}).fetch('resourceVersion', nil)
             end
 
+          # If 'limit' was passed save the continue token
+          # see https://kubernetes.io/docs/reference/using-api/api-concepts/#retrieving-large-results-sets-in-chunks
+          continue = result.fetch('metadata', {}).fetch('continue', nil)
+
           # result['items'] might be nil due to https://github.com/kubernetes/kubernetes/issues/13096
           collection = result['items'].to_a.map { |item| Kubeclient::Resource.new(item) }
 
-          Kubeclient::Common::EntityList.new(list_type, resource_version, collection)
+          Kubeclient::Common::EntityList.new(list_type, resource_version, collection, continue)
         else
           Kubeclient::Resource.new(result)
         end
@@ -471,6 +540,9 @@ module Kubeclient
       @entities = {}
       fetch_entities['resources'].each do |resource|
         next if resource['name'].include?('/')
+        # Not a regular entity, special functionality covered by `process_template`.
+        # https://github.com/openshift/origin/issues/21668
+        next if resource['kind'] == 'Template' && resource['name'] == 'processedtemplates'
         resource['kind'] ||=
           Kubeclient::Common::MissingKindCompatibility.resource_kind(resource['name'])
         entity = ClientMixin.parse_definition(resource['kind'], resource['name'])
@@ -515,7 +587,8 @@ module Kubeclient
         basic_auth_user: @auth_options[:username],
         basic_auth_password: @auth_options[:password],
         headers: @headers,
-        http_proxy_uri: @http_proxy_uri
+        http_proxy_uri: @http_proxy_uri,
+        http_max_redirects: http_max_redirects
       }
 
       if uri.scheme == 'https'

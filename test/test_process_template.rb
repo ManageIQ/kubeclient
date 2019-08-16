@@ -41,4 +41,40 @@ class TestProcessTemplate < MiniTest::Test
         data['metadata']['namespace'] == 'default'
     end
   end
+
+  # Ensure _template and _templates methods hit `/templates` rather than
+  # `/processedtemplates` URL.
+  def test_templates_methods
+    stub_request(:get, %r{/apis/template\.openshift\.io/v1$}).to_return(
+      body: open_test_file('template.openshift.io_api_resource_list.json'),
+      status: 200
+    )
+    client = Kubeclient::Client.new('http://localhost:8080/apis/template.openshift.io', 'v1')
+
+    expected_url = 'http://localhost:8080/apis/template.openshift.io/v1/namespaces/default/templates'
+    stub_request(:get, expected_url)
+      .to_return(body: open_test_file('template_list.json'), status: 200)
+    client.get_templates(namespace: 'default')
+    assert_requested(:get, expected_url, times: 1)
+
+    expected_url = 'http://localhost:8080/apis/template.openshift.io/v1/namespaces/default/templates/my-template'
+    stub_request(:get, expected_url)
+      .to_return(body: open_test_file('template.json'), status: 200)
+    client.get_template('my-template', 'default')
+    assert_requested(:get, expected_url, times: 1)
+  end
+
+  def test_no_processedtemplates_methods
+    stub_request(:get, %r{/apis/template\.openshift\.io/v1$}).to_return(
+      body: open_test_file('template.openshift.io_api_resource_list.json'),
+      status: 200
+    )
+    client = Kubeclient::Client.new('http://localhost:8080/apis/template.openshift.io', 'v1')
+    client.discover
+
+    refute_respond_to(client, :get_processedtemplates)
+    refute_respond_to(client, :get_processedtemplate)
+    refute_respond_to(client, :get_processed_templates)
+    refute_respond_to(client, :get_processed_template)
+  end
 end

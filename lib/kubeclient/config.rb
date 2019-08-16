@@ -18,14 +18,20 @@ module Kubeclient
       end
     end
 
-    def initialize(kcfg, kcfg_path)
-      @kcfg = kcfg
+    # data (Hash) - Parsed kubeconfig data.
+    # kcfg_path (string) - Base directory for resolving relative references to external files.
+    #   If set to nil, all external lookups & commands are disabled (even for absolute paths).
+    # See also the more convenient Config.read
+    def initialize(data, kcfg_path)
+      @kcfg = data
       @kcfg_path = kcfg_path
       raise 'Unknown kubeconfig version' if @kcfg['apiVersion'] != 'v1'
     end
 
+    # Builds Config instance by parsing given file, with lookups relative to file's directory.
     def self.read(filename)
-      Config.new(YAML.load_file(filename), File.dirname(filename))
+      parsed = YAML.safe_load(File.read(filename), [Date, Time])
+      Config.new(parsed, File.dirname(filename))
     end
 
     def contexts
@@ -64,8 +70,33 @@ module Kubeclient
 
     private
 
+    def allow_external_lookups?
+      @kcfg_path != nil
+    end
+
     def ext_file_path(path)
+      unless allow_external_lookups?
+        raise "Kubeclient::Config: external lookups disabled, can't load '#{path}'"
+      end
       Pathname(path).absolute? ? path : File.join(@kcfg_path, path)
+    end
+
+    def ext_command_path(path)
+      unless allow_external_lookups?
+        raise "Kubeclient::Config: external lookups disabled, can't execute '#{path}'"
+      end
+      # Like go client https://github.com/kubernetes/kubernetes/pull/59495#discussion_r171138995,
+      # distinguish 3 cases:
+      # - absolute (e.g. /path/to/foo)
+      # - $PATH-based (e.g. curl)
+      # - relative to config file's dir (e.g. ./foo)
+      if Pathname(path).absolute?
+        path
+      elsif File.basename(path) == path
+        path
+      else
+        File.join(@kcfg_path, path)
+      end
     end
 
     def fetch_context(context_name)
@@ -118,12 +149,34 @@ module Kubeclient
       options = {}
       if user.key?('token')
         options[:bearer_token] = user['token']
+      elsif user.key?('exec')
+        exec_opts = expand_command_option(user['exec'], 'command')
+        options[:bearer_token] = Kubeclient::ExecCredentials.token(exec_opts)
+      elsif user.key?('auth-provider')
+        options[:bearer_token] = fetch_token_from_provider(user['auth-provider'])
       else
         %w[username password].each do |attr|
           options[attr.to_sym] = user[attr] if user.key?(attr)
         end
       end
       options
+    end
+
+    def fetch_token_from_provider(auth_provider)
+      case auth_provider['name']
+      when 'gcp'
+        config = expand_command_option(auth_provider['config'], 'cmd-path')
+        Kubeclient::GCPAuthProvider.token(config)
+      when 'oidc'
+        Kubeclient::OIDCAuthProvider.token(auth_provider['config'])
+      end
+    end
+
+    def expand_command_option(config, key)
+      config = config.dup
+      config[key] = ext_command_path(config[key]) if config[key]
+
+      config
     end
   end
 end
