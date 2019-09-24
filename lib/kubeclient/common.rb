@@ -39,7 +39,7 @@ module Kubeclient
     SEARCH_ARGUMENTS = {
       'labelSelector'   => :label_selector,
       'fieldSelector'   => :field_selector,
-      'resourceVersion' => :resource_version
+      'resourceVersion' => :resource_version,
       'limit'           => :limit,
       'continue'        => :continue
     }.freeze
