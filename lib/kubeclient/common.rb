@@ -37,10 +37,11 @@ module Kubeclient
     DEFAULT_HTTP_MAX_REDIRECTS = 10
 
     SEARCH_ARGUMENTS = {
-      'labelSelector' => :label_selector,
-      'fieldSelector' => :field_selector,
-      'limit'         => :limit,
-      'continue'      => :continue
+      'labelSelector'   => :label_selector,
+      'fieldSelector'   => :field_selector,
+      'resourceVersion' => :resource_version,
+      'limit'           => :limit,
+      'continue'        => :continue
     }.freeze
 
     WATCH_ARGUMENTS = {
