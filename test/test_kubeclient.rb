@@ -296,6 +296,22 @@ class KubeclientTest < MiniTest::Test
     )
   end
 
+  def test_entities_with_resource_version
+    version = '329'
+
+    stub_core_api_list
+    stub_get_services
+
+    services = client.get_services(resource_version: version)
+
+    assert_instance_of(Kubeclient::Common::EntityList, services)
+    assert_requested(
+      :get,
+      "http://localhost:8080/api/v1/services?resourceVersion=#{version}",
+      times: 1
+    )
+  end
+
   def test_entities_with_field_selector
     selector = 'involvedObject.name=redis-master'
 
