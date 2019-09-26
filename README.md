@@ -447,6 +447,12 @@ You can specify multiple labels (that option will return entities which have bot
 pods = client.get_pods(label_selector: 'name=redis-master,app=redis')
 ```
 
+You can get entities at a specific version by specifying a parameter named `resource_version` (named `resourceVersion` in Kubernetes server):
+
+```ruby
+pods = client.get_pods(resource_version: '0')
+```
+
 Get all entities of a specific type in chunks:
 
 ```ruby
