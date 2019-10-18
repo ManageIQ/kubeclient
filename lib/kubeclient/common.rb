@@ -245,6 +245,11 @@ module Kubeclient
           patch_entity(entity.resource_name, name, patch, 'strategic-merge-patch', namespace)
         end
 
+        define_singleton_method("patch_#{entity.method_names[0]}_status") \
+        do |name, patch, namespace = nil|
+          patch_entity_status(entity.resource_name, name, patch, 'strategic-merge-patch', namespace)
+        end
+
         define_singleton_method("json_patch_#{entity.method_names[0]}") \
         do |name, patch, namespace = nil|
           patch_entity(entity.resource_name, name, patch, 'json-patch', namespace)
@@ -391,6 +396,18 @@ module Kubeclient
       response = handle_exception do
         rest_client[ns_prefix + resource_name + "/#{name}"]
           .put(entity_config.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
+      end
+      format_response(@as, response.body)
+    end
+
+    def patch_entity_status(resource_name, name, patch, strategy, namespace)
+      ns_prefix = build_namespace_prefix(namespace)
+      response = handle_exception do
+        rest_client[ns_prefix + resource_name + "/#{name}/status"]
+          .patch(
+            patch.to_json,
+            { 'Content-Type' => "application/#{strategy}+json" }.merge(@headers)
+          )
       end
       format_response(@as, response.body)
     end
