@@ -596,8 +596,7 @@ client.all_entities
 It is possible to receive live update notices watching the relevant entities:
 
 ```ruby
-watcher = client.watch_pods
-watcher.each do |notice|
+client.watch_pods do |notice|
   # process notice data
 end
 ```
@@ -605,15 +604,19 @@ end
 It is possible to interrupt the watcher from another thread with:
 
 ```ruby
-watcher.finish
+watcher = client.watch_pods
+watcher.each do |notice|
+  # process notice data
+end
+
+watcher.finish # other thread
 ```
 
 #### Watch events for a particular object
 You can use the `field_selector` option as part of the watch methods.
 
 ```ruby
-watcher = client.watch_events(namespace: 'development', field_selector: 'involvedObject.name=redis-master')
-watcher.each do |notice|
+client.watch_events(namespace: 'development', field_selector: 'involvedObject.name=redis-master') do |notice|
   # process notice date
 end
 ```
@@ -673,8 +676,7 @@ client.get_pod_log('pod-name', 'default', tail_lines: 10)
 You can also watch the logs of a pod to get a stream of data:
 
 ```ruby
-watcher = client.watch_pod_log('pod-name', 'default', container: 'ruby')
-watcher.each do |line|
+client.watch_pod_log('pod-name', 'default', container: 'ruby') do |line|
   puts line
 end
 ```

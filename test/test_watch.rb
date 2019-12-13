@@ -27,6 +27,19 @@ class TestWatch < MiniTest::Test
     end
   end
 
+  def test_watch_pod_block
+    stub_core_api_list
+    stub_request(:get, %r{/watch/pods})
+      .to_return(body: open_test_file('watch_stream.json'),
+                 status: 200)
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    yielded = []
+    client.watch_pods { |notice| yielded << notice.type }
+
+    assert_equal %w[ADDED MODIFIED DELETED], yielded
+  end
+
   def test_watch_pod_raw
     stub_core_api_list
 
