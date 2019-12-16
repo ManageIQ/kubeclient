@@ -213,12 +213,12 @@ module Kubeclient
         end
 
         # watch all entities of a type e.g. watch_nodes, watch_pods, etc.
-        define_singleton_method("watch_#{entity.method_names[1]}") do |options = {}|
+        define_singleton_method("watch_#{entity.method_names[1]}") do |options = {}, &block|
           # This method used to take resource_version as a param, so
           # this conversion is to keep backwards compatibility
           options = { resource_version: options } unless options.is_a?(Hash)
 
-          watch_entities(entity.resource_name, options)
+          watch_entities(entity.resource_name, options, &block)
         end
 
         # get a single entity of a specific type by name
@@ -295,7 +295,9 @@ module Kubeclient
     #   :as (:raw|:ros) - defaults to :ros
     #     :raw - return the raw response body as a string
     #     :ros - return a collection of RecursiveOpenStruct objects
-    def watch_entities(resource_name, options = {})
+    # Accepts an optional block, that will be called with each entity,
+    # otherwise returns a WatchStream
+    def watch_entities(resource_name, options = {}, &block)
       ns = build_namespace_prefix(options[:namespace])
 
       path = "watch/#{ns}#{resource_name}"
@@ -306,11 +308,13 @@ module Kubeclient
       WATCH_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
       uri.query = URI.encode_www_form(params) if params.any?
 
-      Kubeclient::Common::WatchStream.new(
+      watcher = Kubeclient::Common::WatchStream.new(
         uri,
         http_options(uri),
         formatter: ->(value) { format_response(options[:as] || @as, value) }
       )
+
+      return_or_yield_to_watcher(watcher, &block)
     end
 
     # Accepts the following options:
@@ -438,7 +442,7 @@ module Kubeclient
       end
     end
 
-    def watch_pod_log(pod_name, namespace, container: nil)
+    def watch_pod_log(pod_name, namespace, container: nil, &block)
       # Adding the "follow=true" query param tells the Kubernetes API to keep
       # the connection open and stream updates to the log.
       params = { follow: true }
@@ -450,7 +454,10 @@ module Kubeclient
       uri.path += "/#{@api_version}/#{ns}pods/#{pod_name}/log"
       uri.query = URI.encode_www_form(params)
 
-      Kubeclient::Common::WatchStream.new(uri, http_options(uri), formatter: ->(value) { value })
+      watcher = Kubeclient::Common::WatchStream.new(
+        uri, http_options(uri), formatter: ->(value) { value }
+      )
+      return_or_yield_to_watcher(watcher, &block)
     end
 
     def proxy_url(kind, name, port, namespace = '')
@@ -585,6 +592,16 @@ module Kubeclient
 
       msg = "Cannot read token file #{@auth_options[:bearer_token_file]}"
       raise ArgumentError, msg unless File.readable?(@auth_options[:bearer_token_file])
+    end
+
+    def return_or_yield_to_watcher(watcher, &block)
+      return watcher unless block_given?
+
+      begin
+        watcher.each(&block)
+      ensure
+        watcher.finish
+      end
     end
 
     def http_options(uri)
