@@ -69,6 +69,25 @@ class TestPodLog < MiniTest::Test
                      times: 1)
   end
 
+  def test_get_pod_limit_bytes
+    selected_bytes = open_test_file('pod_log.txt').read(10)
+
+    stub_request(:get, %r{/namespaces/default/pods/[a-z0-9-]+/log})
+      .to_return(body: selected_bytes,
+                 status: 200)
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    retrieved_log = client.get_pod_log('redis-master-pod',
+                                       'default',
+                                       limit_bytes: 10)
+
+    assert_equal(selected_bytes, retrieved_log)
+
+    assert_requested(:get,
+                     'http://localhost:8080/api/v1/namespaces/default/pods/redis-master-pod/log?limitBytes=10',
+                     times: 1)
+  end
+
   def test_watch_pod_log
     file = open_test_file('pod_log.txt')
     expected_lines = file.read.split("\n")

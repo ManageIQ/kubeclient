@@ -673,6 +673,12 @@ client.get_pod_log('pod-name', 'default', tail_lines: 10)
 # => "..."
 ```
 
+Kubernetes can fetch a specific number of bytes from the log, but the exact size is not guaranteed and last line may not be terminated:
+```ruby
+client.get_pod_log('pod-name', 'default', limit_bytes: 10)
+# => "..."
+```
+
 You can also watch the logs of a pod to get a stream of data:
 
 ```ruby
