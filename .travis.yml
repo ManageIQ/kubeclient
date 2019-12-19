@@ -18,6 +18,8 @@ matrix:
   exclude:
     - os: osx
       rvm: "2.2.0"
+    - os: osx
+      rvm: "2.3.0"
   include:
     - os: linux
       rvm: "2.5.0"

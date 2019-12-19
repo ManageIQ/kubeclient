@@ -427,13 +427,14 @@ module Kubeclient
 
     def get_pod_log(pod_name, namespace,
                     container: nil, previous: false,
-                    timestamps: false, since_time: nil, tail_lines: nil)
+                    timestamps: false, since_time: nil, tail_lines: nil, limit_bytes: nil)
       params = {}
       params[:previous] = true if previous
       params[:container] = container if container
       params[:timestamps] = timestamps if timestamps
       params[:sinceTime] = format_datetime(since_time) if since_time
       params[:tailLines] = tail_lines if tail_lines
+      params[:limitBytes] = limit_bytes if limit_bytes
 
       ns = build_namespace_prefix(namespace)
       handle_exception do
