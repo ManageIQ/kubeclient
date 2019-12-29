@@ -207,7 +207,7 @@ client = Kubeclient::Client.new(
 
 ### Timeouts
 
-Watching never times out.
+Watching configures the socket to never time out (however, sooner or later all watches terminate).
 
 One-off actions like `.get_*`, `.delete_*` have a configurable timeout:
 ```ruby
@@ -546,6 +546,86 @@ Other formats are:
  - `:parsed` for `JSON.parse`
  - `:parsed_symbolized` for `JSON.parse(..., symbolize_names: true)`
 
+### Watch — Receive entities updates
+
+See https://kubernetes.io/docs/reference/using-api/api-concepts/#efficient-detection-of-changes for an overview.
+
+It is possible to receive live update notices watching the relevant entities:
+
+```ruby
+client.watch_pods do |notice|
+  # process notice data
+end
+```
+
+The notices have `.type` field which may be `'ADDED'`, `'MODIFIED'`, `'DELETED'`, or currently `'ERROR'`, and an `.object` field containing the object.  **UPCOMING CHANGE**: In next major version, we plan to raise exceptions instead of passing on ERROR into the block.
+
+For namespaced entities, the default watches across all namespaces, and you can specify `client.watch_secrets(namespace: 'foo')` to only watch in a single namespace.
+
+You can narrow down using `label_selector:` and `field_selector:` params, like with `get_pods` methods.
+
+You can also watch a single object by specifying `name:` e.g. `client.watch_nodes(name: 'gandalf')` (not namespaced so a name is enough) or `client.watch_pods(namespace: 'foo', name: 'bar')` (namespaced, need both params).
+Note the method name is still plural!  There is no `watch_pod`, only `watch_pods`.  The yielded "type" remains the same — watch notices, it's just they'll always refer to the same object.
+
+You can use `as:` param to control the format of the yielded notices.
+
+#### All watches come to an end!
+
+While nominally the watch block *looks* like an infinite loop, that's unrealistic.  Network connections eventually get severed, and kubernetes apiserver is known to terminate watches.
+
+Unfortunately, this sometimes raises an exception and sometimes the loop just exits.  **UPCOMING CHANGE**: In next major version, non-deliberate termination will always raise an exception; the block will only exit silenty if stopped deliberately.
+
+#### Deliberately stopping a watch
+
+You can use `break` or `return` inside the watch block.
+
+It is possible to interrupt the watcher from another thread with:
+
+```ruby
+watcher = client.watch_pods
+
+watcher.each do |notice|
+  # process notice data
+end
+# <- control will pass here after .finish is called
+
+### In another thread ###
+watcher.finish
+```
+
+#### Starting watch version
+
+You can specify version to start from, commonly used in "List+Watch" pattern:
+```
+list = client.get_pods
+collection_version = list.resourceVersion
+# or with other return formats:
+list = client.get_pods(as: :parsed)
+collection_version = list['metadata']['resourceVersion']
+
+# note spelling resource_version vs resourceVersion.
+client.watch_pods(resource_version: collection_version) do |notice|
+  # process notice data
+end
+```
+It's important to understand [the effects of unset/0/specific resource_version](https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions) as it modifies the behavior of the watch — in some modes you'll first see a burst of synthetic 'ADDED' notices for all existing objects.
+
+If you re-try a terminated watch again without specific resourceVersion, you might see previously seen notices again, and might miss some events.
+
+To attempt resuming a watch from same point, you can try using last resourceVersion observed during the watch.  Or do list+watch again.
+
+Whenever you ask for a specific version, you must be prepared for an 410 "Gone" error if the server no longer recognizes it.
+
+#### Watch events about a particular object
+Events are [entities in their own right](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#event-v1-core).
+You can use the `field_selector` option as part of the watch methods.
+
+```ruby
+client.watch_events(namespace: 'development', field_selector: 'involvedObject.name=redis-master') do |notice|
+  # process notice date
+end
+```
+
 ### Delete an entity (by name)
 
 For example: `delete_pod "pod name"` , `delete_replication_controller "rc name"`, `delete_node "node name"`, `delete_secret "secret name"`
@@ -630,35 +710,6 @@ Returns a hash with keys being the *singular* entity kind, in lowercase undersco
 
 ```ruby
 client.all_entities
-```
-
-#### Receive entity updates
-It is possible to receive live update notices watching the relevant entities:
-
-```ruby
-client.watch_pods do |notice|
-  # process notice data
-end
-```
-
-It is possible to interrupt the watcher from another thread with:
-
-```ruby
-watcher = client.watch_pods
-watcher.each do |notice|
-  # process notice data
-end
-
-watcher.finish # other thread
-```
-
-#### Watch events for a particular object
-You can use the `field_selector` option as part of the watch methods.
-
-```ruby
-client.watch_events(namespace: 'development', field_selector: 'involvedObject.name=redis-master') do |notice|
-  # process notice date
-end
 ```
 
 ### Get a proxy URL
