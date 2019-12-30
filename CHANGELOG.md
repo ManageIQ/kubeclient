@@ -4,10 +4,19 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
+## 4.6.0 — 2019-12-30
+
+### Fixed
+- AmazonEksCredentials was sometimes leaving base64 padding that IAM auth of the EKS cluster rejects.  Now padding is always stripped. (#424, #423)
+
+### Added
+- Allow calling `watch_foos` methods with a block, simpler to use and guarantees closing the connection. (#425)
+
+- Support `limitBytes` query parameter for `get_pod_log`. (#426)
+
 ## 4.5.0 — 2019-09-27
 
 ### Added
-
 - Support `:resourceVersion` parameter in `get_foos` methods (similar to existing support in `watch_foos` methods). (#420)
 
 - Relax dependency on `http` gem to allow both 3.x and 4.x. (#413)
