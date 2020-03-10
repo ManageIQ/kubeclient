@@ -458,7 +458,7 @@ Such as: `get_pods`, `get_secrets`, `get_services`, `get_nodes`, `get_replicatio
 pods = client.get_pods
 ```
 
-Get all entities of a specific type in a namespace:<br>
+Get all entities of a specific type in a namespace:
 
 ```ruby
 services = client.get_services(namespace: 'development')
@@ -476,13 +476,22 @@ You can specify multiple labels (that option will return entities which have bot
 pods = client.get_pods(label_selector: 'name=redis-master,app=redis')
 ```
 
-You can get entities at a specific version by specifying a parameter named `resource_version` (named `resourceVersion` in Kubernetes server):
+There is also [a limited ability to filter by *some* fields](https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/).  Which fields are supported is not documented, you can try and see if you get an error...
+```ruby
+client.get_pods(field_selector: 'spec.nodeName=master-0')
+```
 
+You can ask for entities at a specific version by specifying a parameter named `resource_version`:
 ```ruby
 pods = client.get_pods(resource_version: '0')
 ```
+but it's not guaranteed you'll get it.  See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions to understand the semantics.
 
-Get all entities of a specific type in chunks:
+With default (`as: :ros`) return format, the returned object acts like an array of the individual pods, but also supports a `.resourceVersion` method.
+
+With `:parsed` and `:parsed_symbolized` formats, the returned data structure matches kubernetes list structure: it's a hash containing  `metadata` and `items` keys, the latter containing the individual pods.
+
+#### Get all entities of a specific type in chunks
 
 ```ruby
 continue = nil
