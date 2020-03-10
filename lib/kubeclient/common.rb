@@ -258,8 +258,12 @@ module Kubeclient
     end
     # rubocop:enable  Metrics/BlockLength
 
+    # Inspired by https://stackoverflow.com/questions/1509915/converting-camel-case-to-underscore-case-in-ruby
     def self.underscore_entity(entity_name)
-      entity_name.gsub(/([a-z])([A-Z])/, '\1_\2').downcase
+      entity_name
+        .gsub(/([A-Z]+)([A-Z][a-z])/, '\1_\2') # ABCd -> AB_Cd
+        .gsub(/([a-z])([A-Z])/, '\1_\2') # AbcD -> Abc_D
+        .downcase
     end
 
     def create_rest_client(path = nil)
