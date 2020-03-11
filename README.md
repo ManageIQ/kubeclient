@@ -207,7 +207,7 @@ client = Kubeclient::Client.new(
 
 ### Timeouts
 
-Watching never times out.
+Watching configures the socket to never time out (however, sooner or later all watches terminate).
 
 One-off actions like `.get_*`, `.delete_*` have a configurable timeout:
 ```ruby
@@ -420,16 +420,45 @@ We try to support the last 3 minor versions, matching the [official support poli
 Kubernetes 1.2 and below have known issues and are unsupported.
 Kubernetes 1.3 presumed to still work although nobody is really testing on such old versions...
 
-## Examples:
+## Supported actions & examples:
 
-#### Get all instances of a specific entity type
+Summary of main CRUD actions:
+
+```
+get_foos(namespace: 'namespace', **opts)  # namespaced collection
+get_foos(**opts)                          # all namespaces or global collection
+
+get_foo('name', 'namespace', opts)  # namespaced
+get_foo('name', nil, opts)          # global
+
+watch_foos(namespace: ns, **opts)   # namespaced collection
+watch_foos(**opts)                  # all namespaces or global collection
+watch_foos(namespace: ns, name: 'name', **opts)   # namespaced single object
+watch_foos(name: 'name', **opts)                  # global single object
+
+delete_foo('name', 'namespace', opts)    # namespaced
+delete_foo('name', nil, opts)            # global
+
+create_foo(Kubeclient::Resource.new({metadata: {name: 'name', namespace: 'namespace', ...}, ...}))
+create_foo(Kubeclient::Resource.new({metadata: {name: 'name', ...}, ...}))  # global
+
+update_foo(Kubeclient::Resource.new({metadata: {name: 'name', namespace: 'namespace', ...}, ...}))
+update_foo(Kubeclient::Resource.new({metadata: {name: 'name', ...}, ...}))  # global
+
+patch_foo('name', patch, 'namespace')    # namespaced
+patch_foo('name', patch)                 # global
+```
+
+These grew to be quite inconsistent :confounded:, see https://github.com/abonas/kubeclient/issues/312 and https://github.com/abonas/kubeclient/issues/332 for improvement plans.
+
+### Get all instances of a specific entity type
 Such as: `get_pods`, `get_secrets`, `get_services`, `get_nodes`, `get_replication_controllers`, `get_resource_quotas`, `get_limit_ranges`, `get_persistent_volumes`, `get_persistent_volume_claims`, `get_component_statuses`, `get_service_accounts`
 
 ```ruby
 pods = client.get_pods
 ```
 
-Get all entities of a specific type in a namespace:<br>
+Get all entities of a specific type in a namespace:
 
 ```ruby
 services = client.get_services(namespace: 'development')
@@ -447,13 +476,22 @@ You can specify multiple labels (that option will return entities which have bot
 pods = client.get_pods(label_selector: 'name=redis-master,app=redis')
 ```
 
-You can get entities at a specific version by specifying a parameter named `resource_version` (named `resourceVersion` in Kubernetes server):
+There is also [a limited ability to filter by *some* fields](https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/).  Which fields are supported is not documented, you can try and see if you get an error...
+```ruby
+client.get_pods(field_selector: 'spec.nodeName=master-0')
+```
 
+You can ask for entities at a specific version by specifying a parameter named `resource_version`:
 ```ruby
 pods = client.get_pods(resource_version: '0')
 ```
+but it's not guaranteed you'll get it.  See https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions to understand the semantics.
 
-Get all entities of a specific type in chunks:
+With default (`as: :ros`) return format, the returned object acts like an array of the individual pods, but also supports a `.resourceVersion` method.
+
+With `:parsed` and `:parsed_symbolized` formats, the returned data structure matches kubernetes list structure: it's a hash containing  `metadata` and `items` keys, the latter containing the individual pods.
+
+#### Get all entities of a specific type in chunks
 
 ```ruby
 continue = nil
@@ -508,7 +546,87 @@ Other formats are:
  - `:parsed` for `JSON.parse`
  - `:parsed_symbolized` for `JSON.parse(..., symbolize_names: true)`
 
-#### Delete an entity (by name)
+### Watch — Receive entities updates
+
+See https://kubernetes.io/docs/reference/using-api/api-concepts/#efficient-detection-of-changes for an overview.
+
+It is possible to receive live update notices watching the relevant entities:
+
+```ruby
+client.watch_pods do |notice|
+  # process notice data
+end
+```
+
+The notices have `.type` field which may be `'ADDED'`, `'MODIFIED'`, `'DELETED'`, or currently `'ERROR'`, and an `.object` field containing the object.  **UPCOMING CHANGE**: In next major version, we plan to raise exceptions instead of passing on ERROR into the block.
+
+For namespaced entities, the default watches across all namespaces, and you can specify `client.watch_secrets(namespace: 'foo')` to only watch in a single namespace.
+
+You can narrow down using `label_selector:` and `field_selector:` params, like with `get_pods` methods.
+
+You can also watch a single object by specifying `name:` e.g. `client.watch_nodes(name: 'gandalf')` (not namespaced so a name is enough) or `client.watch_pods(namespace: 'foo', name: 'bar')` (namespaced, need both params).
+Note the method name is still plural!  There is no `watch_pod`, only `watch_pods`.  The yielded "type" remains the same — watch notices, it's just they'll always refer to the same object.
+
+You can use `as:` param to control the format of the yielded notices.
+
+#### All watches come to an end!
+
+While nominally the watch block *looks* like an infinite loop, that's unrealistic.  Network connections eventually get severed, and kubernetes apiserver is known to terminate watches.
+
+Unfortunately, this sometimes raises an exception and sometimes the loop just exits.  **UPCOMING CHANGE**: In next major version, non-deliberate termination will always raise an exception; the block will only exit silenty if stopped deliberately.
+
+#### Deliberately stopping a watch
+
+You can use `break` or `return` inside the watch block.
+
+It is possible to interrupt the watcher from another thread with:
+
+```ruby
+watcher = client.watch_pods
+
+watcher.each do |notice|
+  # process notice data
+end
+# <- control will pass here after .finish is called
+
+### In another thread ###
+watcher.finish
+```
+
+#### Starting watch version
+
+You can specify version to start from, commonly used in "List+Watch" pattern:
+```
+list = client.get_pods
+collection_version = list.resourceVersion
+# or with other return formats:
+list = client.get_pods(as: :parsed)
+collection_version = list['metadata']['resourceVersion']
+
+# note spelling resource_version vs resourceVersion.
+client.watch_pods(resource_version: collection_version) do |notice|
+  # process notice data
+end
+```
+It's important to understand [the effects of unset/0/specific resource_version](https://kubernetes.io/docs/reference/using-api/api-concepts/#resource-versions) as it modifies the behavior of the watch — in some modes you'll first see a burst of synthetic 'ADDED' notices for all existing objects.
+
+If you re-try a terminated watch again without specific resourceVersion, you might see previously seen notices again, and might miss some events.
+
+To attempt resuming a watch from same point, you can try using last resourceVersion observed during the watch.  Or do list+watch again.
+
+Whenever you ask for a specific version, you must be prepared for an 410 "Gone" error if the server no longer recognizes it.
+
+#### Watch events about a particular object
+Events are [entities in their own right](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.17/#event-v1-core).
+You can use the `field_selector` option as part of the watch methods.
+
+```ruby
+client.watch_events(namespace: 'development', field_selector: 'involvedObject.name=redis-master') do |notice|
+  # process notice date
+end
+```
+
+### Delete an entity (by name)
 
 For example: `delete_pod "pod name"` , `delete_replication_controller "rc name"`, `delete_node "node name"`, `delete_secret "secret name"`
 
@@ -532,7 +650,7 @@ delete_options = Kubeclient::Resource.new(
 client.delete_deployment(deployment_name, namespace, delete_options: delete_options)
 ```
 
-#### Create an entity
+### Create an entity
 For example: `create_pod pod_object`, `create_replication_controller rc_obj`, `create_secret secret_object`, `create_resource_quota resource_quota_object`, `create_limit_range limit_range_object`, `create_persistent_volume persistent_volume_object`, `create_persistent_volume_claim persistent_volume_claim_object`, `create_service_account service_account_object`
 
 Input parameter - object of type `Service`, `Pod`, `ReplicationController`.
@@ -558,7 +676,7 @@ service.metadata.labels.role = 'slave'
 client.create_service(service)
 ```
 
-#### Update an entity
+### Update an entity
 For example: `update_pod`, `update_service`, `update_replication_controller`, `update_secret`, `update_resource_quota`, `update_limit_range`, `update_persistent_volume`, `update_persistent_volume_claim`, `update_service_account`
 
 Input parameter - object of type `Pod`, `Service`, `ReplicationController` etc.
@@ -569,7 +687,7 @@ The below example is for v1
 updated = client.update_service(service1)
 ```
 
-#### Patch an entity (by name)
+### Patch an entity (by name)
 For example: `patch_pod`, `patch_service`, `patch_secret`, `patch_resource_quota`, `patch_persistent_volume`
 
 Input parameters - name (string) specifying the entity name, patch (hash) to be applied to the resource, optional: namespace name (string)
@@ -584,44 +702,17 @@ patched = client.patch_pod("docker-registry", {metadata: {annotations: {key: 'va
 
 `patch_#{entity}` is called using a [strategic merge patch](https://kubernetes.io/docs/tasks/run-application/update-api-object-kubectl-patch/#notes-on-the-strategic-merge-patch). `json_patch_#{entity}` and `merge_patch_#{entity}` are also available that use JSON patch and JSON merge patch, respectively. These strategies are useful for resources that do not support strategic merge patch, such as Custom Resources. Consult the [Kubernetes docs](https://kubernetes.io/docs/tasks/run-application/update-api-object-kubectl-patch/#use-a-json-merge-patch-to-update-a-deployment) for more information about the different patch strategies.
 
-#### Get all entities of all types : all_entities
-Returns a hash with the following keys (node, secret, service, pod, replication_controller, namespace, resource_quota, limit_range, endpoint, event, persistent_volume, persistent_volume_claim, component_status and service_account). Each key points to an EntityList of same type.
-This method is a convenience method instead of calling each entity's get method separately.
+### Get all entities of all types : all_entities
+
+Makes requests for all entities of each discovered kind (in this client's API group).  This method is a convenience method instead of calling each entity's get method separately.
+
+Returns a hash with keys being the *singular* entity kind, in lowercase underscore style.  For example for core API group may return keys `"node'`, `"secret"`, `"service"`, `"pod"`, `"replication_controller"`, `"namespace"`, `"resource_quota"`, `"limit_range"`, `"endpoint"`, `"event"`, `"persistent_volume"`, `"persistent_volume_claim"`, `"component_status"`, `"service_account"`. Each key points to an EntityList of same type.
 
 ```ruby
 client.all_entities
 ```
 
-#### Receive entity updates
-It is possible to receive live update notices watching the relevant entities:
-
-```ruby
-client.watch_pods do |notice|
-  # process notice data
-end
-```
-
-It is possible to interrupt the watcher from another thread with:
-
-```ruby
-watcher = client.watch_pods
-watcher.each do |notice|
-  # process notice data
-end
-
-watcher.finish # other thread
-```
-
-#### Watch events for a particular object
-You can use the `field_selector` option as part of the watch methods.
-
-```ruby
-client.watch_events(namespace: 'development', field_selector: 'involvedObject.name=redis-master') do |notice|
-  # process notice date
-end
-```
-
-#### Get a proxy URL
+### Get a proxy URL
 You can get a complete URL for connecting a kubernetes entity via the proxy.
 
 ```ruby
@@ -636,7 +727,7 @@ client.proxy_url('pod', 'podname', 5001, 'ns')
 # => "https://localhost.localdomain:8443/api/v1/namespaces/ns/pods/podname:5001/proxy"
 ```
 
-#### Get the logs of a pod
+### Get the logs of a pod
 You can get the logs of a running pod, specifying the name of the pod and the
 namespace where the pod is running:
 
@@ -687,7 +778,7 @@ client.watch_pod_log('pod-name', 'default', container: 'ruby') do |line|
 end
 ```
 
-#### Process a template
+### OpenShift: Process a template
 Returns a processed template containing a list of objects to create.
 Input parameter - template (hash)
 Besides its metadata, the template should include a list of objects to be processed and a list of parameters
