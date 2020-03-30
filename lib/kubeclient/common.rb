@@ -229,7 +229,7 @@ module Kubeclient
 
         define_singleton_method("delete_#{entity.method_names[0]}") \
         do |name, namespace = nil, opts = {}|
-          delete_entity(entity.resource_name, name, namespace, opts)
+          delete_entity(entity.resource_name, name, namespace, **opts)
         end
 
         define_singleton_method("create_#{entity.method_names[0]}") do |entity_config|
