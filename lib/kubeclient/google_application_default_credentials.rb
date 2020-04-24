@@ -16,7 +16,12 @@ module Kubeclient
                 'googleauth gem. To support auth-provider gcp, you must include it in your ' \
                 "calling application. Failed with: #{e.message}"
         end
-        scopes = ['https://www.googleapis.com/auth/cloud-platform']
+
+        scopes = [
+          'https://www.googleapis.com/auth/cloud-platform',
+          'https://www.googleapis.com/auth/userinfo.email'
+        ]
+
         authorization = Google::Auth.get_application_default(scopes)
         authorization.apply({})
         authorization.access_token
