@@ -28,7 +28,7 @@ module Kubeclient
         uri,
         '/api',
         version,
-        options
+        **options
       )
     end
   end

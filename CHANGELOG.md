@@ -4,6 +4,16 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
+## 4.7.0 — 2020-06-14
+
+### Fixed
+- Ruby 2.7 compatibility: bumped minimum recursive-open-struct to one that works on 2.7 (#439).
+- Ruby 2.7 warnings (#433, #438).
+- Improved watch documentation, including behavior planned to change in 5.0.0 (#436).
+
+### Added
+- Google Application Default Credentials: Added `userinfo.email` to requested scopes, which is necessary for RBAC policies (#441).
+
 ## 4.6.0 — 2019-12-30
 
 ### Fixed

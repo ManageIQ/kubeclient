@@ -33,6 +33,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'jsonpath', '~> 1.0'
 
   spec.add_dependency 'rest-client', '~> 2.0'
-  spec.add_dependency 'recursive-open-struct', '~> 1.0', '>= 1.0.4'
+  spec.add_dependency 'recursive-open-struct', '~> 1.1', '>= 1.1.1'
   spec.add_dependency 'http', '>= 3.0', '< 5.0'
 end
