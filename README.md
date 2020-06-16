@@ -447,6 +447,9 @@ update_foo(Kubeclient::Resource.new({metadata: {name: 'name', ...}, ...}))  # gl
 
 patch_foo('name', patch, 'namespace')    # namespaced
 patch_foo('name', patch)                 # global
+
+apply_foo(Kubeclient::Resource.new({metadata: {name: 'name', namespace: 'namespace', ...}, ...}), 'myapp')
+apply_foo(Kubeclient::Resource.new({metadata: {name: 'name', ...}, ...}), 'myapp')  # global
 ```
 
 These grew to be quite inconsistent :confounded:, see https://github.com/abonas/kubeclient/issues/312 and https://github.com/abonas/kubeclient/issues/332 for improvement plans.
@@ -701,6 +704,35 @@ patched = client.patch_pod("docker-registry", {metadata: {annotations: {key: 'va
 ```
 
 `patch_#{entity}` is called using a [strategic merge patch](https://kubernetes.io/docs/tasks/run-application/update-api-object-kubectl-patch/#notes-on-the-strategic-merge-patch). `json_patch_#{entity}` and `merge_patch_#{entity}` are also available that use JSON patch and JSON merge patch, respectively. These strategies are useful for resources that do not support strategic merge patch, such as Custom Resources. Consult the [Kubernetes docs](https://kubernetes.io/docs/tasks/run-application/update-api-object-kubectl-patch/#use-a-json-merge-patch-to-update-a-deployment) for more information about the different patch strategies.
+
+### Apply an entity
+For example: `apply_pod`
+
+Input parameters - resource (Kubeclient::Resource) representing the desired state of the resource, field_manager (String) to identify the system managing the state of the resource, force (Boolean) whether or not to override a field managed by someone else.
+
+Example:
+
+```ruby
+service = Kubeclient::Resource.new
+service.metadata = {}
+service.metadata.name = "redis-master"
+service.metadata.namespace = 'staging'
+service.spec = {}
+service.spec.ports = [{
+  'port' => 6379,
+  'targetPort' => 'redis-server'
+}]
+service.spec.selector = {}
+service.spec.selector.name = "redis"
+service.spec.selector.role = "master"
+service.metadata.labels = {}
+service.metadata.labels.app = 'redis'
+service.metadata.labels.role = 'slave'
+
+client.apply_service(service, 'myapp')
+```
+
+See https://kubernetes.io/docs/reference/using-api/api-concepts/#server-side-apply
 
 ### Get all entities of all types : all_entities
 
