@@ -7,7 +7,7 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 ## [Unreleased]
 
 ### Added
-- Support for server-side apply.
+- Support for server-side apply (#448).
 
 ## 4.7.0 — 2020-06-14
 
