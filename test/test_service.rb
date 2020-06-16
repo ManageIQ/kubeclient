@@ -291,7 +291,7 @@ class TestService < MiniTest::Test
       .to_return(body: open_test_file('service_patch.json'), status: 200)
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
-    service = client.apply_service(service, 'myapp')
+    service = client.apply_service(service, field_manager: 'myapp')
     assert_kind_of(RecursiveOpenStruct, service)
 
     assert_requested(:patch, expected_url, times: 1) do |req|

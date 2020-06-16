@@ -255,9 +255,8 @@ module Kubeclient
           patch_entity(entity.resource_name, name, patch, 'merge-patch', namespace)
         end
 
-        define_singleton_method("apply_#{entity.method_names[0]}") \
-        do |resource, field_manager, force = nil|
-          apply_entity(entity.resource_name, resource, field_manager, force)
+        define_singleton_method("apply_#{entity.method_names[0]}") do |*args|
+          apply_entity(entity.resource_name, *args)
         end
       end
     end
@@ -420,8 +419,7 @@ module Kubeclient
       format_response(@as, response.body)
     end
 
-    def apply_entity(resource_name, resource, field_manager, force = nil)
-      force = true if force.nil?
+    def apply_entity(resource_name, resource, field_manager:, force: true)
       name = "#{resource[:metadata][:name]}?fieldManager=#{field_manager}&force=#{force}"
       ns_prefix = build_namespace_prefix(resource[:metadata][:namespace])
       response = handle_exception do

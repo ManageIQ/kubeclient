@@ -729,7 +729,7 @@ service.metadata.labels = {}
 service.metadata.labels.app = 'redis'
 service.metadata.labels.role = 'slave'
 
-client.apply_service(service, 'myapp')
+client.apply_service(service, field_manager: 'myapp')
 ```
 
 See https://kubernetes.io/docs/reference/using-api/api-concepts/#server-side-apply
