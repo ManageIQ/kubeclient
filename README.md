@@ -713,21 +713,15 @@ Input parameters - resource (Kubeclient::Resource) representing the desired stat
 Example:
 
 ```ruby
-service = Kubeclient::Resource.new
-service.metadata = {}
-service.metadata.name = "redis-master"
-service.metadata.namespace = 'staging'
-service.spec = {}
-service.spec.ports = [{
-  'port' => 6379,
-  'targetPort' => 'redis-server'
-}]
-service.spec.selector = {}
-service.spec.selector.name = "redis"
-service.spec.selector.role = "master"
-service.metadata.labels = {}
-service.metadata.labels.app = 'redis'
-service.metadata.labels.role = 'slave'
+service = Kubeclient::Resource.new(
+  metadata: {
+    name: 'redis-master',
+    namespace: 'staging',
+  },
+  spec: {
+    ...
+  }
+)
 
 client.apply_service(service, field_manager: 'myapp')
 ```
