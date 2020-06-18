@@ -448,8 +448,8 @@ update_foo(Kubeclient::Resource.new({metadata: {name: 'name', ...}, ...}))  # gl
 patch_foo('name', patch, 'namespace')    # namespaced
 patch_foo('name', patch)                 # global
 
-apply_foo(Kubeclient::Resource.new({metadata: {name: 'name', namespace: 'namespace', ...}, ...}), 'myapp')
-apply_foo(Kubeclient::Resource.new({metadata: {name: 'name', ...}, ...}), 'myapp')  # global
+apply_foo(Kubeclient::Resource.new({metadata: {name: 'name', namespace: 'namespace', ...}, ...}), field_manager: 'myapp')
+apply_foo(Kubeclient::Resource.new({metadata: {name: 'name', ...}, ...}), field_manager: 'myapp')  # global
 ```
 
 These grew to be quite inconsistent :confounded:, see https://github.com/abonas/kubeclient/issues/312 and https://github.com/abonas/kubeclient/issues/332 for improvement plans.
