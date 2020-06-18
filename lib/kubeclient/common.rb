@@ -5,7 +5,7 @@ module Kubeclient
   # Common methods
   # this is mixed in by other gems
   module ClientMixin
-    ENTITY_METHODS = %w[get watch delete create update patch json_patch merge_patch].freeze
+    ENTITY_METHODS = %w[get watch delete create update patch json_patch merge_patch apply].freeze
 
     DEFAULT_SSL_OPTIONS = {
       client_cert: nil,
@@ -254,6 +254,10 @@ module Kubeclient
         do |name, patch, namespace = nil|
           patch_entity(entity.resource_name, name, patch, 'merge-patch', namespace)
         end
+
+        define_singleton_method("apply_#{entity.method_names[0]}") do |*args|
+          apply_entity(entity.resource_name, *args)
+        end
       end
     end
     # rubocop:enable  Metrics/BlockLength
@@ -410,6 +414,19 @@ module Kubeclient
           .patch(
             patch.to_json,
             { 'Content-Type' => "application/#{strategy}+json" }.merge(@headers)
+          )
+      end
+      format_response(@as, response.body)
+    end
+
+    def apply_entity(resource_name, resource, field_manager:, force: true)
+      name = "#{resource[:metadata][:name]}?fieldManager=#{field_manager}&force=#{force}"
+      ns_prefix = build_namespace_prefix(resource[:metadata][:namespace])
+      response = handle_exception do
+        rest_client[ns_prefix + resource_name + "/#{name}"]
+          .patch(
+            resource.to_json,
+            { 'Content-Type' => 'application/apply-patch+yaml' }.merge(@headers)
           )
       end
       format_response(@as, response.body)
