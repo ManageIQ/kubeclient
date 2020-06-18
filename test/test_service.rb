@@ -274,6 +274,33 @@ class TestService < MiniTest::Test
     end
   end
 
+  def test_apply_service
+    service = Kubeclient::Resource.new
+    name = 'my_service'
+
+    service.metadata = {}
+    service.metadata.name      = name
+    service.metadata.namespace = 'development'
+    service.metadata.annotations = {}
+    service.metadata.annotations['key'] = 'value'
+
+    stub_core_api_list
+    resource_name = "#{name}?fieldManager=myapp&force=true"
+    expected_url = "http://localhost:8080/api/v1/namespaces/development/services/#{resource_name}"
+    stub_request(:patch, expected_url)
+      .to_return(body: open_test_file('service_patch.json'), status: 200)
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    service = client.apply_service(service, field_manager: 'myapp')
+    assert_kind_of(RecursiveOpenStruct, service)
+
+    assert_requested(:patch, expected_url, times: 1) do |req|
+      data = JSON.parse(req.body)
+      req.headers['Content-Type'] == 'application/apply-patch+yaml' &&
+        data['metadata']['annotations']['key'] == 'value'
+    end
+  end
+
   def test_json_patch_service
     service = Kubeclient::Resource.new
     name = 'my-service'

@@ -447,6 +447,9 @@ update_foo(Kubeclient::Resource.new({metadata: {name: 'name', ...}, ...}))  # gl
 
 patch_foo('name', patch, 'namespace')    # namespaced
 patch_foo('name', patch)                 # global
+
+apply_foo(Kubeclient::Resource.new({metadata: {name: 'name', namespace: 'namespace', ...}, ...}), field_manager: 'myapp', **opts)
+apply_foo(Kubeclient::Resource.new({metadata: {name: 'name', ...}, ...}), field_manager: 'myapp', **opts)  # global
 ```
 
 These grew to be quite inconsistent :confounded:, see https://github.com/abonas/kubeclient/issues/312 and https://github.com/abonas/kubeclient/issues/332 for improvement plans.
@@ -701,6 +704,30 @@ patched = client.patch_pod("docker-registry", {metadata: {annotations: {key: 'va
 ```
 
 `patch_#{entity}` is called using a [strategic merge patch](https://kubernetes.io/docs/tasks/run-application/update-api-object-kubectl-patch/#notes-on-the-strategic-merge-patch). `json_patch_#{entity}` and `merge_patch_#{entity}` are also available that use JSON patch and JSON merge patch, respectively. These strategies are useful for resources that do not support strategic merge patch, such as Custom Resources. Consult the [Kubernetes docs](https://kubernetes.io/docs/tasks/run-application/update-api-object-kubectl-patch/#use-a-json-merge-patch-to-update-a-deployment) for more information about the different patch strategies.
+
+### Apply an entity
+
+This is similar to `kubectl apply --server-side` (kubeclient doesn't implement logic for client-side apply). See https://kubernetes.io/docs/reference/using-api/api-concepts/#server-side-apply
+
+For example: `apply_pod`
+
+Input parameters - resource (Kubeclient::Resource) representing the desired state of the resource, field_manager (String) to identify the system managing the state of the resource, force (Boolean) whether or not to override a field managed by someone else.
+
+Example:
+
+```ruby
+service = Kubeclient::Resource.new(
+  metadata: {
+    name: 'redis-master',
+    namespace: 'staging',
+  },
+  spec: {
+    ...
+  }
+)
+
+client.apply_service(service, field_manager: 'myapp')
+```
 
 ### Get all entities of all types : all_entities
 
