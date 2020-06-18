@@ -274,6 +274,40 @@ class TestService < MiniTest::Test
     end
   end
 
+  def test_patch_service_status
+    service = Kubeclient::Resource.new
+    name = 'my_service'
+
+    service.metadata = {}
+    service.metadata.name      = name
+    service.metadata.namespace = 'development'
+
+    stub_core_api_list
+    expected_url = "http://localhost:8080/api/v1/namespaces/development/services/#{name}/status"
+    stub_request(:patch, expected_url)
+      .to_return(body: open_test_file('service_patch.json'), status: 200)
+
+    patch = {
+      status: {
+        conditions: [
+          {
+            type: 'StatusType',
+            status: 'True',
+          }
+        ]
+      }
+    }
+
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    service = client.patch_service_status(name, patch, 'development')
+    assert_kind_of(RecursiveOpenStruct, service)
+
+    assert_requested(:patch, expected_url, times: 1) do |req|
+      data = JSON.parse(req.body)
+      data['status']['conditions'].find { |c| c['type'] == 'StatusType' }['status'] == 'True'
+    end
+  end
+
   def test_json_patch_service
     service = Kubeclient::Resource.new
     name = 'my-service'
