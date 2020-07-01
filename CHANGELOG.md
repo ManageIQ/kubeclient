@@ -8,6 +8,7 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 
 ### Added
 - Support for server-side apply (#448).
+- Declare dependency on jsonpath, needed for `gcp` provider with `cmd-path` (#450).
 
 ## 4.7.0 — 2020-06-14
 
