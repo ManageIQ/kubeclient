@@ -4,11 +4,13 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
-## [Unreleased]
+## 4.8.0 — 2020-07-03
 
 ### Added
 - Support for server-side apply (#448).
-- Declare dependency on jsonpath, needed for `gcp` provider with `cmd-path` (#450).
+
+### Fixed
+- Declared forgotten dependency on jsonpath, needed for `gcp` provider with `cmd-path` (#450).
 
 ## 4.7.0 — 2020-06-14
 
