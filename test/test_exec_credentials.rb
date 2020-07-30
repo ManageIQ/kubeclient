@@ -1,13 +1,13 @@
 require_relative 'test_helper'
 require 'open3'
 
-# Unit tests for the ExecCredentials token provider
+# Unit tests for the ExecCredentials provider
 class ExecCredentialsTest < MiniTest::Test
   def test_exec_opts_missing
     expected_msg =
       'exec options are required'
     exception = assert_raises(ArgumentError) do
-      Kubeclient::ExecCredentials.token(nil)
+      Kubeclient::ExecCredentials.run(nil)
     end
     assert_equal(expected_msg, exception.message)
   end
@@ -16,7 +16,7 @@ class ExecCredentialsTest < MiniTest::Test
     expected_msg =
       'exec command is required'
     exception = assert_raises(KeyError) do
-      Kubeclient::ExecCredentials.token({})
+      Kubeclient::ExecCredentials.run({})
     end
     assert_equal(expected_msg, exception.message)
   end
@@ -33,34 +33,57 @@ class ExecCredentialsTest < MiniTest::Test
 
     Open3.stub(:capture3, [nil, err, st]) do
       exception = assert_raises(RuntimeError) do
-        Kubeclient::ExecCredentials.token(opts)
+        Kubeclient::ExecCredentials.run(opts)
       end
       assert_equal(expected_msg, exception.message)
     end
   end
 
-  def test_token
+  def test_run_with_token_credentials
     opts = { 'command' => 'dummy' }
 
+    credentials = {
+      'token' => '0123456789ABCDEF0123456789ABCDEF'
+    }
+
     creds = JSON.dump(
-      'apiVersion': 'client.authentication.k8s.io/v1alpha1',
-      'status': {
-        'token': '0123456789ABCDEF0123456789ABCDEF'
-      }
+      'apiVersion' => 'client.authentication.k8s.io/v1alpha1',
+      'status' => credentials
     )
 
     st = Minitest::Mock.new
     st.expect(:success?, true)
 
     Open3.stub(:capture3, [creds, nil, st]) do
-      assert_equal('0123456789ABCDEF0123456789ABCDEF', Kubeclient::ExecCredentials.token(opts))
+      assert_equal(credentials, Kubeclient::ExecCredentials.run(opts))
+    end
+  end
+
+  def test_run_with_client_credentials
+    opts = { 'command' => 'dummy' }
+
+    credentials = {
+      'clientCertificateData' => '0123456789ABCDEF0123456789ABCDEF',
+      'clientKeyData' => '0123456789ABCDEF0123456789ABCDEF'
+    }
+
+    creds = JSON.dump(
+      'apiVersion' => 'client.authentication.k8s.io/v1alpha1',
+      'status' => credentials
+    )
+
+    st = Minitest::Mock.new
+    st.expect(:success?, true)
+
+    Open3.stub(:capture3, [creds, nil, st]) do
+      assert_equal(credentials, Kubeclient::ExecCredentials.run(opts))
     end
   end
 
   def test_status_missing
     opts = { 'command' => 'dummy' }
 
-    creds = JSON.dump('apiVersion': 'client.authentication.k8s.io/v1alpha1')
+    creds = JSON.dump('apiVersion' => 'client.authentication.k8s.io/v1alpha1')
 
     st = Minitest::Mock.new
     st.expect(:success?, true)
@@ -69,18 +92,18 @@ class ExecCredentialsTest < MiniTest::Test
 
     Open3.stub(:capture3, [creds, nil, st]) do
       exception = assert_raises(RuntimeError) do
-        Kubeclient::ExecCredentials.token(opts)
+        Kubeclient::ExecCredentials.run(opts)
       end
       assert_equal(expected_msg, exception.message)
     end
   end
 
-  def test_token_missing
+  def test_credentials_missing
     opts = { 'command' => 'dummy' }
 
     creds = JSON.dump(
-      'apiVersion': 'client.authentication.k8s.io/v1alpha1',
-      'status': {}
+      'apiVersion' => 'client.authentication.k8s.io/v1alpha1',
+      'status' => {}
     )
 
     st = Minitest::Mock.new
@@ -90,7 +113,7 @@ class ExecCredentialsTest < MiniTest::Test
 
     Open3.stub(:capture3, [creds, nil, st]) do
       exception = assert_raises(RuntimeError) do
-        Kubeclient::ExecCredentials.token(opts)
+        Kubeclient::ExecCredentials.run(opts)
       end
       assert_equal(expected_msg, exception.message)
     end
@@ -106,7 +129,7 @@ class ExecCredentialsTest < MiniTest::Test
     }
 
     creds = JSON.dump(
-      'apiVersion': api_version
+      'apiVersion' => api_version
     )
 
     st = Minitest::Mock.new
@@ -117,7 +140,7 @@ class ExecCredentialsTest < MiniTest::Test
 
     Open3.stub(:capture3, [creds, nil, st]) do
       exception = assert_raises(RuntimeError) do
-        Kubeclient::ExecCredentials.token(opts)
+        Kubeclient::ExecCredentials.run(opts)
       end
       assert_equal(expected_msg, exception.message)
     end
