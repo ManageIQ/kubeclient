@@ -41,6 +41,11 @@ module Kubeclient
     def context(context_name = nil)
       cluster, user, namespace = fetch_context(context_name || @kcfg['current-context'])
 
+      if user.key?('exec')
+        exec_opts = expand_command_option(user['exec'], 'command')
+        user['exec_result'] = ExecCredentials.run(exec_opts)
+      end
+
       ca_cert_data     = fetch_cluster_ca_data(cluster)
       client_cert_data = fetch_user_cert_data(user)
       client_key_data  = fetch_user_key_data(user)
@@ -134,6 +139,8 @@ module Kubeclient
         File.read(ext_file_path(user['client-certificate']))
       elsif user.key?('client-certificate-data')
         Base64.decode64(user['client-certificate-data'])
+      elsif user.key?('exec_result') && user['exec_result'].key?('clientCertificateData')
+        user['exec_result']['clientCertificateData']
       end
     end
 
@@ -142,6 +149,8 @@ module Kubeclient
         File.read(ext_file_path(user['client-key']))
       elsif user.key?('client-key-data')
         Base64.decode64(user['client-key-data'])
+      elsif user.key?('exec_result') && user['exec_result'].key?('clientKeyData')
+        user['exec_result']['clientKeyData']
       end
     end
 
@@ -149,9 +158,8 @@ module Kubeclient
       options = {}
       if user.key?('token')
         options[:bearer_token] = user['token']
-      elsif user.key?('exec')
-        exec_opts = expand_command_option(user['exec'], 'command')
-        options[:bearer_token] = Kubeclient::ExecCredentials.token(exec_opts)
+      elsif user.key?('exec_result') && user['exec_result'].key?('token')
+        options[:bearer_token] = user['exec_result']['token']
       elsif user.key?('auth-provider')
         options[:bearer_token] = fetch_token_from_provider(user['auth-provider'])
       else
