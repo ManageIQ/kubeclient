@@ -53,10 +53,15 @@ module Kubeclient
         raise 'exec plugin didn\'t return a status field' if status.nil?
 
         has_client_credentials = validate_client_credentials_status(status)
-        return if has_client_credentials
-
         has_token = status.key?('token')
-        raise 'exec plugin didn\'t return a token' unless has_token
+
+        if has_client_credentials && has_token
+          raise 'exec plugin returned both token and client data'
+        end
+
+        return if has_client_credentials || has_token
+
+        raise 'exec plugin didn\'t return a token or client data' unless has_token
       end
 
       def validate_credentials(opts, creds)
