@@ -4,6 +4,10 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
+## 4.9.0 - 2020-08-03
+### Added
+- Support for `user: exec` credential plugins using TLS client auth (#453)
+
 ## 4.8.0 — 2020-07-03
 
 ### Added
