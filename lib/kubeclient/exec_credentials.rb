@@ -6,7 +6,7 @@ module Kubeclient
   # Inspired by https://github.com/kubernetes/client-go/blob/master/plugin/pkg/client/auth/exec/exec.go
   class ExecCredentials
     class << self
-      def token(opts)
+      def run(opts)
         require 'open3'
         require 'json'
 
@@ -25,13 +25,43 @@ module Kubeclient
 
         creds = JSON.parse(out)
         validate_credentials(opts, creds)
-        creds['status']['token']
+        creds['status']
       end
 
       private
 
       def validate_opts(opts)
         raise KeyError, 'exec command is required' unless opts['command']
+      end
+
+      def validate_client_credentials_status(status)
+        has_client_cert_data = status.key?('clientCertificateData')
+        has_client_key_data = status.key?('clientKeyData')
+
+        if has_client_cert_data && !has_client_key_data
+          raise 'exec plugin didn\'t return client key data'
+        end
+
+        if !has_client_cert_data && has_client_key_data
+          raise 'exec plugin didn\'t return client certificate data'
+        end
+
+        has_client_cert_data && has_client_key_data
+      end
+
+      def validate_credentials_status(status)
+        raise 'exec plugin didn\'t return a status field' if status.nil?
+
+        has_client_credentials = validate_client_credentials_status(status)
+        has_token = status.key?('token')
+
+        if has_client_credentials && has_token
+          raise 'exec plugin returned both token and client data'
+        end
+
+        return if has_client_credentials || has_token
+
+        raise 'exec plugin didn\'t return a token or client data' unless has_token
       end
 
       def validate_credentials(opts, creds)
@@ -45,8 +75,7 @@ module Kubeclient
             "plugin returned version #{creds['apiVersion']}"
         end
 
-        raise 'exec plugin didn\'t return a status field' if creds['status'].nil?
-        raise 'exec plugin didn\'t return a token' if creds['status']['token'].nil?
+        validate_credentials_status(creds['status'])
       end
 
       # Transform name/value pairs to hash
