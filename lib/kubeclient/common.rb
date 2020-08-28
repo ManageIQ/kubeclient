@@ -194,10 +194,22 @@ module Kubeclient
     def handle_uri(uri, path)
       raise ArgumentError, 'Missing uri' unless uri
       @api_endpoint = (uri.is_a?(URI) ? uri : URI.parse(uri))
-      @api_endpoint.path = path if @api_endpoint.path.empty?
-      @api_endpoint.path = @api_endpoint.path.chop if @api_endpoint.path.end_with?('/')
-      components = @api_endpoint.path.to_s.split('/') # ["", "api"] or ["", "apis", batch]
-      @api_group = components.length > 2 ? components[2] + '/' : ''
+
+      # This regex will anchor at the last `/api`, `/oapi` or`/apis/:group`) part of the URL
+      # The whole path will be matched and if existing, the api_group will be extracted.
+      re = /^(?<path>.*\/o?api(?:s\/(?<apigroup>[^\/]+))?)$/mi
+      match = re.match(@api_endpoint.path.chomp('/'))
+
+      if match
+        # Since `re` captures 2 groups, match will always have 3 elements
+        # If thus we have a non-nil value in match 2, this is our api_group.
+        @api_group = match[:apigroup].nil? ? '' : match[:apigroup] + '/'
+        @api_endpoint.path = match[:path]
+      else
+        # This is a fallback, for when `/api` was not provided as part of the uri
+        @api_group = ''
+        @api_endpoint.path = @api_endpoint.path.chomp('/') + path
+      end
     end
 
     def build_namespace_prefix(namespace)
