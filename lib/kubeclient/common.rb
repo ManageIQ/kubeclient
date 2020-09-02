@@ -577,6 +577,8 @@ module Kubeclient
         else
           Kubeclient::Resource.new(result)
         end
+      when Class
+        as.new(body)
       else
         raise ArgumentError, "Unsupported format #{as.inspect}"
       end

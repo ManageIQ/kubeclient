@@ -262,6 +262,23 @@ class KubeclientTest < MiniTest::Test
     assert_equal %i[metadata spec status], response[:items].first.keys
   end
 
+  class ServiceList
+    attr_reader :names
+
+    def initialize(raw)
+      items = JSON.parse(raw)['items']
+      @names = items.map { |item| item['metadata']['name'] }
+    end
+  end
+
+  def test_entity_list_class
+    stub_core_api_list
+    stub_get_services
+
+    response = client.get_services(as: ServiceList)
+    assert_equal %w[kubernetes kubernetes-ro], response.names
+  end
+
   def test_entity_list_unknown
     stub_core_api_list
     stub_get_services

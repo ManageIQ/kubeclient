@@ -548,6 +548,7 @@ Other formats are:
  - `:ros` (default) for `RecursiveOpenStruct`
  - `:parsed` for `JSON.parse`
  - `:parsed_symbolized` for `JSON.parse(..., symbolize_names: true)`
+ - a class of your choice (this will instantiate a new instance of that class with the raw value of the response body) 
 
 ### Watch — Receive entities updates
 
