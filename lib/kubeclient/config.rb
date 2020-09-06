@@ -46,16 +46,15 @@ module Kubeclient
         user['exec_result'] = ExecCredentials.run(exec_opts)
       end
 
-      ca_cert_data     = fetch_cluster_ca_data(cluster)
       client_cert_data = fetch_user_cert_data(user)
       client_key_data  = fetch_user_key_data(user)
       auth_options     = fetch_user_auth_options(user)
 
       ssl_options = {}
 
-      if !ca_cert_data.nil?
+      if cluster_ca_data?(cluster)
         cert_store = OpenSSL::X509::Store.new
-        cert_store.add_cert(OpenSSL::X509::Certificate.new(ca_cert_data))
+        populate_cert_store_from_cluster_ca_data(cluster, cert_store)
         ssl_options[:verify_ssl] = OpenSSL::SSL::VERIFY_PEER
         ssl_options[:cert_store] = cert_store
       else
@@ -126,11 +125,16 @@ module Kubeclient
       [cluster, user, namespace]
     end
 
-    def fetch_cluster_ca_data(cluster)
+    def cluster_ca_data?(cluster)
+      cluster.key?('certificate-authority') || cluster.key?('certificate-authority-data')
+    end
+
+    def populate_cert_store_from_cluster_ca_data(cluster, cert_store)
       if cluster.key?('certificate-authority')
-        File.read(ext_file_path(cluster['certificate-authority']))
+        cert_store.add_file(ext_file_path(cluster['certificate-authority']))
       elsif cluster.key?('certificate-authority-data')
-        Base64.decode64(cluster['certificate-authority-data'])
+        ca_cert_data = Base64.decode64(cluster['certificate-authority-data'])
+        cert_store.add_cert(OpenSSL::X509::Certificate.new(ca_cert_data))
       end
     end
 
