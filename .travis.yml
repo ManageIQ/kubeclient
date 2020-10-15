@@ -13,6 +13,7 @@ rvm:
   - "2.5.0"
   - "2.6.0"
   - "2.7.0"
+  - truffleruby-head
 env:
  - TASK=test
 matrix:
@@ -21,6 +22,8 @@ matrix:
       rvm: "2.2.0"
     - os: osx
       rvm: "2.3.0"
+    - os: osx
+      rvm: truffleruby-head
   # No point running Rubocop on different rubies, results will be same.
   # The rubies it expects the code to target are controlled in .rubocop.yml.
   include:
