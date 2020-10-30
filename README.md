@@ -420,6 +420,20 @@ We try to support the last 3 minor versions, matching the [official support poli
 Kubernetes 1.2 and below have known issues and are unsupported.
 Kubernetes 1.3 presumed to still work although nobody is really testing on such old versions...
 
+### Changing the underlying HTTP library
+
+Kubeclient uses [rest_client](https://github.com/rest-client/rest-client) by default to perform HTTP requests. You can change this by specifying the `http_client_type` option when initializing `Kubeclient::Client`. Currently the only other option is [httpclient](https://github.com/nahi/httpclient).
+
+To use a different HTTP library, specify the `http_client_type` option when initializing `Kubeclient::Client`:
+
+```ruby
+client = Kubeclient::Client.new(
+  'https://localhost:8443/api/', "v1", http_client_type: 'httpclient'
+)
+```
+
+Using a different underlying HTTP library might have various advantages. For example, the `httpclient` gem is able to re-use HTTP connections between requests, as opposed to `rest_client`, which closes the HTTP connection after each request (see <https://github.com/rest-client/rest-client/issues/453>).
+
 ## Supported actions & examples:
 
 Summary of main CRUD actions:

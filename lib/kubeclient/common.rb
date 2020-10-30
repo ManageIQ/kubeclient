@@ -38,6 +38,8 @@ module Kubeclient
     DEFAULT_HTTP_PROXY_URI = nil
     DEFAULT_HTTP_MAX_REDIRECTS = 10
 
+    DEFAULT_HTTP_CLIENT_TYPE = 'rest_client'.freeze
+
     SEARCH_ARGUMENTS = {
       'labelSelector'   => :label_selector,
       'fieldSelector'   => :field_selector,
@@ -70,7 +72,8 @@ module Kubeclient
       timeouts: DEFAULT_TIMEOUTS,
       http_proxy_uri: DEFAULT_HTTP_PROXY_URI,
       http_max_redirects: DEFAULT_HTTP_MAX_REDIRECTS,
-      as: :ros
+      as: :ros,
+      http_client_type: DEFAULT_HTTP_CLIENT_TYPE
     )
       validate_auth_options(auth_options)
       handle_uri(uri, path)
@@ -88,6 +91,7 @@ module Kubeclient
       @http_proxy_uri = http_proxy_uri ? http_proxy_uri.to_s : nil
       @http_max_redirects = http_max_redirects
       @as = as
+      @http_client_type = http_client_type
 
       if auth_options[:bearer_token]
         bearer_token(@auth_options[:bearer_token])
@@ -285,6 +289,7 @@ module Kubeclient
         .downcase
     end
 
+    # *DEPRECATED:* Use +create_http_client+ instead.
     def create_rest_client(path = nil)
       path ||= @api_endpoint.path
       options = {
@@ -303,9 +308,44 @@ module Kubeclient
       RestClient::Resource.new(@api_endpoint.merge(path).to_s, options)
     end
 
+    # *DEPRECATED:* Use +http_client+ instead.
     def rest_client
-      @rest_client ||= begin
-        create_rest_client("#{@api_endpoint.path}/#{@api_version}")
+      http_client
+    end
+
+    # Returns the instance of the HTTP library used for making HTTP requests.
+    # By default this will be an instance of RestClient from `rest_client` gem.
+    # You can select a different HTTP library when creating and instance of +Kubeclient::Client+,
+    # see the +http_client_type+ option on +Kubeclient::Client.new+.
+    def http_client
+      http.client
+    end
+
+    # Creates and returns a new instance of a class that implements the interface
+    # defined by +HTTPWrapper+ class.
+    def create_http_client(url = nil, options = nil, http_client_type = nil)
+      url = "#{@api_endpoint}/#{@api_version}" if url.nil?
+      if options.nil?
+        options = {
+          ssl_ca_file: @ssl_options[:ca_file],
+          ssl_cert_store: @ssl_options[:cert_store],
+          verify_ssl: @ssl_options[:verify_ssl],
+          ssl_client_cert: @ssl_options[:client_cert],
+          ssl_client_key: @ssl_options[:client_key],
+          proxy: @http_proxy_uri,
+          max_redirects: @http_max_redirects,
+          user: @auth_options[:username],
+          password: @auth_options[:password],
+          open_timeout: @timeouts[:open],
+          read_timeout: @timeouts[:read]
+        }
+      end
+      http_client_type = @http_client_type if http_client_type.nil?
+
+      if http_client_type == 'httpclient'
+        HTTPClientWrapper.new(url, options)
+      else
+        RestClientWrapper.new(url, options)
       end
     end
 
@@ -355,8 +395,7 @@ module Kubeclient
 
       ns_prefix = build_namespace_prefix(options[:namespace])
       response = handle_exception do
-        rest_client[ns_prefix + resource_name]
-          .get({ 'params' => params }.merge(@headers))
+        http.get(ns_prefix + resource_name, params: params, headers: @headers)
       end
       format_response(options[:as] || @as, response.body, entity_type)
     end
@@ -368,8 +407,7 @@ module Kubeclient
     def get_entity(resource_name, name, namespace = nil, options = {})
       ns_prefix = build_namespace_prefix(namespace)
       response = handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
-          .get(@headers)
+        http.get(ns_prefix + resource_name + "/#{name}", headers: @headers)
       end
       format_response(options[:as] || @as, response.body)
     end
@@ -380,14 +418,10 @@ module Kubeclient
       ns_prefix = build_namespace_prefix(namespace)
       payload = delete_options_hash.to_json unless delete_options_hash.empty?
       response = handle_exception do
-        rs = rest_client[ns_prefix + resource_name + "/#{name}"]
-        RestClient::Request.execute(
-          rs.options.merge(
-            method: :delete,
-            url: rs.url,
-            headers: { 'Content-Type' => 'application/json' }.merge(@headers),
-            payload: payload
-          )
+        http.delete(
+          ns_prefix + resource_name + "/#{name}",
+          body: payload,
+          headers: { 'Content-Type' => 'application/json' }.merge(@headers)
         )
       end
       format_response(@as, response.body)
@@ -406,8 +440,11 @@ module Kubeclient
       hash[:kind] = entity_type
       hash[:apiVersion] = @api_group + @api_version
       response = handle_exception do
-        rest_client[ns_prefix + resource_name]
-          .post(hash.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
+        http.post(
+          ns_prefix + resource_name,
+          body: hash.to_json,
+          headers: { 'Content-Type' => 'application/json' }.merge(@headers)
+        )
       end
       format_response(@as, response.body)
     end
@@ -416,8 +453,11 @@ module Kubeclient
       name      = entity_config[:metadata][:name]
       ns_prefix = build_namespace_prefix(entity_config[:metadata][:namespace])
       response = handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
-          .put(entity_config.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
+        http.put(
+          ns_prefix + resource_name + "/#{name}",
+          body: entity_config.to_h.to_json,
+          headers: { 'Content-Type' => 'application/json' }.merge(@headers)
+        )
       end
       format_response(@as, response.body)
     end
@@ -425,11 +465,11 @@ module Kubeclient
     def patch_entity(resource_name, name, patch, strategy, namespace)
       ns_prefix = build_namespace_prefix(namespace)
       response = handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
-          .patch(
-            patch.to_json,
-            { 'Content-Type' => "application/#{strategy}+json" }.merge(@headers)
-          )
+        http.patch(
+          ns_prefix + resource_name + "/#{name}",
+          body: patch.to_json,
+          headers: { 'Content-Type' => "application/#{strategy}+json" }.merge(@headers)
+        )
       end
       format_response(@as, response.body)
     end
@@ -438,11 +478,11 @@ module Kubeclient
       name = "#{resource[:metadata][:name]}?fieldManager=#{field_manager}&force=#{force}"
       ns_prefix = build_namespace_prefix(resource[:metadata][:namespace])
       response = handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
-          .patch(
-            resource.to_json,
-            { 'Content-Type' => 'application/apply-patch+yaml' }.merge(@headers)
-          )
+        http.patch(
+          ns_prefix + resource_name + "/#{name}",
+          body: resource.to_json,
+          headers: { 'Content-Type' => 'application/apply-patch+yaml' }.merge(@headers)
+        )
       end
       format_response(@as, response.body)
     end
@@ -474,8 +514,11 @@ module Kubeclient
 
       ns = build_namespace_prefix(namespace)
       handle_exception do
-        rest_client[ns + "pods/#{pod_name}/log"]
-          .get({ 'params' => params }.merge(@headers))
+        http.get(
+          ns + "pods/#{pod_name}/log",
+          params: params,
+          headers: @headers
+        )
       end
     end
 
@@ -506,14 +549,17 @@ module Kubeclient
           @entities[kind.to_s].resource_name
         end
       ns_prefix = build_namespace_prefix(namespace)
-      rest_client["#{ns_prefix}#{entity_name_plural}/#{name}:#{port}/proxy"].url
+      "#{@api_endpoint}/#{@api_version}/#{ns_prefix}#{entity_name_plural}/#{name}:#{port}/proxy"
     end
 
     def process_template(template)
       ns_prefix = build_namespace_prefix(template[:metadata][:namespace])
       response = handle_exception do
-        rest_client["#{ns_prefix}processedtemplates"]
-          .post(template.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
+        http.post(
+          "#{ns_prefix}processedtemplates",
+          body: template.to_h.to_json,
+          headers: { 'Content-Type' => 'application/json' }.merge(@headers)
+        )
       end
       JSON.parse(response)
     end
@@ -526,11 +572,18 @@ module Kubeclient
     end
 
     def api
-      response = handle_exception { create_rest_client.get(@headers) }
+      response = handle_exception { create_http_client(@api_endpoint.to_s).get(headers: @headers) }
       JSON.parse(response)
     end
 
     private
+
+    # Returns an object that implements the interface defined by the +HTTPWrapper+ class.
+    def http
+      @http ||= begin
+        create_http_client
+      end
+    end
 
     IRREGULAR_NAMES = {
       # In a few cases, the given kind itself is still plural.
@@ -602,7 +655,7 @@ module Kubeclient
     end
 
     def fetch_entities
-      JSON.parse(handle_exception { rest_client.get(@headers) })
+      JSON.parse(handle_exception { http.get(headers: @headers) })
     end
 
     def bearer_token(bearer_token)
