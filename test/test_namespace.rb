@@ -53,7 +53,7 @@ class TestNamespace < MiniTest::Test
     namespace.metadata = {}
     namespace.metadata.name = 'development'
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/')
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     created_namespace = client.create_namespace(namespace)
     assert_instance_of(Kubeclient::Resource, created_namespace)
     assert_equal(namespace.metadata.name, created_namespace.metadata.name)

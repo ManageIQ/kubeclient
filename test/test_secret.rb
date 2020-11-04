@@ -49,7 +49,7 @@ class TestSecret < MiniTest::Test
     secret.data = {}
     secret.data['super-secret'] = 'Y2F0J3MgYXJlIGF3ZXNvbWUK'
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/')
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     created_secret = client.create_secret(secret)
     assert_instance_of(Kubeclient::Resource, created_secret)
     assert_equal(secret.metadata.name, created_secret.metadata.name)
