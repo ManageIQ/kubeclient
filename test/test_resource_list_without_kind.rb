@@ -4,8 +4,7 @@ require_relative 'test_helper'
 class TestResourceListWithoutKind < MiniTest::Test
   def test_get_from_json_api_v1
     stub_request(:get, %r{/api/v1$})
-      .to_return(body: open_test_file('core_api_resource_list_without_kind.json'),
-                 status: 200)
+      .to_return(body: open_test_file('core_api_resource_list_without_kind.json'), status: 200)
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     client.discover
@@ -31,15 +30,12 @@ class TestResourceListWithoutKind < MiniTest::Test
       }
     ].each { |h| assert_entities(client.instance_variable_get(:@entities)[h[:entity]], h) }
 
-    assert_requested(:get,
-                     'http://localhost:8080/api/v1',
-                     times: 1)
+    assert_requested(:get, 'http://localhost:8080/api/v1', times: 1)
   end
 
   def test_get_from_json_oapi_v1
     stub_request(:get, %r{/oapi/v1$})
-      .to_return(body: open_test_file('core_oapi_resource_list_without_kind.json'),
-                 status: 200)
+      .to_return(body: open_test_file('core_oapi_resource_list_without_kind.json'), status: 200)
 
     client = Kubeclient::Client.new('http://localhost:8080/oapi/', 'v1')
     client.discover
@@ -65,9 +61,7 @@ class TestResourceListWithoutKind < MiniTest::Test
       }
     ].each { |h| assert_entities(client.instance_variable_get(:@entities)[h[:entity]], h) }
 
-    assert_requested(:get,
-                     'http://localhost:8080/oapi/v1',
-                     times: 1)
+    assert_requested(:get, 'http://localhost:8080/oapi/v1', times: 1)
   end
 
   def assert_entities(entity, h)
