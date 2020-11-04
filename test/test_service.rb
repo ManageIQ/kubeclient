@@ -138,9 +138,9 @@ class TestService < MiniTest::Test
     assert_equal('', service.spec.ports[0].name)
     assert_equal('redis-server', service.spec.ports[0].targetPort)
 
-    assert_requested(:get,
-                     'http://localhost:8080/api/v1/namespaces/development/services/redis-slave',
-                     times: 1)
+    assert_requested(
+      :get, 'http://localhost:8080/api/v1/namespaces/development/services/redis-slave', times: 1
+    )
   end
 
   def test_delete_service
@@ -159,9 +159,9 @@ class TestService < MiniTest::Test
     our_service = client.delete_service(our_service.name, 'default')
     assert_kind_of(RecursiveOpenStruct, our_service)
 
-    assert_requested(:delete,
-                     'http://localhost:8080/api/v1/namespaces/default/services/redis-service',
-                     times: 1)
+    assert_requested(
+      :delete, 'http://localhost:8080/api/v1/namespaces/default/services/redis-service', times: 1
+    )
   end
 
   def test_get_service_no_ns
@@ -182,16 +182,15 @@ class TestService < MiniTest::Test
   def test_get_service
     stub_core_api_list
     stub_request(:get, %r{/namespaces/development/services/redis-slave})
-      .to_return(body: open_test_file('service.json'),
-                 status: 200)
+      .to_return(body: open_test_file('service.json'), status: 200)
 
     client = Kubeclient::Client.new('http://localhost:8080/api/')
     service = client.get_service('redis-slave', 'development')
     assert_equal('redis-slave', service.metadata.name)
 
-    assert_requested(:get,
-                     'http://localhost:8080/api/v1/namespaces/development/services/redis-slave',
-                     times: 1)
+    assert_requested(
+      :get, 'http://localhost:8080/api/v1/namespaces/development/services/redis-slave', times: 1
+    )
   end
 
   def test_update_service

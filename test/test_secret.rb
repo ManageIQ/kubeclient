@@ -5,8 +5,7 @@ class TestSecret < MiniTest::Test
   def test_get_secret_v1
     stub_core_api_list
     stub_request(:get, %r{/secrets})
-      .to_return(body: open_test_file('created_secret.json'),
-                 status: 200)
+      .to_return(body: open_test_file('created_secret.json'), status: 200)
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     secret = client.get_secret('test-secret', 'dev')
@@ -17,9 +16,9 @@ class TestSecret < MiniTest::Test
     assert_equal('v1', secret.apiVersion)
     assert_equal('Y2F0J3MgYXJlIGF3ZXNvbWUK', secret.data['super-secret'])
 
-    assert_requested(:get,
-                     'http://localhost:8080/api/v1/namespaces/dev/secrets/test-secret',
-                     times: 1)
+    assert_requested(
+      :get, 'http://localhost:8080/api/v1/namespaces/dev/secrets/test-secret', times: 1
+    )
   end
 
   def test_delete_secret_v1
@@ -31,16 +30,15 @@ class TestSecret < MiniTest::Test
     secret = client.delete_secret('test-secret', 'dev')
     assert_kind_of(RecursiveOpenStruct, secret)
 
-    assert_requested(:delete,
-                     'http://localhost:8080/api/v1/namespaces/dev/secrets/test-secret',
-                     times: 1)
+    assert_requested(
+      :delete, 'http://localhost:8080/api/v1/namespaces/dev/secrets/test-secret', times: 1
+    )
   end
 
   def test_create_secret_v1
     stub_core_api_list
     stub_request(:post, %r{/secrets})
-      .to_return(body: open_test_file('created_secret.json'),
-                 status: 201)
+      .to_return(body: open_test_file('created_secret.json'), status: 201)
 
     secret = Kubeclient::Resource.new
     secret.metadata = {}

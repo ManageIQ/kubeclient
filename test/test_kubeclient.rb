@@ -87,8 +87,10 @@ class KubeclientTest < MiniTest::Test
     end
 
     assert_instance_of(Kubeclient::HttpError, exception)
-    assert_equal("converting  to : type names don't match (Pod, Namespace)",
-                 exception.message)
+    assert_equal(
+      "converting  to : type names don't match (Pod, Namespace)",
+      exception.message
+    )
 
     assert_includes(exception.to_s, ' for POST http://localhost:8080/api')
     assert_equal(409, exception.error_code)
