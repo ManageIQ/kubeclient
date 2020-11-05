@@ -1,6 +1,6 @@
 AllCops:
   DisplayCopNames: true
-  TargetRubyVersion: 2.2 # Oldest version kubeclient supports
+  TargetRubyVersion: 2.2 # Oldest version kubeclient supports TODO: update rubocop version and then bump this
 MethodLength:
   Enabled: false
 ClassLength:
