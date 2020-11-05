@@ -25,7 +25,7 @@ module Kubeclient
         response.body.each do |chunk|
           buffer << chunk
           while (line = buffer.slice!(/.+\n/))
-            yield @formatter.call(line.chomp)
+            yield(@formatter.call(line.chomp))
           end
         end
       rescue StandardError
@@ -34,7 +34,7 @@ module Kubeclient
 
       def finish
         @finished = true
-        @http_client.close unless @http_client.nil?
+        @http_client&.close
       end
 
       private

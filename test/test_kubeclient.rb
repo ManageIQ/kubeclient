@@ -249,9 +249,9 @@ class KubeclientTest < MiniTest::Test
     stub_get_services
 
     response = client.get_services(as: :parsed)
-    assert_equal Hash, response.class
-    assert_equal 'ServiceList', response['kind']
-    assert_equal %w[metadata spec status], response['items'].first.keys
+    assert_equal(Hash, response.class)
+    assert_equal('ServiceList', response['kind'])
+    assert_equal(%w[metadata spec status], response['items'].first.keys)
   end
 
   def test_entity_list_parsed_symbolized
@@ -259,9 +259,9 @@ class KubeclientTest < MiniTest::Test
     stub_get_services
 
     response = client.get_services(as: :parsed_symbolized)
-    assert_equal Hash, response.class
-    assert_equal 'ServiceList', response[:kind]
-    assert_equal %i[metadata spec status], response[:items].first.keys
+    assert_equal(Hash, response.class)
+    assert_equal('ServiceList', response[:kind])
+    assert_equal(%i[metadata spec status], response[:items].first.keys)
   end
 
   class ServiceList
@@ -278,7 +278,7 @@ class KubeclientTest < MiniTest::Test
     stub_get_services
 
     response = client.get_services(as: ServiceList)
-    assert_equal %w[kubernetes kubernetes-ro], response.names
+    assert_equal(%w[kubernetes kubernetes-ro], response.names)
   end
 
   def test_entity_list_unknown
@@ -286,7 +286,7 @@ class KubeclientTest < MiniTest::Test
     stub_get_services
 
     e = assert_raises(ArgumentError) { client.get_services(as: :whoops) }
-    assert_equal 'Unsupported format :whoops', e.message
+    assert_equal('Unsupported format :whoops', e.message)
   end
 
   def test_entity_list_raw_failure

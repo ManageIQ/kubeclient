@@ -7,8 +7,7 @@ module Kubeclient
 
       def initialize(kind, resource_version, list, continue = nil)
         @kind = kind
-        # rubocop:disable Style/VariableName
-        @resourceVersion = resource_version
+        @resourceVersion = resource_version # rubocop:disable Naming/VariableName
         @continue = continue
         super(list)
       end

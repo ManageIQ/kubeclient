@@ -120,11 +120,12 @@ module Kubeclient
     def handle_exception
       yield
     rescue RestClient::Exception => e
-      json_error_msg = begin
-        JSON.parse(e.response || '') || {}
-      rescue JSON::ParserError
-        {}
-      end
+      json_error_msg =
+        begin
+          JSON.parse(e.response || '') || {}
+        rescue JSON::ParserError
+          {}
+        end
       err_message = json_error_msg['message'] || e.message
       error_klass = e.http_code == 404 ? ResourceNotFoundError : HttpError
       raise error_klass.new(e.http_code, err_message, e.response)

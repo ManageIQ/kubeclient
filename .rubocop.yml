@@ -1,6 +1,6 @@
 AllCops:
   DisplayCopNames: true
-  TargetRubyVersion: 2.2 # Oldest version kubeclient supports TODO: update rubocop version and then bump this
+  TargetRubyVersion: 2.5 # Oldest version kubeclient supports
 MethodLength:
   Enabled: false
 ClassLength:
@@ -20,16 +20,26 @@ Metrics/ModuleLength:
   Enabled: false
 Style/MethodCallWithArgsParentheses:
   Enabled: true
-  IgnoredMethods: [require, raise, include, attr_reader, refute, assert]
+  IgnoredMethods: [require, raise, include, attr_reader, refute, assert, require_relative]
   Exclude: [Gemfile, Rakefile, kubeclient.gemspec, Gemfile.dev.rb]
 Metrics/BlockLength:
   Exclude: [kubeclient.gemspec]
 Security/MarshalLoad:
   Exclude: [test/**/*]
-Style/FileName:
+Nameing/FileName:
   Exclude: [Gemfile, Rakefile, Gemfile.dev.rb]
-Style/MethodCallWithArgsParentheses:
-  IgnoredMethods:
-  - require_relative
 Style/RegexpLiteral:
+  Enabled: false
+Layout/EmptyLineAfterGuardClause:
+  Enabled: false
+Style/IfUnlessModifier:
+  Enabled: false
+Layout/AlignHash:
+  Enabled: false
+Naming/UncommunicativeMethodParamName:
+  Enabled: false
+Gemspec/OrderedDependencies:
+  Enabled: false
+# TODO: enable
+Style/FrozenStringLiteralComment:
   Enabled: false
