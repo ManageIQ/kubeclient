@@ -35,8 +35,10 @@ class TestSecurityContextConstraints < MiniTest::Test
     assert_equal('SecurityContextConstraints', created_scc.kind)
     assert_equal('security.openshift.io/v1', created_scc.apiVersion)
 
-    client = Kubeclient::Client.new('http://localhost:8080/apis/security.openshift.io', 'v1',
-                                    as: :parsed_symbolized)
+    client = Kubeclient::Client.new(
+      'http://localhost:8080/apis/security.openshift.io', 'v1',
+      as: :parsed_symbolized
+    )
     created_scc = client.create_security_context_constraint(testing_scc)
     assert_equal('SecurityContextConstraints', created_scc[:kind])
     assert_equal('security.openshift.io/v1', created_scc[:apiVersion])

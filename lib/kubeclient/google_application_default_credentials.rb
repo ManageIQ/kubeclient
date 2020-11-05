@@ -11,10 +11,12 @@ module Kubeclient
         begin
           require 'googleauth'
         rescue LoadError => e
-          raise GoogleDependencyError,
-                'Error requiring googleauth gem. Kubeclient itself does not include the ' \
-                'googleauth gem. To support auth-provider gcp, you must include it in your ' \
-                "calling application. Failed with: #{e.message}"
+          raise(
+            GoogleDependencyError,
+            'Error requiring googleauth gem. Kubeclient itself does not include the ' \
+            'googleauth gem. To support auth-provider gcp, you must include it in your ' \
+            "calling application. Failed with: #{e.message}"
+          )
         end
 
         scopes = [

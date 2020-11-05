@@ -52,8 +52,10 @@ class KubeclientConfigTest < MiniTest::Test
 
   def test_user_token
     config = Kubeclient::Config.read(config_file('userauth.kubeconfig'))
-    assert_equal(['localhost/system:admin:token', 'localhost/system:admin:userpass'],
-                 config.contexts)
+    assert_equal(
+      ['localhost/system:admin:token', 'localhost/system:admin:userpass'],
+      config.contexts
+    )
     context = config.context('localhost/system:admin:token')
     check_context(context, ssl: false)
     assert_equal('0123456789ABCDEF0123456789ABCDEF', context.auth_options[:bearer_token])
@@ -61,8 +63,10 @@ class KubeclientConfigTest < MiniTest::Test
 
   def test_user_password
     config = Kubeclient::Config.read(config_file('userauth.kubeconfig'))
-    assert_equal(['localhost/system:admin:token', 'localhost/system:admin:userpass'],
-                 config.contexts)
+    assert_equal(
+      ['localhost/system:admin:token', 'localhost/system:admin:userpass'],
+      config.contexts
+    )
     context = config.context('localhost/system:admin:userpass')
     check_context(context, ssl: false)
     assert_equal('admin', context.auth_options[:username])
@@ -84,10 +88,14 @@ class KubeclientConfigTest < MiniTest::Test
     }
 
     config = Kubeclient::Config.read(config_file('execauth.kubeconfig'))
-    assert_equal(['localhost/system:admin:exec-search-path',
-                  'localhost/system:admin:exec-relative-path',
-                  'localhost/system:admin:exec-absolute-path'],
-                 config.contexts)
+    assert_equal(
+      [
+        'localhost/system:admin:exec-search-path',
+        'localhost/system:admin:exec-relative-path',
+        'localhost/system:admin:exec-absolute-path'
+      ],
+      config.contexts
+    )
 
     # A bare command name in config means search PATH, so it's executed as bare command.
     stub_exec(%r{^example-exec-plugin$}, creds) do
@@ -147,28 +155,34 @@ class KubeclientConfigTest < MiniTest::Test
   end
 
   def test_gcp_command_auth
-    Kubeclient::GCPCommandCredentials.expects(:token)
-                                     .with('access-token' => '<fake_token>',
-                                           'cmd-args' => 'config config-helper --format=json',
-                                           'cmd-path' => '/path/to/gcloud',
-                                           'expiry' => '2019-04-09 19:26:18 UTC',
-                                           'expiry-key' => '{.credential.token_expiry}',
-                                           'token-key' => '{.credential.access_token}')
-                                     .returns('token1')
-                                     .once
+    Kubeclient::GCPCommandCredentials
+      .expects(:token)
+      .with(
+        'access-token' => '<fake_token>',
+        'cmd-args' => 'config config-helper --format=json',
+        'cmd-path' => '/path/to/gcloud',
+        'expiry' => '2019-04-09 19:26:18 UTC',
+        'expiry-key' => '{.credential.token_expiry}',
+        'token-key' => '{.credential.access_token}'
+      )
+      .returns('token1')
+      .once
     config = Kubeclient::Config.read(config_file('gcpcmdauth.kubeconfig'))
     config.context(config.contexts.first)
   end
 
   def test_oidc_auth_provider
-    Kubeclient::OIDCAuthProvider.expects(:token)
-                                .with('client-id' => 'fake-client-id',
-                                      'client-secret' => 'fake-client-secret',
-                                      'id-token' => 'fake-id-token',
-                                      'idp-issuer-url' => 'https://accounts.google.com',
-                                      'refresh-token' => 'fake-refresh-token')
-                                .returns('token1')
-                                .once
+    Kubeclient::OIDCAuthProvider
+      .expects(:token)
+      .with(
+        'client-id' => 'fake-client-id',
+        'client-secret' => 'fake-client-secret',
+        'id-token' => 'fake-id-token',
+        'idp-issuer-url' => 'https://accounts.google.com',
+        'refresh-token' => 'fake-refresh-token'
+      )
+      .returns('token1')
+      .once
     parsed = YAML.safe_load(File.read(config_file('oidcauth.kubeconfig')))
     config = Kubeclient::Config.new(parsed, nil)
     config.context(config.contexts.first)

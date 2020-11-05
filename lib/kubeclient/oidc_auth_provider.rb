@@ -11,10 +11,12 @@ module Kubeclient
         begin
           require 'openid_connect'
         rescue LoadError => e
-          raise OpenIDConnectDependencyError,
-                'Error requiring openid_connect gem. Kubeclient itself does not include the ' \
-                'openid_connect gem. To support auth-provider oidc, you must include it in your ' \
-                "calling application. Failed with: #{e.message}"
+          raise(
+            OpenIDConnectDependencyError,
+            'Error requiring openid_connect gem. Kubeclient itself does not include the ' \
+            'openid_connect gem. To support auth-provider oidc, you must include it in your ' \
+            "calling application. Failed with: #{e.message}"
+          )
         end
 
         issuer_url = provider_config['idp-issuer-url']
