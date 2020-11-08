@@ -873,11 +873,7 @@ class KubeclientTest < MiniTest::Test
   end
 
   def assert_default_open_timeout(actual)
-    if RUBY_VERSION >= '2.3'
-      assert_equal(60, actual)
-    else
-      assert_nil(actual)
-    end
+    assert_equal(60, actual)
   end
 
   private

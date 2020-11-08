@@ -220,8 +220,8 @@ client = Kubeclient::Client.new(
 )
 ```
 
-Default timeouts match `Net::HTTP` and `RestClient`, which unfortunately depends on ruby version:
-- open was infinite up to ruby 2.2, 60 seconds in 2.3+.
+Default timeouts match `Net::HTTP` and `RestClient`:
+- open is 60 seconds
 - read is 60 seconds.
 
 If you want ruby-independent behavior, always specify `:open`.
@@ -548,7 +548,7 @@ Other formats are:
  - `:ros` (default) for `RecursiveOpenStruct`
  - `:parsed` for `JSON.parse`
  - `:parsed_symbolized` for `JSON.parse(..., symbolize_names: true)`
- - a class of your choice (this will instantiate a new instance of that class with the raw value of the response body) 
+ - a class of your choice (this will instantiate a new instance of that class with the raw value of the response body)
 
 ### Watch — Receive entities updates
 
