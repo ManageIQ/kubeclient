@@ -1,3 +1,9 @@
+name: CI
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -5,18 +11,18 @@ jobs:
       matrix:
         ruby: [ '2.5', '2.6', '2.7', 'truffleruby-head' ]
         os: ['ubuntu-latest', 'macos-latest']
-        task: test
+        task: [test]
         include:
         # run rubocop against lowest supported ruby
         - os: ubuntu-latest
           ruby: '2.5'
           task: rubocop
-
     name: ${{ matrix.os }} ${{ matrix.ruby }} rake ${{ matrix.task }}
     steps:
     - uses: actions/checkout@v2
-    - uses: actions/setup-ruby@v1
+    # actions/setup-ruby did not support truffle or bundler caching
+    - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
-    - run: bundle install --jobs 4 --retry 3
-    - run: bundle exec rake ${{ matrix.ruby }}
+        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+    - run: bundle exec rake ${{ matrix.task }}
