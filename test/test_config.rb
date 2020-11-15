@@ -133,7 +133,11 @@ class KubeclientConfigTest < MiniTest::Test
 
   def test_gcp_default_auth
     Kubeclient::GoogleApplicationDefaultCredentials.expects(:token).returns('token1').once
-    parsed = YAML.safe_load(File.read(config_file('gcpauth.kubeconfig')), [Date, Time])
+    options = (RUBY_VERSION >= '2.6' ? { permitted_classes: [Date, Time] } : [Date, Time])
+    parsed = YAML.safe_load(
+      File.read(config_file('gcpauth.kubeconfig')),
+      options
+    )
     config = Kubeclient::Config.new(parsed, nil)
     config.context(config.contexts.first)
   end
@@ -142,7 +146,11 @@ class KubeclientConfigTest < MiniTest::Test
   # NOTE: this is not a guarantee, may change, just testing current behavior.
   def test_gcp_default_auth_renew
     Kubeclient::GoogleApplicationDefaultCredentials.expects(:token).returns('token1').once
-    parsed = YAML.safe_load(File.read(config_file('gcpauth.kubeconfig')), [Date, Time])
+    options = (RUBY_VERSION >= '2.6' ? { permitted_classes: [Date, Time] } : [Date, Time])
+    parsed = YAML.safe_load(
+      File.read(config_file('gcpauth.kubeconfig')),
+      options
+    )
     config = Kubeclient::Config.new(parsed, nil)
     context = config.context(config.contexts.first)
     assert_equal({ bearer_token: 'token1' }, context.auth_options)
