@@ -20,9 +20,9 @@ module Kubeclient
         end
 
         issuer_url = provider_config['idp-issuer-url']
-        discovery = OpenIDConnect::Discovery::Provider::Config.discover! issuer_url
+        discovery = OpenIDConnect::Discovery::Provider::Config.discover!(issuer_url)
 
-        if provider_config.key? 'id-token'
+        if provider_config.key?('id-token')
           return provider_config['id-token'] unless expired?(provider_config['id-token'], discovery)
         end
 

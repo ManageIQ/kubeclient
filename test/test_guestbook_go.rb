@@ -45,8 +45,8 @@ class CreateGuestbookGo < MiniTest::Test
 
   def delete_namespace(client, namespace_name)
     client.delete_namespace(namespace_name)
-  rescue Kubeclient::ResourceNotFoundError => exception
-    assert_equal(404, exception.error_code)
+  rescue Kubeclient::ResourceNotFoundError => e
+    assert_equal(404, e.error_code)
   end
 
   def get_namespaces(client)
@@ -81,32 +81,28 @@ class CreateGuestbookGo < MiniTest::Test
   def delete_services(client, namespace, services)
     # if the entity is not found, no need to fail the test
     services.each do |service|
-      begin
-        if service.instance_of?(Kubeclient::Resource)
-          client.delete_service(service.metadata.name, namespace)
-        else
-          # it's just a string - service name
-          client.delete_service(service, namespace)
-        end
-      rescue Kubeclient::ResourceNotFoundError => exception
-        assert_equal(404, exception.error_code)
+      if service.instance_of?(Kubeclient::Resource)
+        client.delete_service(service.metadata.name, namespace)
+      else
+        # it's just a string - service name
+        client.delete_service(service, namespace)
       end
+    rescue Kubeclient::ResourceNotFoundError => e
+      assert_equal(404, e.error_code)
     end
   end
 
   def delete_replication_controllers(client, namespace, replication_controllers)
     # if the entity is not found, no need to fail the test
     replication_controllers.each do |rc|
-      begin
-        if rc.instance_of?(Kubeclient::Resource)
-          client.delete_replication_controller(rc.metadata.name, namespace)
-        else
-          # it's just a string - rc name
-          client.delete_replication_controller(rc, namespace)
-        end
-      rescue Kubeclient::ResourceNotFoundError => exception
-        assert_equal(404, exception.error_code)
+      if rc.instance_of?(Kubeclient::Resource)
+        client.delete_replication_controller(rc.metadata.name, namespace)
+      else
+        # it's just a string - rc name
+        client.delete_replication_controller(rc, namespace)
       end
+    rescue Kubeclient::ResourceNotFoundError => e
+      assert_equal(404, e.error_code)
     end
   end
 

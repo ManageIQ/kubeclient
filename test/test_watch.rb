@@ -34,7 +34,7 @@ class TestWatch < MiniTest::Test
     yielded = []
     client.watch_pods { |notice| yielded << notice.type }
 
-    assert_equal %w[ADDED MODIFIED DELETED], yielded
+    assert_equal(%w[ADDED MODIFIED DELETED], yielded)
   end
 
   def test_watch_pod_raw

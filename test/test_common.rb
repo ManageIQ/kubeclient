@@ -1,4 +1,3 @@
-
 require_relative 'test_helper'
 
 # Unit tests for the common module
