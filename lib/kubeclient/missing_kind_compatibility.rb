@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Kubeclient
   module Common
     # Backward compatibility for old versions where kind is missing (e.g. OpenShift Enterprise 3.1)
