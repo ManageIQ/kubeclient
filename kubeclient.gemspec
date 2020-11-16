@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'webmock', '~> 3.0'
   spec.add_development_dependency 'vcr'
   spec.add_development_dependency 'rubocop', '~> 0.68.0' # TODO: bump to 1.0
-  spec.add_development_dependency 'googleauth', '~> 0.5.1'
+  spec.add_development_dependency 'googleauth', '~> 0.5'
   spec.add_development_dependency('mocha', '~> 1.5')
   spec.add_development_dependency 'openid_connect', '~> 1.1'
 
