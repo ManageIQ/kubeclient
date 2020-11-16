@@ -9,7 +9,11 @@ module Kubeclient
   class Config
     # Kubernetes client configuration context class
     class Context
-      attr_reader :api_endpoint, :api_version, :ssl_options, :auth_options, :namespace
+      attr_reader :api_endpoint
+      attr_reader :api_version
+      attr_reader :ssl_options
+      attr_reader :auth_options
+      attr_reader :namespace
 
       def initialize(api_endpoint, api_version, ssl_options, auth_options, namespace)
         @api_endpoint = api_endpoint
@@ -97,9 +101,7 @@ module Kubeclient
       # - absolute (e.g. /path/to/foo)
       # - $PATH-based (e.g. curl)
       # - relative to config file's dir (e.g. ./foo)
-      if Pathname(path).absolute?
-        path
-      elsif File.basename(path) == path
+      if Pathname(path).absolute? || File.basename(path) == path
         path
       else
         File.join(@kcfg_path, path)

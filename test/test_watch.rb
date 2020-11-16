@@ -60,8 +60,7 @@ class TestWatch < MiniTest::Test
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     assert_raises(Kubeclient::HttpError) do
-      client.watch_pods.each do
-      end
+      client.watch_pods.each {} # rubocop:disable Lint/EmptyBlock
     end
   end
 
@@ -99,8 +98,7 @@ class TestWatch < MiniTest::Test
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1', http_max_redirects: 0)
 
     assert_raises(Kubeclient::HttpError) do
-      client.watch_pods.each do
-      end
+      client.watch_pods.each {} # rubocop:disable Lint/EmptyBlock
     end
   end
 
@@ -123,7 +121,7 @@ class TestWatch < MiniTest::Test
     api_host = 'http://localhost:8080/api'
     version = '1995'
     stub_core_api_list
-    stub_request(:get, %r{.*\/watch/events})
+    stub_request(:get, %r{.*/watch/events})
       .to_return(body: open_test_file('watch_stream.json'), status: 200)
 
     client = Kubeclient::Client.new(api_host, 'v1')
@@ -138,7 +136,7 @@ class TestWatch < MiniTest::Test
     selector = 'name=redis-master'
 
     stub_core_api_list
-    stub_request(:get, %r{.*\/watch/events})
+    stub_request(:get, %r{.*/watch/events})
       .to_return(body: open_test_file('watch_stream.json'),
                  status: 200)
 
@@ -154,7 +152,7 @@ class TestWatch < MiniTest::Test
     selector = 'involvedObject.kind=Pod'
 
     stub_core_api_list
-    stub_request(:get, %r{.*\/watch/events})
+    stub_request(:get, %r{.*/watch/events})
       .to_return(body: open_test_file('watch_stream.json'), status: 200)
 
     client = Kubeclient::Client.new(api_host, 'v1')
@@ -168,14 +166,14 @@ class TestWatch < MiniTest::Test
     api_host = 'http://localhost:8080/api'
 
     stub_core_api_list
-    stub_request(:get, %r{.*\/watch/events})
+    stub_request(:get, %r{.*/watch/events})
       .to_return(body: open_test_file('watch_stream.json'), status: 200)
 
     client = Kubeclient::Client.new(api_host, 'v1')
     watcher = client.watch_events
 
     # explodes when StandardError is not caught
-    watcher.each do
+    watcher.each do # rubocop:disable Lint/UnreachableLoop
       watcher.finish
       raise StandardError
     end

@@ -72,7 +72,7 @@ class TestPod < MiniTest::Test
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
 
-    err = assert_raises Kubeclient::HttpError do
+    err = assert_raises(Kubeclient::HttpError) do
       client.get_pods(limit: 2, continue: 'eyJ2IjoibWV0YS5')
     end
 

@@ -1,21 +1,21 @@
 AllCops:
-  DisplayCopNames: true
   TargetRubyVersion: 2.5 # Oldest version kubeclient supports
-MethodLength:
+  NewCops: enable
+Metrics/MethodLength:
   Enabled: false
-ClassLength:
+Metrics/ClassLength:
   Enabled: false
 Metrics/AbcSize:
   Enabled: false
-Metrics/LineLength:
+Layout/LineLength:
   Max: 100
 Metrics/ParameterLists:
   Max: 5
   CountKeywordArgs: false
 Metrics/CyclomaticComplexity:
-  Max: 8
+  Max: 10
 Metrics/PerceivedComplexity:
-  Max: 8
+  Max: 10
 Metrics/ModuleLength:
   Enabled: false
 Style/MethodCallWithArgsParentheses:
@@ -26,7 +26,7 @@ Metrics/BlockLength:
   Exclude: [kubeclient.gemspec]
 Security/MarshalLoad:
   Exclude: [test/**/*]
-Nameing/FileName:
+Naming/FileName:
   Exclude: [Gemfile, Rakefile, Gemfile.dev.rb]
 Style/RegexpLiteral:
   Enabled: false
@@ -34,9 +34,17 @@ Layout/EmptyLineAfterGuardClause:
   Enabled: false
 Style/IfUnlessModifier:
   Enabled: false
-Layout/AlignHash:
+Layout/HashAlignment:
   Enabled: false
-Naming/UncommunicativeMethodParamName:
+Naming/MethodParameterName:
   Enabled: false
 Gemspec/OrderedDependencies:
+  Enabled: false
+Style/FrozenStringLiteralComment:
+  Enabled: false
+Style/WordArray:
+  Enabled: false
+Style/AccessorGrouping:
+  EnforcedStyle: separated
+Style/NegatedIfElseCondition:
   Enabled: false

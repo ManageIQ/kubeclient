@@ -164,7 +164,7 @@ module Kubeclient
         else
           # Some plurals are not exact suffixes, e.g. NetworkPolicy -> networkpolicies.
           # So don't expect full last word to match.
-          /^(?<prefix>(.*[A-Z]))(?<singular_suffix>[^A-Z]*)$/ =~ kind  # "NetworkP", "olicy"
+          /^(?<prefix>.*[A-Z])(?<singular_suffix>[^A-Z]*)$/ =~ kind # "NetworkP", "olicy"
           if name.start_with?(prefix.downcase)
             plural_suffix = name[prefix.length..-1]                    # "olicies"
             prefix_underscores = ClientMixin.underscore_entity(prefix) # "network_p"
@@ -206,7 +206,7 @@ module Kubeclient
       if match
         # Since `re` captures 2 groups, match will always have 3 elements
         # If thus we have a non-nil value in match 2, this is our api_group.
-        @api_group = match[:apigroup].nil? ? '' : match[:apigroup] + '/'
+        @api_group = match[:apigroup].nil? ? '' : "#{match[:apigroup]}/"
         @api_endpoint.path = match[:path]
       else
         # This is a fallback, for when `/api` was not provided as part of the uri
@@ -221,7 +221,7 @@ module Kubeclient
 
     # rubocop:disable  Metrics/BlockLength
     def define_entity_methods
-      @entities.values.each do |entity|
+      @entities.each_value do |entity|
         # get all entities of a type e.g. get_nodes, get_pods, etc.
         define_singleton_method("get_#{entity.method_names[1]}") do |options = {}|
           get_entities(entity.entity_type, entity.resource_name, options)
@@ -512,7 +512,7 @@ module Kubeclient
     def process_template(template)
       ns_prefix = build_namespace_prefix(template[:metadata][:namespace])
       response = handle_exception do
-        rest_client[ns_prefix + 'processedtemplates']
+        rest_client["#{ns_prefix}processedtemplates"]
           .post(template.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
       end
       JSON.parse(response)
