@@ -163,6 +163,17 @@ In this version `Kubeclient::Config.read` raises Psych::DisallowedClass on legal
 ## 3.0.0 - 2018-02-04
 ### Removed
 - Dropped entity classes (`Kubeclient::Pod` etc.), only `Kubeclient::Resource` exists now (#292, #288).
+  Checking the type of a resource can be done using:
+  ```
+  > pod.kind
+  => "Pod"
+  ```
+
+  update_* delete_* and patch_* now return a RecursiveOpenStruct like the get_* methods
+
+  The `Kubeclient::Client` class raises `Kubeclient::HttpError` or subclasses now. Catching `KubeException` still works but is deprecated.
+
+  `Kubeclient::Config#context` raises `KeyError` instead of `RuntimeError` for non-existent context name.
 - Ruby 2.0, 2.1 no longer supported (#253, #291).
 
 ### Fixed
@@ -198,3 +209,18 @@ No changes since 2.5.0, fixed packaging mistake.
 - `as: raw` option for `get_*` methods returning a string (#262 via #271).
 
 ## 2.4.0 - 2017-05-10
+
+#### past version 1.2.0
+Replace Specific Entity class references:
+
+```ruby
+Kubeclient::Service
+```
+
+with the generic
+
+```ruby
+Kubeclient::Resource.new
+```
+
+Where ever possible.
