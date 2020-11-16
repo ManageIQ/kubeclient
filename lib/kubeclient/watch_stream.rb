@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'json'
 require 'http'
 module Kubeclient
@@ -21,7 +23,7 @@ module Kubeclient
           raise Kubeclient::HttpError.new(response.code, response.reason, response)
         end
 
-        buffer = ''
+        buffer = +''
         response.body.each do |chunk|
           buffer << chunk
           while (line = buffer.slice!(/.+\n/))
