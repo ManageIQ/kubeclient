@@ -3,9 +3,11 @@
 # TODO: remove this on next major version bump
 # Deprected http exception
 class KubeException < StandardError
-  attr_reader :error_code, :message, :response
+  attr_reader :error_code
+  attr_reader :message
+  attr_reader :response
 
-  def initialize(error_code, message, response)
+  def initialize(error_code, message, response) # rubocop:disable Lint/MissingSuper
     @error_code = error_code
     @message = message
     @response = response

@@ -117,7 +117,7 @@ class TestPodLog < MiniTest::Test
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
 
     client.watch_pod_log('redis-master-pod', 'default') do |line|
-      assert_equal first, line
+      assert_equal(first, line)
       break
     end
   end
@@ -151,7 +151,7 @@ class TestPodLog < MiniTest::Test
 
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1', http_max_redirects: 0)
     assert_raises(Kubeclient::HttpError) do
-      client.watch_pod_log('redis-master-pod', 'default').each {}
+      client.watch_pod_log('redis-master-pod', 'default').each {} # rubocop:disable Lint/EmptyBlock
     end
   end
 end

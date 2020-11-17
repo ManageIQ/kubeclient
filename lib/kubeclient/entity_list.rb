@@ -5,7 +5,9 @@ module Kubeclient
   module Common
     # Kubernetes Entity List
     class EntityList < DelegateClass(Array)
-      attr_reader :continue, :kind, :resourceVersion
+      attr_reader :continue
+      attr_reader :kind
+      attr_reader :resourceVersion # rubocop:disable Naming/MethodName
 
       def initialize(kind, resource_version, list, continue = nil)
         @kind = kind

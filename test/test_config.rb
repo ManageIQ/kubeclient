@@ -125,7 +125,7 @@ class KubeclientConfigTest < MiniTest::Test
     yaml = File.read(config_file('execauth.kubeconfig'))
     config = Kubeclient::Config.new(YAML.safe_load(yaml), nil)
     config.contexts.each do |context_name|
-      Open3.stub(:capture3, proc { flunk 'should not execute command' }) do
+      Open3.stub(:capture3, proc { flunk('should not execute command') }) do
         assert_raises(StandardError) do
           config.context(context_name)
         end
@@ -231,17 +231,15 @@ class KubeclientConfigTest < MiniTest::Test
     File.join(File.dirname(__FILE__), 'config', name)
   end
 
-  def stub_exec(command_regexp, creds)
+  def stub_exec(command_regexp, creds, &block)
     st = Minitest::Mock.new
     st.expect(:success?, true)
 
     capture3_stub = lambda do |_env, command, *_args|
-      assert_match command_regexp, command
+      assert_match(command_regexp, command)
       [JSON.dump(creds), nil, st]
     end
 
-    Open3.stub(:capture3, capture3_stub) do
-      yield
-    end
+    Open3.stub(:capture3, capture3_stub, &block)
   end
 end
