@@ -818,50 +818,6 @@ to be substituted. Note that for a required parameter that does not provide a ge
 client.process_template template
 ```
 
-## Upgrading
-
-Kubeclient release versioning follows [SemVer](https://semver.org/).
-See [CHANGELOG.md](CHANGELOG.md) for full changelog.
-
-#### past version 4.0
-
-Old kubernetes versions < 1.3 no longer supported.
-
-#### past version 3.0
-
-Ruby versions < 2.2 are no longer supported
-
-Specific entity classes mentioned in [past version 1.2.0](#past_version_1.2.0) have been dropped.
-Return values and expected classes are always Kubeclient::Resource.
-Checking the type of a resource can be done using:
-```
-> pod.kind
-=> "Pod"
-```
-
-update_* delete_* and patch_* now return a RecursiveOpenStruct like the get_* methods
-
-The `Kubeclient::Client` class raises `Kubeclient::HttpError` or subclasses now. Catching `KubeException` still works but is deprecated.
-
-`Kubeclient::Config#context` raises `KeyError` instead of `RuntimeError` for non-existent context name.
-
-<a name="past_version_1.2.0">
-
-#### past version 1.2.0
-Replace Specific Entity class references:
-
-```ruby
-Kubeclient::Service
-```
-
-with the generic
-
-```ruby
-Kubeclient::Resource.new
-```
-
-Where ever possible.
-
 ## Contributing
 
 1. Fork it ( https://github.com/[my-github-username]/kubeclient/fork )
