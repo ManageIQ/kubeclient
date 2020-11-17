@@ -8,7 +8,6 @@ module Kubeclient
         require 'open3'
         require 'shellwords'
         require 'json'
-        require 'jsonpath'
 
         cmd = config['cmd-path']
         args = config['cmd-args']
@@ -23,8 +22,13 @@ module Kubeclient
 
       private
 
-      def extract_token(output, token_key)
-        JsonPath.on(output, token_key.gsub(/^{|}$/, '')).first
+      def extract_token(output, key)
+        path =
+          key
+          .gsub(/\A{(.*)}\z/, '\\1') # {.foo.bar} -> .foo.bar
+          .sub(/\A\./, '') # .foo.bar -> foo.bar
+          .split('.')
+        JSON.parse(output).dig(*path)
       end
     end
   end
