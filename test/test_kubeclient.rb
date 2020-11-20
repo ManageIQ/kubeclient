@@ -59,8 +59,6 @@ class KubeclientTest < MiniTest::Test
   def test_pass_max_redirects
     max_redirects = 0
     client = Kubeclient::Client.new('http://localhost:8080/api/', http_max_redirects: max_redirects)
-    http_client = client.http_client
-    # assert_equal(max_redirects, http_client.options[:max_redirects])
 
     stub_request(:get, 'http://localhost:8080/api')
       .to_return(status: 302, headers: { location: 'http://localhost:1234/api' })

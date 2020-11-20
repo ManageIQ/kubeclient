@@ -57,7 +57,10 @@ class TestCommonUrlHandling < MiniTest::Test
     http_client = client.http_client
     assert_equal('v1', client.instance_variable_get(:@api_version))
     assert_equal('', client.instance_variable_get(:@api_group))
-    assert_equal('http://localhost:8080/api/but/I/want/a/hidden/k8s/api/v1', http_client.url_prefix.to_s)
+    assert_equal(
+      'http://localhost:8080/api/but/I/want/a/hidden/k8s/api/v1',
+      http_client.url_prefix.to_s
+    )
   end
 
   def test_with_api_group_path_in_api
@@ -79,7 +82,10 @@ class TestCommonUrlHandling < MiniTest::Test
     http_client = client.http_client
     assert_equal('v1', client.instance_variable_get(:@api_version))
     assert_equal('', client.instance_variable_get(:@api_group))
-    assert_equal('http://localhost:8080/k8s/clusters/c-somerancherID/api/v1', http_client.url_prefix.to_s)
+    assert_equal(
+      'http://localhost:8080/k8s/clusters/c-somerancherID/api/v1',
+      http_client.url_prefix.to_s
+    )
   end
 
   def test_rancher_no_api_path_in_uri
@@ -87,7 +93,10 @@ class TestCommonUrlHandling < MiniTest::Test
     http_client = client.http_client
     assert_equal('v1', client.instance_variable_get(:@api_version))
     assert_equal('', client.instance_variable_get(:@api_group))
-    assert_equal('http://localhost:8080/k8s/clusters/c-somerancherID/api/v1', http_client.url_prefix.to_s)
+    assert_equal(
+      'http://localhost:8080/k8s/clusters/c-somerancherID/api/v1',
+      http_client.url_prefix.to_s
+    )
   end
 
   def test_rancher_no_api_path_in_uri_trailing_slash
@@ -95,7 +104,10 @@ class TestCommonUrlHandling < MiniTest::Test
     http_client = client.http_client
     assert_equal('v1', client.instance_variable_get(:@api_version))
     assert_equal('', client.instance_variable_get(:@api_group))
-    assert_equal('http://localhost:8080/k8s/clusters/c-somerancherID/api/v1', http_client.url_prefix.to_s)
+    assert_equal(
+      'http://localhost:8080/k8s/clusters/c-somerancherID/api/v1',
+      http_client.url_prefix.to_s
+    )
   end
 
   def test_rancher_with_api_path_in_uri_trailing_slash
@@ -103,7 +115,10 @@ class TestCommonUrlHandling < MiniTest::Test
     http_client = client.http_client
     assert_equal('v1', client.instance_variable_get(:@api_version))
     assert_equal('', client.instance_variable_get(:@api_group))
-    assert_equal('http://localhost:8080/k8s/clusters/c-somerancherID/api/v1', http_client.url_prefix.to_s)
+    assert_equal(
+      'http://localhost:8080/k8s/clusters/c-somerancherID/api/v1',
+      http_client.url_prefix.to_s
+    )
   end
 
   def test_rancher_with_api_group_in_uri_trailing_slash
