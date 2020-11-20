@@ -67,6 +67,6 @@ class TestNode < MiniTest::Test
     end
 
     assert_instance_of(Kubeclient::HttpError, exception)
-    assert_equal('500 Internal Server Error', exception.message)
+    assert_equal(500, exception.error_code)
   end
 end
