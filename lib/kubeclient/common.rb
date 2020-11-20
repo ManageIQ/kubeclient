@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
+require 'faraday'
+require 'faraday_middleware'
 require 'json'
-require 'rest-client'
+require 'net/http'
 
 module Kubeclient
   # Common methods
@@ -121,16 +123,17 @@ module Kubeclient
 
     def handle_exception
       yield
-    rescue RestClient::Exception => e
+    rescue Faraday::Error => e
       json_error_msg =
         begin
-          JSON.parse(e.response || '') || {}
-        rescue JSON::ParserError
+          JSON.parse(e.response[:body] || '') || {}
+        rescue
           {}
         end
-      err_message = json_error_msg['message'] || e.message
-      error_klass = e.http_code == 404 ? ResourceNotFoundError : HttpError
-      raise error_klass.new(e.http_code, err_message, e.response)
+      err_message = json_error_msg['message'] || e.message || ''
+      response_code = e.response ? (e.response[:status] || e.response&.env&.status) : nil
+      error_klass = response_code == 404 ? ResourceNotFoundError : HttpError
+      raise error_klass.new(response_code, err_message, e.response)
     end
 
     def discover
@@ -285,27 +288,33 @@ module Kubeclient
         .downcase
     end
 
-    def create_rest_client(path = nil)
-      path ||= @api_endpoint.path
+    def create_http_client(url = nil)
+      url = "#{@api_endpoint}/#{@api_version}" if url.nil?
       options = {
-        ssl_ca_file: @ssl_options[:ca_file],
-        ssl_cert_store: @ssl_options[:cert_store],
-        verify_ssl: @ssl_options[:verify_ssl],
-        ssl_client_cert: @ssl_options[:client_cert],
-        ssl_client_key: @ssl_options[:client_key],
         proxy: @http_proxy_uri,
-        max_redirects: @http_max_redirects,
-        user: @auth_options[:username],
-        password: @auth_options[:password],
-        open_timeout: @timeouts[:open],
-        read_timeout: @timeouts[:read]
+        request: {
+          open_timeout: @timeouts[:open],
+          read_timeout: @timeouts[:read],
+        },
+        ssl: {
+          ca_file: @ssl_options[:ca_file],
+          cert_store: @ssl_options[:cert_store],
+          client_cert: @ssl_options[:client_cert],
+          client_key: @ssl_options[:client_key],
+          verify: @ssl_options[:verify_ssl],
+        },
       }
-      RestClient::Resource.new(@api_endpoint.merge(path).to_s, options)
+
+      Faraday.new(url, options) do |connection|
+        connection.basic_auth(@auth_options[:username], @auth_options[:password]) if @auth_options[:username] && @auth_options[:password]
+        connection.use FaradayMiddleware::FollowRedirects, limit: @http_max_redirects
+        connection.response :raise_error
+      end
     end
 
-    def rest_client
-      @rest_client ||= begin
-        create_rest_client("#{@api_endpoint.path}/#{@api_version}")
+    def http_client
+      @http_client ||= begin
+        create_http_client
       end
     end
 
@@ -355,8 +364,7 @@ module Kubeclient
 
       ns_prefix = build_namespace_prefix(options[:namespace])
       response = handle_exception do
-        rest_client[ns_prefix + resource_name]
-          .get({ 'params' => params }.merge(@headers))
+        http_client.get(ns_prefix + resource_name, params, @headers)
       end
       format_response(options[:as] || @as, response.body, entity_type)
     end
@@ -368,8 +376,7 @@ module Kubeclient
     def get_entity(resource_name, name, namespace = nil, options = {})
       ns_prefix = build_namespace_prefix(namespace)
       response = handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
-          .get(@headers)
+        http_client.get("#{ns_prefix}#{resource_name}/#{name}", nil, @headers)
       end
       format_response(options[:as] || @as, response.body)
     end
@@ -380,15 +387,9 @@ module Kubeclient
       ns_prefix = build_namespace_prefix(namespace)
       payload = delete_options_hash.to_json unless delete_options_hash.empty?
       response = handle_exception do
-        rs = rest_client[ns_prefix + resource_name + "/#{name}"]
-        RestClient::Request.execute(
-          rs.options.merge(
-            method: :delete,
-            url: rs.url,
-            headers: { 'Content-Type' => 'application/json' }.merge(@headers),
-            payload: payload
-          )
-        )
+        http_client.delete("#{ns_prefix}#{resource_name}/#{name}", nil, { 'Content-Type' => 'application/json' }.merge(@headers)) do |request|
+          request.body = payload
+        end
       end
       format_response(@as, response.body)
     end
@@ -406,8 +407,7 @@ module Kubeclient
       hash[:kind] = entity_type
       hash[:apiVersion] = @api_group + @api_version
       response = handle_exception do
-        rest_client[ns_prefix + resource_name]
-          .post(hash.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
+        http_client.post(ns_prefix + resource_name, hash.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
       end
       format_response(@as, response.body)
     end
@@ -416,8 +416,7 @@ module Kubeclient
       name      = entity_config[:metadata][:name]
       ns_prefix = build_namespace_prefix(entity_config[:metadata][:namespace])
       response = handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
-          .put(entity_config.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
+        http_client.put("#{ns_prefix}#{resource_name}/#{name}", entity_config.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
       end
       format_response(@as, response.body)
     end
@@ -425,11 +424,7 @@ module Kubeclient
     def patch_entity(resource_name, name, patch, strategy, namespace)
       ns_prefix = build_namespace_prefix(namespace)
       response = handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
-          .patch(
-            patch.to_json,
-            { 'Content-Type' => "application/#{strategy}+json" }.merge(@headers)
-          )
+        http_client.patch("#{ns_prefix}#{resource_name}/#{name}", patch.to_json, { 'Content-Type' => "application/#{strategy}+json" }.merge(@headers))
       end
       format_response(@as, response.body)
     end
@@ -438,11 +433,7 @@ module Kubeclient
       name = "#{resource[:metadata][:name]}?fieldManager=#{field_manager}&force=#{force}"
       ns_prefix = build_namespace_prefix(resource[:metadata][:namespace])
       response = handle_exception do
-        rest_client[ns_prefix + resource_name + "/#{name}"]
-          .patch(
-            resource.to_json,
-            { 'Content-Type' => 'application/apply-patch+yaml' }.merge(@headers)
-          )
+        http_client.patch("#{ns_prefix}#{resource_name}/#{name}", resource.to_json, { 'Content-Type' => 'application/apply-patch+yaml' }.merge(@headers))
       end
       format_response(@as, response.body)
     end
@@ -474,8 +465,7 @@ module Kubeclient
 
       ns = build_namespace_prefix(namespace)
       handle_exception do
-        rest_client[ns + "pods/#{pod_name}/log"]
-          .get({ 'params' => params }.merge(@headers))
+        http_client.get("#{ns}pods/#{pod_name}/log", params, @headers).body
       end
     end
 
@@ -506,16 +496,15 @@ module Kubeclient
           @entities[kind.to_s].resource_name
         end
       ns_prefix = build_namespace_prefix(namespace)
-      rest_client["#{ns_prefix}#{entity_name_plural}/#{name}:#{port}/proxy"].url
+      "#{@api_endpoint}/#{@api_version}/#{ns_prefix}#{entity_name_plural}/#{name}:#{port}/proxy"
     end
 
     def process_template(template)
       ns_prefix = build_namespace_prefix(template[:metadata][:namespace])
       response = handle_exception do
-        rest_client["#{ns_prefix}processedtemplates"]
-          .post(template.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
+        http_client.post("#{ns_prefix}processedtemplates", template.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
       end
-      JSON.parse(response)
+      JSON.parse(response.body)
     end
 
     def api_valid?
@@ -526,7 +515,7 @@ module Kubeclient
     end
 
     def api
-      response = handle_exception { create_rest_client.get(@headers) }
+      response = handle_exception { create_http_client(@api_endpoint.to_s).get(nil, nil, @headers).body }
       JSON.parse(response)
     end
 
@@ -602,7 +591,7 @@ module Kubeclient
     end
 
     def fetch_entities
-      JSON.parse(handle_exception { rest_client.get(@headers) })
+      JSON.parse(handle_exception { http_client.get(nil, nil, @headers).body })
     end
 
     def bearer_token(bearer_token)
