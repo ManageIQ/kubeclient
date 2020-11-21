@@ -6,7 +6,7 @@ require 'minitest/rg'
 require 'webmock/minitest'
 require 'mocha/minitest'
 require 'json'
-require 'kubeclient'
+require_relative '../lib/kubeclient'
 
 # Assumes test files will be in a subdirectory with the same name as the
 # file suffix.  e.g. a file named foo.json would be a "json" subdirectory.
