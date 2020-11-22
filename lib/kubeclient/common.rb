@@ -126,11 +126,11 @@ module Kubeclient
     rescue Faraday::Error => e
       err_message = get_error_message(e)
       response_code = e.response ? (e.response[:status] || e.response&.env&.status) : nil
-      error_klass = response_code == 404 ? ResourceNotFoundError : HttpError
+      error_klass = (response_code == 404 ? ResourceNotFoundError : HttpError)
       raise error_klass.new(response_code, err_message, e.response)
     end
 
-    def get_error_message(e)
+    def build_http_error_message(e)
       json_error_msg =
         begin
           JSON.parse(e.response[:body] || '') || {}
