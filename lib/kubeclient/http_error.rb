@@ -15,8 +15,10 @@ class KubeException < StandardError
 
   def to_s
     string = "HTTP status code #{@error_code}, #{@message}"
-    if @response.is_a?(RestClient::Response) && @response.request
-      string += " for #{@response.request.method.upcase} #{@response.request.url}"
+    if @response && @response[:request]
+      request_method = @response[:request][:method]&.to_s&.upcase
+      request_path = @response[:request][:url_path]
+      string += " for #{request_method} #{request_path}"
     end
     string
   end

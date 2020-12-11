@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'json'
-require 'rest-client'
 
 require_relative 'kubeclient/aws_eks_credentials'
 require_relative 'kubeclient/common'

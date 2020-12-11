@@ -26,20 +26,20 @@ class KubeclientTest < MiniTest::Test
     uri = URI::HTTP.build(port: 8080)
     uri.hostname = 'localhost'
     client = Kubeclient::Client.new(uri)
-    rest_client = client.rest_client
-    assert_equal('http://localhost:8080/api/v1', rest_client.url.to_s)
+    http_client = client.http_client
+    assert_equal('http://localhost:8080/api/v1', http_client.url_prefix.to_s)
   end
 
   def test_no_path_in_uri
     client = Kubeclient::Client.new('http://localhost:8080', 'v1')
-    rest_client = client.rest_client
-    assert_equal('http://localhost:8080/api/v1', rest_client.url.to_s)
+    http_client = client.http_client
+    assert_equal('http://localhost:8080/api/v1', http_client.url_prefix.to_s)
   end
 
   def test_no_version_passed
     client = Kubeclient::Client.new('http://localhost:8080')
-    rest_client = client.rest_client
-    assert_equal('http://localhost:8080/api/v1', rest_client.url.to_s)
+    http_client = client.http_client
+    assert_equal('http://localhost:8080/api/v1', http_client.url_prefix.to_s)
   end
 
   def test_pass_proxy
@@ -48,8 +48,8 @@ class KubeclientTest < MiniTest::Test
     stub_core_api_list
 
     client = Kubeclient::Client.new(uri, http_proxy_uri: proxy_uri)
-    rest_client = client.rest_client
-    assert_equal(proxy_uri.to_s, rest_client.options[:proxy])
+    http_client = client.http_client
+    assert_equal(proxy_uri.to_s, http_client.proxy.uri.to_s)
 
     watch_client = client.watch_pods
     assert_equal(watch_client.send(:build_client_options)[:proxy][:proxy_address], proxy_uri.host)
@@ -59,8 +59,6 @@ class KubeclientTest < MiniTest::Test
   def test_pass_max_redirects
     max_redirects = 0
     client = Kubeclient::Client.new('http://localhost:8080/api/', http_max_redirects: max_redirects)
-    rest_client = client.rest_client
-    assert_equal(max_redirects, rest_client.options[:max_redirects])
 
     stub_request(:get, 'http://localhost:8080/api')
       .to_return(status: 302, headers: { location: 'http://localhost:1234/api' })
@@ -94,7 +92,7 @@ class KubeclientTest < MiniTest::Test
       exception.message
     )
 
-    assert_includes(exception.to_s, ' for POST http://localhost:8080/api')
+    assert_includes(exception.to_s, ' for POST /api/')
     assert_equal(409, exception.error_code)
   end
 
@@ -136,7 +134,7 @@ class KubeclientTest < MiniTest::Test
     client = Kubeclient::Client.new('http://localhost:8080/api/')
 
     exception = assert_raises(Kubeclient::HttpError) { client.api }
-    assert_match(/(timed out|timeout)/i, exception.message)
+    assert_match(/execution expired/i, exception.message)
   end
 
   def test_api_valid
@@ -200,7 +198,6 @@ class KubeclientTest < MiniTest::Test
       client.get_services
     end
 
-    assert(exception.message.include?('Not Found'))
     assert_equal(404, exception.error_code)
   end
 
@@ -213,7 +210,6 @@ class KubeclientTest < MiniTest::Test
       client.get_services(as: :raw)
     end
 
-    assert(exception.message.include?('Not Found'))
     assert_equal(404, exception.error_code)
   end
 
@@ -297,7 +293,6 @@ class KubeclientTest < MiniTest::Test
       .to_return(body: open_test_file('entity_list.json'), status: 500)
 
     exception = assert_raises(Kubeclient::HttpError) { client.get_services(as: :raw) }
-    assert_equal('500 Internal Server Error', exception.message)
     assert_equal(500, exception.error_code)
   end
 
@@ -829,9 +824,9 @@ class KubeclientTest < MiniTest::Test
     client = Kubeclient::Client.new(
       'http://localhost:8080/api/'
     )
-    rest_client = client.rest_client
-    assert_default_open_timeout(rest_client.open_timeout)
-    assert_equal(60, rest_client.read_timeout)
+    http_client = client.http_client
+    assert_default_open_timeout(http_client.options.open_timeout)
+    assert_equal(60, http_client.options.read_timeout)
   end
 
   def test_timeouts_open
@@ -839,9 +834,9 @@ class KubeclientTest < MiniTest::Test
       'http://localhost:8080/api/',
       timeouts: { open: 10 }
     )
-    rest_client = client.rest_client
-    assert_equal(10, rest_client.open_timeout)
-    assert_equal(60, rest_client.read_timeout)
+    http_client = client.http_client
+    assert_equal(10, http_client.options.open_timeout)
+    assert_equal(60, http_client.options.read_timeout)
   end
 
   def test_timeouts_read
@@ -849,9 +844,9 @@ class KubeclientTest < MiniTest::Test
       'http://localhost:8080/api/',
       timeouts: { read: 300 }
     )
-    rest_client = client.rest_client
-    assert_default_open_timeout(rest_client.open_timeout)
-    assert_equal(300, rest_client.read_timeout)
+    http_client = client.http_client
+    assert_default_open_timeout(http_client.options.open_timeout)
+    assert_equal(300, http_client.options.read_timeout)
   end
 
   def test_timeouts_both
@@ -859,9 +854,9 @@ class KubeclientTest < MiniTest::Test
       'http://localhost:8080/api/',
       timeouts: { open: 10, read: 300 }
     )
-    rest_client = client.rest_client
-    assert_equal(10, rest_client.open_timeout)
-    assert_equal(300, rest_client.read_timeout)
+    http_client = client.http_client
+    assert_equal(10, http_client.options.open_timeout)
+    assert_equal(300, http_client.options.read_timeout)
   end
 
   def test_timeouts_infinite
@@ -869,9 +864,9 @@ class KubeclientTest < MiniTest::Test
       'http://localhost:8080/api/',
       timeouts: { open: nil, read: nil }
     )
-    rest_client = client.rest_client
-    assert_nil(rest_client.open_timeout)
-    assert_nil(rest_client.read_timeout)
+    http_client = client.http_client
+    assert_nil(http_client.options.open_timeout)
+    assert_nil(http_client.options.read_timeout)
   end
 
   def assert_default_open_timeout(actual)
