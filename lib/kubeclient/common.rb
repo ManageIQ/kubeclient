@@ -393,7 +393,11 @@ module Kubeclient
       ns_prefix = build_namespace_prefix(namespace)
       payload = delete_options_hash.to_json unless delete_options_hash.empty?
       response = handle_exception do
-        faraday_client.delete("#{ns_prefix}#{resource_name}/#{name}", nil, json_headers) do |request|
+        faraday_client.delete(
+          "#{ns_prefix}#{resource_name}/#{name}",
+          nil,
+          json_headers
+        ) do |request|
           request.body = payload
         end
       end
