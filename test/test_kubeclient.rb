@@ -26,20 +26,20 @@ class KubeclientTest < MiniTest::Test
     uri = URI::HTTP.build(port: 8080)
     uri.hostname = 'localhost'
     client = Kubeclient::Client.new(uri)
-    http_client = client.http_client
-    assert_equal('http://localhost:8080/api/v1', http_client.url_prefix.to_s)
+    faraday_client = client.faraday_client
+    assert_equal('http://localhost:8080/api/v1', faraday_client.url_prefix.to_s)
   end
 
   def test_no_path_in_uri
     client = Kubeclient::Client.new('http://localhost:8080', 'v1')
-    http_client = client.http_client
-    assert_equal('http://localhost:8080/api/v1', http_client.url_prefix.to_s)
+    faraday_client = client.faraday_client
+    assert_equal('http://localhost:8080/api/v1', faraday_client.url_prefix.to_s)
   end
 
   def test_no_version_passed
     client = Kubeclient::Client.new('http://localhost:8080')
-    http_client = client.http_client
-    assert_equal('http://localhost:8080/api/v1', http_client.url_prefix.to_s)
+    faraday_client = client.faraday_client
+    assert_equal('http://localhost:8080/api/v1', faraday_client.url_prefix.to_s)
   end
 
   def test_pass_proxy
@@ -48,8 +48,8 @@ class KubeclientTest < MiniTest::Test
     stub_core_api_list
 
     client = Kubeclient::Client.new(uri, http_proxy_uri: proxy_uri)
-    http_client = client.http_client
-    assert_equal(proxy_uri.to_s, http_client.proxy.uri.to_s)
+    faraday_client = client.faraday_client
+    assert_equal(proxy_uri.to_s, faraday_client.proxy.uri.to_s)
 
     watch_client = client.watch_pods
     assert_equal(watch_client.send(:build_client_options)[:proxy][:proxy_address], proxy_uri.host)
@@ -824,9 +824,9 @@ class KubeclientTest < MiniTest::Test
     client = Kubeclient::Client.new(
       'http://localhost:8080/api/'
     )
-    http_client = client.http_client
-    assert_default_open_timeout(http_client.options.open_timeout)
-    assert_equal(60, http_client.options.read_timeout)
+    faraday_client = client.faraday_client
+    assert_default_open_timeout(faraday_client.options.open_timeout)
+    assert_equal(60, faraday_client.options.read_timeout)
   end
 
   def test_timeouts_open
@@ -834,9 +834,9 @@ class KubeclientTest < MiniTest::Test
       'http://localhost:8080/api/',
       timeouts: { open: 10 }
     )
-    http_client = client.http_client
-    assert_equal(10, http_client.options.open_timeout)
-    assert_equal(60, http_client.options.read_timeout)
+    faraday_client = client.faraday_client
+    assert_equal(10, faraday_client.options.open_timeout)
+    assert_equal(60, faraday_client.options.read_timeout)
   end
 
   def test_timeouts_read
@@ -844,9 +844,9 @@ class KubeclientTest < MiniTest::Test
       'http://localhost:8080/api/',
       timeouts: { read: 300 }
     )
-    http_client = client.http_client
-    assert_default_open_timeout(http_client.options.open_timeout)
-    assert_equal(300, http_client.options.read_timeout)
+    faraday_client = client.faraday_client
+    assert_default_open_timeout(faraday_client.options.open_timeout)
+    assert_equal(300, faraday_client.options.read_timeout)
   end
 
   def test_timeouts_both
@@ -854,9 +854,9 @@ class KubeclientTest < MiniTest::Test
       'http://localhost:8080/api/',
       timeouts: { open: 10, read: 300 }
     )
-    http_client = client.http_client
-    assert_equal(10, http_client.options.open_timeout)
-    assert_equal(300, http_client.options.read_timeout)
+    faraday_client = client.faraday_client
+    assert_equal(10, faraday_client.options.open_timeout)
+    assert_equal(300, faraday_client.options.read_timeout)
   end
 
   def test_timeouts_infinite
@@ -864,9 +864,9 @@ class KubeclientTest < MiniTest::Test
       'http://localhost:8080/api/',
       timeouts: { open: nil, read: nil }
     )
-    http_client = client.http_client
-    assert_nil(http_client.options.open_timeout)
-    assert_nil(http_client.options.read_timeout)
+    faraday_client = client.faraday_client
+    assert_nil(faraday_client.options.open_timeout)
+    assert_nil(faraday_client.options.read_timeout)
   end
 
   def assert_default_open_timeout(actual)
