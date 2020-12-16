@@ -292,7 +292,7 @@ module Kubeclient
         .downcase
     end
 
-    def create_http_client(url = nil)
+    def create_faraday_client(url = nil)
       url = "#{@api_endpoint}/#{@api_version}" if url.nil?
       options = {
         proxy: @http_proxy_uri,
@@ -318,9 +318,9 @@ module Kubeclient
       end
     end
 
-    def http_client
-      @http_client ||= begin
-        create_http_client
+    def faraday_client
+      @faraday_client ||= begin
+        create_faraday_client
       end
     end
 
@@ -370,7 +370,7 @@ module Kubeclient
 
       ns_prefix = build_namespace_prefix(options[:namespace])
       response = handle_exception do
-        http_client.get(ns_prefix + resource_name, params, @headers)
+        faraday_client.get(ns_prefix + resource_name, params, @headers)
       end
       format_response(options[:as] || @as, response.body, entity_type)
     end
@@ -382,7 +382,7 @@ module Kubeclient
     def get_entity(resource_name, name, namespace = nil, options = {})
       ns_prefix = build_namespace_prefix(namespace)
       response = handle_exception do
-        http_client.get("#{ns_prefix}#{resource_name}/#{name}", nil, @headers)
+        faraday_client.get("#{ns_prefix}#{resource_name}/#{name}", nil, @headers)
       end
       format_response(options[:as] || @as, response.body)
     end
@@ -393,7 +393,11 @@ module Kubeclient
       ns_prefix = build_namespace_prefix(namespace)
       payload = delete_options_hash.to_json unless delete_options_hash.empty?
       response = handle_exception do
-        http_client.delete("#{ns_prefix}#{resource_name}/#{name}", nil, json_headers) do |request|
+        faraday_client.delete(
+          "#{ns_prefix}#{resource_name}/#{name}",
+          nil,
+          json_headers
+        ) do |request|
           request.body = payload
         end
       end
@@ -413,7 +417,7 @@ module Kubeclient
       hash[:kind] = entity_type
       hash[:apiVersion] = @api_group + @api_version
       response = handle_exception do
-        http_client.post(ns_prefix + resource_name, hash.to_json, json_headers)
+        faraday_client.post(ns_prefix + resource_name, hash.to_json, json_headers)
       end
       format_response(@as, response.body)
     end
@@ -423,7 +427,7 @@ module Kubeclient
       ns_prefix = build_namespace_prefix(entity_config[:metadata][:namespace])
       params = entity_config.to_h.to_json
       response = handle_exception do
-        http_client.put("#{ns_prefix}#{resource_name}/#{name}", params, json_headers)
+        faraday_client.put("#{ns_prefix}#{resource_name}/#{name}", params, json_headers)
       end
       format_response(@as, response.body)
     end
@@ -431,7 +435,7 @@ module Kubeclient
     def patch_entity(resource_name, name, patch, strategy, namespace)
       ns_prefix = build_namespace_prefix(namespace)
       response = handle_exception do
-        http_client.patch(
+        faraday_client.patch(
           "#{ns_prefix}#{resource_name}/#{name}",
           patch.to_json,
           { 'Content-Type' => "application/#{strategy}+json" }.merge(@headers)
@@ -444,7 +448,7 @@ module Kubeclient
       name = "#{resource[:metadata][:name]}?fieldManager=#{field_manager}&force=#{force}"
       ns_prefix = build_namespace_prefix(resource[:metadata][:namespace])
       response = handle_exception do
-        http_client.patch(
+        faraday_client.patch(
           "#{ns_prefix}#{resource_name}/#{name}",
           resource.to_json,
           { 'Content-Type' => 'application/apply-patch+yaml' }.merge(@headers)
@@ -480,7 +484,7 @@ module Kubeclient
 
       ns = build_namespace_prefix(namespace)
       handle_exception do
-        http_client.get("#{ns}pods/#{pod_name}/log", params, @headers).body
+        faraday_client.get("#{ns}pods/#{pod_name}/log", params, @headers).body
       end
     end
 
@@ -517,7 +521,7 @@ module Kubeclient
     def process_template(template)
       ns_prefix = build_namespace_prefix(template[:metadata][:namespace])
       response = handle_exception do
-        http_client.post("#{ns_prefix}processedtemplates", template.to_h.to_json, json_headers)
+        faraday_client.post("#{ns_prefix}processedtemplates", template.to_h.to_json, json_headers)
       end
       JSON.parse(response.body)
     end
@@ -531,7 +535,7 @@ module Kubeclient
 
     def api
       response = handle_exception do
-        create_http_client(@api_endpoint.to_s).get(nil, nil, @headers).body
+        create_faraday_client(@api_endpoint.to_s).get(nil, nil, @headers).body
       end
       JSON.parse(response)
     end
@@ -608,7 +612,7 @@ module Kubeclient
     end
 
     def fetch_entities
-      JSON.parse(handle_exception { http_client.get(nil, nil, @headers).body })
+      JSON.parse(handle_exception { faraday_client.get(nil, nil, @headers).body })
     end
 
     def bearer_token(bearer_token)
