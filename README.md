@@ -160,24 +160,6 @@ namespace = File.read('/var/run/secrets/kubernetes.io/serviceaccount/namespace')
 ```
 You can find information about tokens in [this guide](https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/#accessing-the-api-from-a-pod) and in [this reference](http://kubernetes.io/docs/admin/authentication/).
 
-### Non-blocking IO
-
-You can also use kubeclient with non-blocking sockets such as Celluloid::IO, see [here](https://github.com/httprb/http/wiki/Parallel-requests-with-Celluloid%3A%3AIO)
-for details. For example:
-
-```ruby
-require 'celluloid/io'
-socket_options = {
-  socket_class: Celluloid::IO::TCPSocket,
-  ssl_socket_class: Celluloid::IO::SSLSocket
-}
-client = Kubeclient::Client.new(
-  'https://localhost:8443/api', 'v1', socket_options: socket_options
-)
-```
-
-This affects only `.watch_*` sockets, not one-off actions like `.get_*`, `.delete_*` etc.
-
 ### Proxies
 
 You can also use kubeclient with an http proxy server such as tinyproxy. It can be entered as a string or a URI object.

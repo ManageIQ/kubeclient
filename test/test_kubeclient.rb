@@ -60,8 +60,10 @@ class KubeclientTest < MiniTest::Test
     assert_equal(proxy_uri.to_s, faraday_client.proxy.uri.to_s)
 
     watch_client = client.watch_pods
-    assert_equal(watch_client.send(:build_client_options)[:proxy][:proxy_address], proxy_uri.host)
-    assert_equal(watch_client.send(:build_client_options)[:proxy][:proxy_port], proxy_uri.port)
+    assert_equal(
+      watch_client.instance_variable_get('@faraday_client').proxy.uri.to_s,
+      proxy_uri.to_s
+    )
   end
 
   def test_pass_max_redirects

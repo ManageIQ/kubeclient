@@ -162,7 +162,7 @@ class TestWatch < MiniTest::Test
     assert_requested(:get, "#{api_host}/v1/watch/events?fieldSelector=#{selector}", times: 1)
   end
 
-  def test_watch_with_finish_and_ebadf
+  def test_watch_with_finish
     api_host = 'http://localhost:8080/api'
 
     stub_core_api_list
@@ -172,10 +172,8 @@ class TestWatch < MiniTest::Test
     client = Kubeclient::Client.new(api_host, 'v1')
     watcher = client.watch_events
 
-    # explodes when StandardError is not caught
-    watcher.each do # rubocop:disable Lint/UnreachableLoop
+    watcher.each do
       watcher.finish
-      raise StandardError
     end
 
     assert_requested(:get, "#{api_host}/v1/watch/events", times: 1)

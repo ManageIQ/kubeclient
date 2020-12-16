@@ -7,6 +7,7 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 ## Unreleased
 ### Changed
 - `Kubeclient::Client.new` now always requires an api version, use for example: `Kubeclient::Client.new(uri, 'v1')`
+- `socket_options` has been removed from `Kubeclient::Client.new`
 
 ## 4.9.1 — 2020-08-31
 ### Fixed
