@@ -31,7 +31,7 @@ class TestService < MiniTest::Test
     stub_request(:post, expected_url)
       .to_return(body: open_test_file('created_service.json'), status: 201)
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/')
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     created = client.create_service(our_service)
 
     assert_instance_of(Kubeclient::Resource, created)
@@ -70,7 +70,7 @@ class TestService < MiniTest::Test
     stub_request(:post, expected_url)
       .to_return(body: open_test_file('created_service.json'), status: 201)
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/')
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     client.create_service(service)
 
     assert_requested(:post, expected_url, times: 1) do |req|
@@ -103,7 +103,7 @@ class TestService < MiniTest::Test
     stub_request(:post, %r{namespaces/staging/services})
       .to_return(body: open_test_file('created_service.json'), status: 201)
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/')
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     client.create_service(service)
 
     assert_requested(:post, expected_url, times: 1) do |req|
@@ -122,7 +122,7 @@ class TestService < MiniTest::Test
       .to_return(body: open_test_file('service.json'),
                  status: 200)
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/')
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     service = client.get_service('redis-slave', 'development')
 
     assert_instance_of(Kubeclient::Resource, service)
@@ -173,7 +173,7 @@ class TestService < MiniTest::Test
     stub_request(:get, %r{/services/redis-slave})
       .to_return(status: 404)
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/')
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
 
     exception = assert_raises(Kubeclient::HttpError) do
       client.get_service('redis-slave')
@@ -186,7 +186,7 @@ class TestService < MiniTest::Test
     stub_request(:get, %r{/namespaces/development/services/redis-slave})
       .to_return(body: open_test_file('service.json'), status: 200)
 
-    client = Kubeclient::Client.new('http://localhost:8080/api/')
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     service = client.get_service('redis-slave', 'development')
     assert_equal('redis-slave', service.metadata.name)
 

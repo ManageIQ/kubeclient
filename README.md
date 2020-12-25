@@ -34,13 +34,7 @@ gem install kubeclient
 Initialize the client:
 
 ```ruby
-client = Kubeclient::Client.new('http://localhost:8080/api/', "v1")
-```
-
-Or without specifying version (it will be set by default to "v1")
-
-```ruby
-client = Kubeclient::Client.new('http://localhost:8080/api/')
+client = Kubeclient::Client.new('http://localhost:8080/api', 'v1')
 ```
 
 For A Group Api:
@@ -53,7 +47,7 @@ Another option is to initialize the client with URI object:
 
 ```ruby
 uri = URI::HTTP.build(host: "somehostname", port: 8080)
-client = Kubeclient::Client.new(uri)
+client = Kubeclient::Client.new(uri, 'v1')
 ```
 
 ### SSL
@@ -68,7 +62,7 @@ ssl_options = {
   verify_ssl:  OpenSSL::SSL::VERIFY_PEER
 }
 client = Kubeclient::Client.new(
-  'https://localhost:8443/api/', "v1", ssl_options: ssl_options
+  'https://localhost:8443/api', 'v1', ssl_options: ssl_options
 )
 ```
 
@@ -82,7 +76,7 @@ ssl_options = {
   verify_ssl: OpenSSL::SSL::VERIFY_PEER
 }
 client = Kubeclient::Client.new(
-  'https://localhost:8443/api/', "v1", ssl_options: ssl_options
+  'https://localhost:8443/api', 'v1', ssl_options: ssl_options
 )
 ```
 
@@ -91,7 +85,7 @@ For testing and development purpose you can disable the ssl check with:
 ```ruby
 ssl_options = { verify_ssl: OpenSSL::SSL::VERIFY_NONE }
 client = Kubeclient::Client.new(
-  'https://localhost:8443/api/', 'v1', ssl_options: ssl_options
+  'https://localhost:8443/api', 'v1', ssl_options: ssl_options
 )
 ```
 
@@ -107,7 +101,7 @@ auth_options = {
   password: 'password'
 }
 client = Kubeclient::Client.new(
-  'https://localhost:8443/api/', 'v1', auth_options: auth_options
+  'https://localhost:8443/api', 'v1', auth_options: auth_options
 )
 ```
 
@@ -118,7 +112,7 @@ auth_options = {
   bearer_token: 'MDExMWJkMjItOWY1Ny00OGM5LWJlNDEtMjBiMzgxODkxYzYz'
 }
 client = Kubeclient::Client.new(
-  'https://localhost:8443/api/', 'v1', auth_options: auth_options
+  'https://localhost:8443/api', 'v1', auth_options: auth_options
 )
 ```
 
@@ -129,7 +123,7 @@ auth_options = {
   bearer_token_file: '/path/to/token_file'
 }
 client = Kubeclient::Client.new(
-  'https://localhost:8443/api/', 'v1', auth_options: auth_options
+  'https://localhost:8443/api', 'v1', auth_options: auth_options
 )
 ```
 
@@ -178,7 +172,7 @@ socket_options = {
   ssl_socket_class: Celluloid::IO::SSLSocket
 }
 client = Kubeclient::Client.new(
-  'https://localhost:8443/api/', 'v1', socket_options: socket_options
+  'https://localhost:8443/api', 'v1', socket_options: socket_options
 )
 ```
 
@@ -191,7 +185,7 @@ For example:
 ```ruby
 proxy_uri = URI::HTTP.build(host: "myproxyhost", port: 8443)
 client = Kubeclient::Client.new(
-  'https://localhost:8443/api/', http_proxy_uri: proxy_uri
+  'https://localhost:8443/api', 'v1', http_proxy_uri: proxy_uri
 )
 ```
 
@@ -201,7 +195,7 @@ You can optionally not allow redirection with kubeclient. For example:
 
 ```ruby
 client = Kubeclient::Client.new(
-  'https://localhost:8443/api/', http_max_redirects: 0
+  'https://localhost:8443/api', 'v1', http_max_redirects: 0
 )
 ```
 
@@ -216,7 +210,7 @@ timeouts = {
   read: nil  # nil means never time out
 }
 client = Kubeclient::Client.new(
-  'https://localhost:8443/api/', timeouts: timeouts
+  'https://localhost:8443/api', 'v1', timeouts: timeouts
 )
 ```
 
@@ -346,7 +340,7 @@ auth_options = {
   bearer_token: Kubeclient::GoogleApplicationDefaultCredentials.token
 }
 client = Kubeclient::Client.new(
-  'https://localhost:8443/api/', 'v1', auth_options: auth_options
+  'https://localhost:8443/api', 'v1', auth_options: auth_options
 )
 ```
 
@@ -534,7 +528,7 @@ To avoid overhead from parsing and building `RecursiveOpenStruct` objects for ea
 The result can then be printed, or searched with a regex, or parsed via `JSON.parse(r)`.
 
 ```ruby
-client = Kubeclient::Client.new(as: :raw)
+client = Kubeclient::Client.new(url, version, as: :raw)
 ```
 
 or
