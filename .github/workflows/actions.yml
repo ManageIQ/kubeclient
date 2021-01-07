@@ -9,7 +9,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        ruby: [ '2.5', '2.6', '2.7', 'truffleruby-head' ]
+        ruby: [ '2.5', '2.6', '2.7', '3.0', 'truffleruby-head' ]
         os: ['ubuntu-latest', 'macos-latest']
         task: [test]
         include:
