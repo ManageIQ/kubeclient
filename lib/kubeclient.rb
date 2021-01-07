@@ -1,7 +1,6 @@
 # frozen_string_literal: true
 
 require 'json'
-require 'rest-client'
 
 require_relative 'kubeclient/aws_eks_credentials'
 require_relative 'kubeclient/common'
@@ -23,9 +22,12 @@ module Kubeclient
     include ClientMixin
     def initialize(
       uri,
-      version = 'v1',
+      version,
       **options
     )
+      unless version.is_a?(String)
+        raise ArgumentError, "second argument must be an api version like 'v1'"
+      end
       initialize_client(
         uri,
         '/api',

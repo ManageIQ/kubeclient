@@ -14,7 +14,7 @@ module Kubeclient
         args = config['cmd-args']
         token_key = config['token-key']
 
-        out, err, st = Open3.capture3(cmd, *args.split(' '))
+        out, err, st = Open3.capture3(cmd, *args.split)
 
         raise "exec command failed: #{err}" unless st.success?
 
