@@ -178,4 +178,26 @@ class TestWatch < MiniTest::Test
 
     assert_requested(:get, "#{api_host}/v1/watch/events", times: 1)
   end
+
+  def test_watch_with_finish_without_api_server_response
+    api_host = 'http://localhost:8080/api'
+
+    stub_core_api_list
+    stub_request(:get, %r{.*/watch/events})
+      .to_return(body: lambda { |request| sleep 3; open_test_file('watch_stream.json') }, status: 200)
+
+    client = Kubeclient::Client.new(api_host, 'v1')
+    watcher = client.watch_events
+
+    watch_killer = Thread.new(watcher) do |watcher|
+      sleep 1
+      watcher.finish
+    end
+
+    watcher.each do |event|
+      raise "Watching should finish before receiving an event"
+    end
+
+    assert_requested(:get, "#{api_host}/v1/watch/events", times: 1)
+  end
 end
