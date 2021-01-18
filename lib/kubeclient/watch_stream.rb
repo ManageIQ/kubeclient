@@ -40,6 +40,7 @@ module Kubeclient
 
       def finish
         @finished = true
+        @faraday_client.close
       end
 
       private
