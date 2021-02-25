@@ -72,6 +72,7 @@ module Kubeclient
       timeouts: DEFAULT_TIMEOUTS,
       http_proxy_uri: DEFAULT_HTTP_PROXY_URI,
       http_max_redirects: DEFAULT_HTTP_MAX_REDIRECTS,
+      retry_options: nil,
       as: :ros
     )
       validate_auth_options(auth_options)
@@ -97,6 +98,7 @@ module Kubeclient
         validate_bearer_token_file
         bearer_token(File.read(@auth_options[:bearer_token_file]))
       end
+      @faraday_client = create_faraday_client(nil, retry_options: retry_options) if retry_options
     end
 
     def method_missing(method_sym, *args, &block)
@@ -292,7 +294,7 @@ module Kubeclient
         .downcase
     end
 
-    def create_faraday_client(url = nil)
+    def create_faraday_client(url = nil, retry_options: nil)
       url = "#{@api_endpoint}/#{@api_version}" if url.nil?
       options = {
         proxy: @http_proxy_uri,
@@ -313,6 +315,7 @@ module Kubeclient
         if @auth_options[:username] && @auth_options[:password]
           connection.basic_auth(@auth_options[:username], @auth_options[:password])
         end
+        connection.use(Faraday::Request::Retry, retry_options) if retry_options
         connection.use(FaradayMiddleware::FollowRedirects, limit: @http_max_redirects)
         connection.response(:raise_error)
       end

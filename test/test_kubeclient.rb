@@ -273,6 +273,20 @@ class KubeclientTest < MiniTest::Test
     assert_equal(%i[metadata spec status], response[:items].first.keys)
   end
 
+  def test_retry_options_middleware
+    retry_options = {
+      exceptions: [Faraday::ClientError],
+      only: %i[get],
+      max: 3,
+      interval: 0.05
+    }
+    Kubeclient::Client.any_instance.expects(:create_faraday_client).with do |args, kwargs|
+      refute(args)
+      assert_equal(kwargs, retry_options: retry_options)
+    end
+    Kubeclient::Client.new('http://localhost:8080/api/', 'v1', retry_options: retry_options)
+  end
+
   class ServiceList
     attr_reader :names
 
