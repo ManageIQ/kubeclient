@@ -276,9 +276,6 @@ class KubeclientTest < MiniTest::Test
   def test_retry_options_middleware
     retry_options = {
       exceptions: [Faraday::ClientError],
-      only: %i[get],
-      max: 3,
-      interval: 0.05
     }
     Kubeclient::Client.any_instance.expects(:create_faraday_client).with do |args, kwargs|
       refute(args)
