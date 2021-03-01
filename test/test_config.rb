@@ -21,7 +21,7 @@ class KubeclientConfigTest < MiniTest::Test
   def test_allinone_nopath
     yaml = File.read(config_file('allinone.kubeconfig'))
     # A self-contained config shouldn't depend on kcfg_path.
-    config = Kubeclient::Config.new(YAML.safe_load(yaml), nil)
+    config = Kubeclient::Config.new(load_yaml(yaml), nil)
     assert_equal(['default/localhost:8443/system:admin'], config.contexts)
     check_context(config.context, ssl: true)
   end
@@ -29,7 +29,7 @@ class KubeclientConfigTest < MiniTest::Test
   def test_external_nopath
     yaml = File.read(config_file('external.kubeconfig'))
     # kcfg_path = nil should prevent file access
-    config = Kubeclient::Config.new(YAML.safe_load(yaml), nil)
+    config = Kubeclient::Config.new(load_yaml(yaml), nil)
     assert_raises(StandardError) do
       config.context
     end
@@ -40,7 +40,7 @@ class KubeclientConfigTest < MiniTest::Test
     # kcfg_path = nil should prevent file access, even if absolute path specified
     ca_absolute_path = File.absolute_path(config_file('external-'))
     yaml = yaml.gsub('external-', ca_absolute_path)
-    config = Kubeclient::Config.new(YAML.safe_load(yaml), nil)
+    config = Kubeclient::Config.new(load_yaml(yaml), nil)
     assert_raises(StandardError) do
       config.context
     end
@@ -123,7 +123,7 @@ class KubeclientConfigTest < MiniTest::Test
 
   def test_user_exec_nopath
     yaml = File.read(config_file('execauth.kubeconfig'))
-    config = Kubeclient::Config.new(YAML.safe_load(yaml), nil)
+    config = Kubeclient::Config.new(load_yaml(yaml), nil)
     config.contexts.each do |context_name|
       Open3.stub(:capture3, proc { flunk('should not execute command') }) do
         assert_raises(StandardError) do
@@ -135,11 +135,7 @@ class KubeclientConfigTest < MiniTest::Test
 
   def test_gcp_default_auth
     Kubeclient::GoogleApplicationDefaultCredentials.expects(:token).returns('token1').once
-    options = (RUBY_VERSION >= '2.6' ? { permitted_classes: [Date, Time] } : [Date, Time])
-    parsed = YAML.safe_load(
-      File.read(config_file('gcpauth.kubeconfig')),
-      options
-    )
+    parsed = load_yaml(File.read(config_file('gcpauth.kubeconfig')))
     config = Kubeclient::Config.new(parsed, nil)
     config.context(config.contexts.first)
   end
@@ -148,11 +144,7 @@ class KubeclientConfigTest < MiniTest::Test
   # NOTE: this is not a guarantee, may change, just testing current behavior.
   def test_gcp_default_auth_renew
     Kubeclient::GoogleApplicationDefaultCredentials.expects(:token).returns('token1').once
-    options = (RUBY_VERSION >= '2.6' ? { permitted_classes: [Date, Time] } : [Date, Time])
-    parsed = YAML.safe_load(
-      File.read(config_file('gcpauth.kubeconfig')),
-      options
-    )
+    parsed = load_yaml(File.read(config_file('gcpauth.kubeconfig')))
     config = Kubeclient::Config.new(parsed, nil)
     context = config.context(config.contexts.first)
     assert_equal({ bearer_token: 'token1' }, context.auth_options)
@@ -193,7 +185,7 @@ class KubeclientConfigTest < MiniTest::Test
       )
       .returns('token1')
       .once
-    parsed = YAML.safe_load(File.read(config_file('oidcauth.kubeconfig')))
+    parsed = load_yaml(File.read(config_file('oidcauth.kubeconfig')))
     config = Kubeclient::Config.new(parsed, nil)
     config.context(config.contexts.first)
   end
@@ -229,6 +221,14 @@ class KubeclientConfigTest < MiniTest::Test
 
   def config_file(name)
     File.join(File.dirname(__FILE__), 'config', name)
+  end
+
+  def load_yaml(string)
+    if RUBY_VERSION >= '2.6' 
+      YAML.safe_load(string, permitted_classes: [Date, Time])
+    else
+      YAML.safe_load(string, [Date, Time])
+    end
   end
 
   def stub_exec(command_regexp, creds, &block)
