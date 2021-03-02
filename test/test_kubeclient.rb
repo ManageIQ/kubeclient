@@ -273,15 +273,14 @@ class KubeclientTest < MiniTest::Test
     assert_equal(%i[metadata spec status], response[:items].first.keys)
   end
 
-  def test_retry_options_middleware
-    retry_options = {
-      exceptions: [Faraday::ClientError]
-    }
-    Kubeclient::Client.any_instance.expects(:create_faraday_client).with do |args, kwargs|
-      refute(args)
-      assert_equal(kwargs, retry_options: retry_options)
+  def test_custom_faraday_config_options
+    client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+    [FaradayMiddleware::FollowRedirects, Faraday::Response::RaiseError].each do |klass|
+      assert(client.faraday_client.builder.handlers.include?(klass))
     end
-    Kubeclient::Client.new('http://localhost:8080/api/', 'v1', retry_options: retry_options)
+    client.with_faraday_config { |connection| connection.use(Faraday::Request::Retry) }
+    assert(client.faraday_client.builder.handlers.include?(Faraday::Request::Retry))
+    assert_equal(client.faraday_client.builder.handlers.length, 1)
   end
 
   class ServiceList
