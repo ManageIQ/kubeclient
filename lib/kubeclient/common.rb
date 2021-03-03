@@ -317,9 +317,8 @@ module Kubeclient
         if @auth_options[:username] && @auth_options[:password]
           connection.basic_auth(@auth_options[:username], @auth_options[:password])
         end
-        if block_given?
-          yield(connection)
-        else
+          # hook for adding custom faraday configuration
+          yield(connection) if block_given?
           connection.use(FaradayMiddleware::FollowRedirects, limit: @http_max_redirects)
           connection.response(:raise_error)
         end
