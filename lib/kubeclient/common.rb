@@ -99,7 +99,7 @@ module Kubeclient
       end
     end
 
-    def with_faraday_config(&block)
+    def configure_faraday(&block)
       @faraday_client = create_faraday_client(&block)
     end
 
