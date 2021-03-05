@@ -812,6 +812,20 @@ to be substituted. Note that for a required parameter that does not provide a ge
 client.process_template template
 ```
 
+### Informer
+
+A list that is always updated because it is it kept in sync by a watch in the background.
+Can also share a list+watch with multiple threads.
+
+```ruby
+client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
+informer = Kubeclient::Informer.new(client, "pods", reconcile_timeout: 15 * 60, logger: Logger.new(STDOUT))
+informer.start_worker
+
+informer.list # all current pods
+informer.watch { |notice|  } # watch for changes (hides restarts and errors)
+```
+
 ## Contributing
 
 1. Fork it ( https://github.com/[my-github-username]/kubeclient/fork )
