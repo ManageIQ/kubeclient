@@ -160,6 +160,15 @@ namespace = File.read('/var/run/secrets/kubernetes.io/serviceaccount/namespace')
 ```
 You can find information about tokens in [this guide](https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/#accessing-the-api-from-a-pod) and in [this reference](http://kubernetes.io/docs/admin/authentication/).
 
+### Retries
+
+If you api servers regularly fail, configure retries:
+(client will sleep 0.1s-1s, see RETRY_BACKOFF, between each retry)
+
+```ruby
+client = Kubeclient::Client.new('http://localhost:8080/apis/batch', 'v1', retries: 3)
+```
+
 ### Non-blocking IO
 
 You can also use kubeclient with non-blocking sockets such as Celluloid::IO, see [here](https://github.com/httprb/http/wiki/Parallel-requests-with-Celluloid%3A%3AIO)

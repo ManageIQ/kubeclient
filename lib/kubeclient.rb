@@ -3,12 +3,12 @@
 require 'json'
 
 require_relative 'kubeclient/aws_eks_credentials'
+require_relative 'kubeclient/http_error'
 require_relative 'kubeclient/common'
 require_relative 'kubeclient/config'
 require_relative 'kubeclient/entity_list'
 require_relative 'kubeclient/exec_credentials'
 require_relative 'kubeclient/gcp_auth_provider'
-require_relative 'kubeclient/http_error'
 require_relative 'kubeclient/missing_kind_compatibility'
 require_relative 'kubeclient/oidc_auth_provider'
 require_relative 'kubeclient/resource'

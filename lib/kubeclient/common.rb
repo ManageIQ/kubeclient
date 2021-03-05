@@ -54,6 +54,15 @@ module Kubeclient
       'resourceVersion' => :resource_version
     }.freeze
 
+    RETRY_BACKOFF = [0.1, 0.2, 0.4, 1].freeze
+    RETRY_ERRORS = [
+      Timeout::Error,
+      OpenSSL::SSL::SSLError,
+      Kubeclient::HttpError,
+      Faraday::Error,
+      SystemCallError
+    ].freeze
+
     attr_reader :api_endpoint
     attr_reader :ssl_options
     attr_reader :auth_options
@@ -72,7 +81,8 @@ module Kubeclient
       timeouts: DEFAULT_TIMEOUTS,
       http_proxy_uri: DEFAULT_HTTP_PROXY_URI,
       http_max_redirects: DEFAULT_HTTP_MAX_REDIRECTS,
-      as: :ros
+      as: :ros,
+      retries: 0
     )
       validate_auth_options(auth_options)
       handle_uri(uri, path)
@@ -90,6 +100,7 @@ module Kubeclient
       @http_proxy_uri = http_proxy_uri ? http_proxy_uri.to_s : nil
       @http_max_redirects = http_max_redirects
       @as = as
+      @retries = retries
 
       if auth_options[:bearer_token]
         bearer_token(@auth_options[:bearer_token])
@@ -121,8 +132,8 @@ module Kubeclient
       !@discovered && ENTITY_METHODS.any? { |x| method_sym.to_s.start_with?(x) }
     end
 
-    def handle_exception
-      yield
+    def handle_exception(&block)
+      with_retries(@retries, &block)
     rescue Faraday::Error => e
       err_message = build_http_error_message(e)
       response_code = e.response ? (e.response[:status] || e.response&.env&.status) : nil
@@ -138,6 +149,19 @@ module Kubeclient
           {}
         end
       json_error_msg['message'] || e.message || ''
+    end
+
+    def with_retries(retries)
+      return yield if retries <= 0
+      try = 0
+      begin
+        yield
+      rescue *RETRY_ERRORS => e
+        raise e if try >= retries || e.is_a?(Faraday::ResourceNotFound)
+        sleep(RETRY_BACKOFF[try] || RETRY_BACKOFF.last)
+        try += 1
+        retry
+      end
     end
 
     def discover
