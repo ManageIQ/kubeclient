@@ -24,7 +24,6 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'minitest'
   spec.add_development_dependency 'minitest-rg'
   spec.add_development_dependency 'webmock', '~> 3.0'
-  spec.add_development_dependency 'vcr'
   spec.add_development_dependency 'rubocop', '~> 1.3.0' # locked to minor so new cops don't slip in
   spec.add_development_dependency 'googleauth', '~> 0.5'
   spec.add_development_dependency('mocha', '~> 1.5')
