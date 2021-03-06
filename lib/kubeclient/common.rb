@@ -407,15 +407,11 @@ module Kubeclient
     def create_entity(entity_type, resource_name, entity_config)
       # Duplicate the entity_config to a hash so that when we assign
       # kind and apiVersion, this does not mutate original entity_config obj.
+      # TODO: skip?
       hash = entity_config.to_hash
 
       ns_prefix = build_namespace_prefix(hash[:metadata][:namespace])
 
-      # TODO: temporary solution to add "kind" and apiVersion to request
-      # until this issue is solved
-      # https://github.com/GoogleCloudPlatform/kubernetes/issues/6439
-      hash[:kind] = entity_type
-      hash[:apiVersion] = @api_group + @api_version
       response = handle_exception do
         faraday_client.post(ns_prefix + resource_name, hash.to_json, json_headers)
       end
