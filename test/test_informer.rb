@@ -2,10 +2,11 @@
 
 require_relative 'test_helper'
 
-# tests with_retries in common.rb
+# tests with_retries in kubeclient.rb
 class RetryTest < MiniTest::Test
   def setup
     super
+    skip if RUBY_ENGINE == 'truffleruby' # TODO: race condition in truffle-ruby fails random tests
     @slept = []
     stub_core_api_list
   end
@@ -96,8 +97,6 @@ class RetryTest < MiniTest::Test
   end
 
   def test_can_watch_watches
-    skip if RUBY_ENGINE == 'truffleruby' # TODO: some race condition in truffle-ruby
-
     list = stub_list
     watch = stub_request(:get, %r{/v1/watch/pods}).to_return(
       body: {
