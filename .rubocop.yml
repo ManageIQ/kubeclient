@@ -48,3 +48,5 @@ Style/AccessorGrouping:
   EnforcedStyle: separated
 Style/NegatedIfElseCondition:
   Enabled: false
+Style/Semicolon:
+  Exclude: ["test/**/*.rb"]
