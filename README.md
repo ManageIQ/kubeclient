@@ -127,6 +127,19 @@ client = Kubeclient::Client.new(
 )
 ```
 
+### Middleware
+
+The Faraday HTTP client used by kubeclient allows configuration of custom middlewares. For example, you may want to add instrumentation, or add custom retry options. Kubeclient provides a hook for injecting these custom middlewares into the request/response chain, via `Client#configure_faraday(&block)`. This provides an access point to the `Faraday::Connection` object during initialization. As an example, the following code adds retry options to client requests:
+
+```ruby
+client = Kubeclient::Client.new('http://localhost:8080/api', 'v1')
+retry_options = { max: 2, interval: 0.05, interval_randomness: 0.5, backoff_factor: 2 }
+client.configure_faraday { |conn| conn.request(:retry, retry_options) }
+```
+
+For more examples and documentation, consult the [Faraday docs](https://lostisland.github.io/faraday/).
+Note that certain middlewares (e.g. `:raise_error`) are always included since Kubeclient is dependent on their behaviour to function correctly.
+
 #### Inside a Kubernetes cluster
 
 The [recommended way to locate the API server](https://kubernetes.io/docs/tasks/access-application-cluster/access-cluster/#accessing-the-api-from-a-pod) within the pod is with the `kubernetes.default.svc` DNS name, which resolves to a Service IP which in turn will be routed to an API server.
