@@ -4,12 +4,11 @@ require_relative 'test_helper'
 
 # Unit tests for the common module
 class CommonTest < MiniTest::Test
-  class ClientStub
-    include Kubeclient::ClientMixin
+  class ClientStub < Kubeclient::Client
   end
 
   def client
-    @client ||= ClientStub.new
+    @client ||= ClientStub.allocate
   end
 
   def test_underscore_entity
@@ -44,7 +43,7 @@ class CommonTest < MiniTest::Test
       OAuthClient o_auth_client
       OAuthClientAuthorization o_auth_client_authorization
     ].each_slice(2) do |kind, expected_underscore|
-      underscore = Kubeclient::ClientMixin.underscore_entity(kind)
+      underscore = Kubeclient::Client.underscore_entity(kind)
       assert_equal(underscore, expected_underscore)
     end
   end
@@ -79,7 +78,7 @@ class CommonTest < MiniTest::Test
       MixedDashMinus mixed-dash_minuses mixed_dash_minus mixed_dash_minuses
       SameUptoWordboundary sameup-toword-boundarys sameuptowordboundary sameuptowordboundarys
     ].each_slice(4) do |kind, plural, expected_single, expected_plural|
-      method_names = Kubeclient::ClientMixin.parse_definition(kind, plural).method_names
+      method_names = Kubeclient::Client.parse_definition(kind, plural).method_names
       assert_equal(method_names[0], expected_single)
       assert_equal(method_names[1], expected_plural)
     end
