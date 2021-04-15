@@ -224,6 +224,18 @@ class KubeclientTest < MiniTest::Test
     assert_equal(404, exception.error_code)
   end
 
+  def test_resource_already_exists_exception
+    stub_core_api_list
+    stub_request(:post, %r{/api/v1/namespaces})
+      .to_return(body: open_test_file('namespace_already_exists.json'), status: 409)
+
+    exception = assert_raises(Kubeclient::ResourceAlreadyExistsError) do
+      client.create_namespace(Kubeclient::Resource.new(metadata: { name: 'default' }))
+    end
+
+    assert_equal(409, exception.error_code)
+  end
+
   def test_entity_list
     stub_core_api_list
     stub_get_services

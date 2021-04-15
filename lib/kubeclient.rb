@@ -16,6 +16,7 @@ require_relative 'kubeclient/missing_kind_compatibility'
 require_relative 'kubeclient/oidc_auth_provider'
 require_relative 'kubeclient/resource'
 require_relative 'kubeclient/resource_not_found_error'
+require_relative 'kubeclient/resource_already_exists_error'
 require_relative 'kubeclient/version'
 require_relative 'kubeclient/watch_stream'
 
@@ -159,7 +160,15 @@ module Kubeclient
     rescue Faraday::Error => e
       err_message = build_http_error_message(e)
       response_code = e.response ? (e.response[:status] || e.response&.env&.status) : nil
-      error_klass = (response_code == 404 ? ResourceNotFoundError : HttpError)
+
+      error_klass = if response_code == 404
+                      ResourceNotFoundError
+                    elsif response_code == 409 && build_http_conflict_reason(e) == 'AlreadyExists'
+                      ResourceAlreadyExistsError
+                    else
+                      HttpError
+                    end
+
       raise error_klass.new(response_code, err_message, e.response)
     end
 
@@ -588,6 +597,16 @@ module Kubeclient
       'SecurityContextConstraints' => %w[security_context_constraint
                                          security_context_constraints]
     }.freeze
+
+    def build_http_conflict_reason(e)
+      json_response =
+        begin
+          JSON.parse(e.response[:body] || '') || {}
+        rescue StandardError
+          {}
+        end
+      json_response['reason']
+    end
 
     # Format datetime according to RFC3339
     def format_datetime(value)

@@ -1,0 +1,11 @@
+ {
+  "metadata": {},
+  "status": "Failure",
+  "message": "namespaces \"default\" already exists",
+  "reason": "AlreadyExists",
+  "details": {
+    "name": "default",
+    "kind": "namespaces"
+  },
+  "code": 409
+}
