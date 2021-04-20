@@ -233,6 +233,15 @@ Default timeouts match `Net::HTTP` and `RestClient`:
 
 If you want ruby-independent behavior, always specify `:open`.
 
+### Errors
+
+If an error occurs while performing a request to the API server, `Kubeclient::HttpError` will be raised.
+
+There are also certain case-specific errors that can be raised (which also inherit from `Kubeclient::HttpError`):
+
+- `Kubeclient::ResourceNotFoundError` when attempting to fetch a resource that does not exist or any other situation that results in the API server returning a 404.
+- `Kubeclient::ResourceAlreadyExistsError` when attempting to create a resource that already exists.
+
 ### Discovery
 
 Discovery from the kube-apiserver is done lazily on method calls so it would not change behavior.
