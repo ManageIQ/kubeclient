@@ -322,7 +322,12 @@ module Kubeclient
         end
 
         define_singleton_method("apply_#{entity.method_names[0]}") do |*args|
-          apply_entity(entity.resource_name, *args)
+          if RUBY_VERSION > '3.0'
+            rest = Hash[*args[1..-1]]
+            apply_entity(entity.resource_name, args[0], **rest)
+          else
+            apply_entity(entity.resource_name, *args)
+          end
         end
       end
     end

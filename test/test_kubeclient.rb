@@ -47,7 +47,11 @@ class KubeclientTest < MiniTest::Test
     e = assert_raises(ArgumentError) do
       Kubeclient::Client.new('http://localhost:8080', foo: 1)
     end
-    assert_includes(e.message, 'second argument')
+    if RUBY_VERSION >= '3.0'
+      assert_includes(e.message, 'wrong number of arguments')
+    else
+      assert_includes(e.message, 'second argument')
+    end
   end
 
   def test_pass_proxy
