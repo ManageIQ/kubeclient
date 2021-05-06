@@ -239,7 +239,7 @@ class KubeclientConfigTest < MiniTest::Test
     if RUBY_VERSION >= '2.6'
       YAML.safe_load(File.read(file_name), permitted_classes: [Date, Time])
     else
-      YAML.safe_load(file_name, [Date, Time])
+      YAML.safe_load(File.read(file_name), [Date, Time])
     end
   end
 end
