@@ -321,13 +321,8 @@ module Kubeclient
           patch_entity(entity.resource_name, name, patch, 'merge-patch', namespace)
         end
 
-        define_singleton_method("apply_#{entity.method_names[0]}") do |*args|
-          if RUBY_VERSION > '3.0'
-            rest = Hash[*args[1..-1]]
-            apply_entity(entity.resource_name, args[0], **rest)
-          else
-            apply_entity(entity.resource_name, *args)
-          end
+        define_singleton_method("apply_#{entity.method_names[0]}") do |resource, opts = {}|
+          apply_entity(entity.resource_name, resource, **opts)
         end
       end
     end
