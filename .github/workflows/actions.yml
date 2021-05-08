@@ -9,7 +9,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        ruby: [ '2.5', '2.6', '2.7', 'truffleruby-head' ]
+        ruby: [ '2.5', '2.6', '2.7', '3.0', 'truffleruby-head' ]
         os: ['ubuntu-latest', 'macos-latest']
         task: [test]
         include:
@@ -24,5 +24,7 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: ${{ matrix.ruby }}
-        bundler-cache: true # runs 'bundle install' and caches installed gems automatically
+        bundler-cache: false # disable running 'bundle install' and caching installed gems see https://github.com/httprb/http/issues/572
+    - run: gem install rake bundler
+    - run: bundle install
     - run: bundle exec rake ${{ matrix.task }}
