@@ -30,7 +30,12 @@ module Kubeclient
 
     # Builds Config instance by parsing given file, with lookups relative to file's directory.
     def self.read(filename)
-      parsed = YAML.safe_load(File.read(filename), [Date, Time])
+      parsed =
+        if RUBY_VERSION >= '2.6'
+          YAML.safe_load(File.read(filename), permitted_classes: [Date, Time])
+        else
+          YAML.safe_load(File.read(filename), [Date, Time])
+        end
       Config.new(parsed, File.dirname(filename))
     end
 
