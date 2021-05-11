@@ -14,9 +14,10 @@ Gem::Specification.new do |spec|
   spec.homepage      = 'https://github.com/abonas/kubeclient'
   spec.license       = 'MIT'
 
-  spec.files         = `git ls-files -z`.split("\x0")
+  git_files = `git ls-files -z`.split("\x0")
+  spec.files         = git_files.grep_v(%r{^(test|spec|features)/})
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
+  spec.test_files    = []
   spec.require_paths = ['lib']
   spec.required_ruby_version = '>= 2.2.0'
 
