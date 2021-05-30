@@ -4,7 +4,10 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
-## UNRELEASED
+## 4.9.2 — 2021-05-30
+
+### Added
+- Ruby 3.0 compatibility (#500, #505).
 
 ### Removed
 - Reduce .gem size by dropping test/ directory, it's useless at run time (#502).
