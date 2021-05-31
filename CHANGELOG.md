@@ -8,6 +8,14 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 ### Changed
 - `Kubeclient::Client.new` now always requires an api version, use for example: `Kubeclient::Client.new(uri, 'v1')`
 
+## 4.9.2 — 2021-05-30
+
+### Added
+- Ruby 3.0 compatibility (#500, #505).
+
+### Removed
+- Reduce .gem size by dropping test/ directory, it's useless at run time (#502).
+
 ## 4.9.1 — 2020-08-31
 ### Fixed
 - Now should work with apiserver deployed not at root of domain but a sub-path,
