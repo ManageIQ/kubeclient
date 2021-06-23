@@ -7,7 +7,7 @@ module Kubeclient
     end
 
     class << self
-      def token(credentials, eks_cluster)
+      def token(credentials, eks_cluster, region: 'us-east-1')
         begin
           require 'aws-sigv4'
           require 'base64'
@@ -20,10 +20,9 @@ module Kubeclient
         end
         # https://github.com/aws/aws-sdk-ruby/pull/1848
         # Get a signer
-        # Note - sts only has ONE endpoint (not regional) so 'us-east-1' hardcoding should be OK
         signer = Aws::Sigv4::Signer.new(
           service: 'sts',
-          region: 'us-east-1',
+          region: region,
           credentials: credentials
         )
 
