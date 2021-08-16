@@ -722,7 +722,6 @@ module Kubeclient
         headers: @headers,
         http_proxy_uri: @http_proxy_uri,
         http_max_redirects: http_max_redirects
-        keep_alive_timeout: keep_alive_timeout
       }
 
       if uri.scheme == 'https'
