@@ -287,6 +287,7 @@ module Kubeclient
           # This method used to take resource_version as a param, so
           # this conversion is to keep backwards compatibility
           options = { resource_version: options } unless options.is_a?(Hash)
+          options[timeoutSeconds] = 380 # 6 mins 20 seconds
 
           watch_entities(entity.resource_name, options, &block)
         end
