@@ -65,7 +65,8 @@ module Kubeclient
     WATCH_ARGUMENTS = {
       'labelSelector'   => :label_selector,
       'fieldSelector'   => :field_selector,
-      'resourceVersion' => :resource_version
+      'resourceVersion' => :resource_version,
+      'allowWatchBookmarks' => :allow_watch_bookmarks
     }.freeze
 
     attr_reader :api_endpoint

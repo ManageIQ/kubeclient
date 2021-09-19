@@ -495,7 +495,7 @@ You can specify multiple labels (that option will return entities which have bot
 pods = client.get_pods(label_selector: 'name=redis-master,app=redis')
 ```
 
-There is also [a limited ability to filter by *some* fields](https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/).  Which fields are supported is not documented, you can try and see if you get an error...
+There is also [a ability to filter by *some* fields](https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/).  Which fields are supported is not documented, you can try and see if you get an error...
 ```ruby
 client.get_pods(field_selector: 'spec.nodeName=master-0')
 ```
@@ -588,6 +588,13 @@ You can also watch a single object by specifying `name:` e.g. `client.watch_node
 Note the method name is still plural!  There is no `watch_pod`, only `watch_pods`.  The yielded "type" remains the same — watch notices, it's just they'll always refer to the same object.
 
 You can use `as:` param to control the format of the yielded notices.
+
+You can use `allow_watch_bookmarks: true` to get `BOOKMARK` events returned regularly, see [watch bookmarks](https://kubernetes.io/docs/reference/using-api/api-concepts/#watch-bookmarks)
+```ruby
+client.watch_pods allow_watch_bookmarks: true do |notice|
+  # process notice data
+end
+```
 
 #### All watches come to an end!
 
