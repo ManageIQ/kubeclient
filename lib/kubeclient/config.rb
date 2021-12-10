@@ -85,21 +85,21 @@ module Kubeclient
 
     private
 
-    def allow_external_lookups?
-      @kcfg_path != nil
-    end
-
     def ext_file_path(path)
-      unless allow_external_lookups?
-        raise "Kubeclient::Config: external lookups disabled, can't load '#{path}'"
-      end
+      prevent_invalid_external_lookups!("execute '#{path}'")
       Pathname(path).absolute? ? path : File.join(@kcfg_path, path)
     end
 
+    def prevent_invalid_external_lookups!(action)
+      return if @kcfg_path
+      raise(
+        "Kubeclient::Config: external lookups disabled, can't #{action}." \
+        'Call .new with config and execution directory to enable.'
+      )
+    end
+
     def ext_command_path(path)
-      unless allow_external_lookups?
-        raise "Kubeclient::Config: external lookups disabled, can't execute '#{path}'"
-      end
+      prevent_invalid_external_lookups!("load '#{path}'")
       # Like go client https://github.com/kubernetes/kubernetes/pull/59495#discussion_r171138995,
       # distinguish 3 cases:
       # - absolute (e.g. /path/to/foo)
