@@ -83,6 +83,10 @@ module Kubeclient
       Context.new(cluster['server'], @kcfg['apiVersion'], ssl_options, auth_options, namespace)
     end
 
+    def kube_config
+      @kcfg
+    end
+
     private
 
     def allow_external_lookups?
