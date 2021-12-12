@@ -183,6 +183,16 @@ module Kubeclient
           options[attr.to_sym] = user[attr] if user.key?(attr)
         end
       end
+
+      # TODO: allow setting Impersonate-Uid from here or comment on why it is not possible
+      [
+        ['as', :as],
+        ['as-groups', :as_groups],
+        ['as-user-extra', :as_user_extra]
+      ].each do |k, v|
+        options[v] = user[k] if user.key?(k)
+      end
+
       options
     end
 

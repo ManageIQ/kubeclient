@@ -233,6 +233,19 @@ class KubeclientConfigTest < MiniTest::Test
     config.context(config.contexts.first)
   end
 
+  def test_impersonate
+    parsed = YAML.safe_load(File.read(config_file('impersonate.kubeconfig')))
+    config = Kubeclient::Config.new(parsed, nil)
+    assert_equal(
+      {
+        as: 'foo',
+        as_groups: ['bar', 'baz'],
+        as_user_extra: { 'reason' => ['foo'] }
+      },
+      config.context(config.contexts.first).auth_options
+    )
+  end
+
   private
 
   def check_context(context, ssl: true, custom_ca: true, client_cert: true)

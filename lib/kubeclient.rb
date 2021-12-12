@@ -137,6 +137,7 @@ module Kubeclient
       @as = as
 
       validate_bearer_token_file
+      configure_impersonation_headers
     end
 
     def configure_faraday(&block)
@@ -742,6 +743,21 @@ module Kubeclient
       return unless (file = @auth_options[:bearer_token_file])
       raise ArgumentError, "Token file #{file} does not exist" unless File.file?(file)
       raise ArgumentError, "Token file #{file} cannot be read" unless File.readable?(file)
+    end
+
+    # following https://kubernetes.io/docs/reference/access-authn-authz/authentication/#user-impersonation
+    def configure_impersonation_headers
+      return unless (auth_as = @auth_options[:as])
+      @headers[:'Impersonate-User'] = auth_as
+      if (auth_as_groups = @auth_options[:as_groups])
+        @headers[:'Impersonate-Group'] = Array(auth_as_groups).join
+      end
+      if (auth_as_uid = @auth_options[:as_uid])
+        @headers[:'Impersonate-Uid'] = auth_as_uid
+      end
+      @auth_options[:as_user_extra]&.each do |k, v|
+        @headers[:"Impersonate-Extra-#{k}"] = Array(v).join
+      end
     end
 
     def return_or_yield_to_watcher(watcher, &block)
