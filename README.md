@@ -430,6 +430,24 @@ You can read it as follows:
 puts config.context.namespace
 ```
 
+### Impersonation
+
+Impersonation is supported when loading a kubectl config and via the Ruby API, for example:
+
+```ruby
+client = Kubeclient::Client.new(
+  context.api_endpoint, 'v1',
+  auth_options: {
+    as: "admin",
+    as_groups: ["system:masters"],
+    as_uid: "123", # optional
+    as_user_extra: {
+      "reason" => ["admin access"]
+    }
+  }
+)
+```
+
 ### Supported kubernetes versions
 
 We try to support the last 3 minor versions, matching the [official support policy for Kubernetes](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/release/versioning.md#supported-releases-and-component-skew).

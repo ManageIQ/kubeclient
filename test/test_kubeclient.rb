@@ -791,6 +791,37 @@ class KubeclientTest < MiniTest::Test
     assert_equal(1, pods.size)
   end
 
+  def test_impersonate
+    stub_request(:get, 'http://localhost:8080/api/v1/pods')
+      .with(
+        headers: {
+          Authorization: 'Bearer valid_token',
+          'Impersonate-Extra-Reason': 'baz',
+          'Impersonate-Group': 'bar',
+          'Impersonate-User': 'foo',
+          'Impersonate-Uid': '123'
+        }
+      )
+      .to_return(body: { items: [] }.to_json)
+    stub_request(:get, %r{/api/v1$})
+      .with(headers: { Authorization: 'Bearer valid_token' })
+      .to_return(body: open_test_file('core_api_resource_list.json'))
+
+    client = Kubeclient::Client.new(
+      'http://localhost:8080/api/',
+      'v1',
+      auth_options: {
+        bearer_token: 'valid_token',
+        as: 'foo',
+        as_groups: ['bar'],
+        as_user_extra: { 'reason' => ['baz'] },
+        as_uid: '123'
+      }
+    )
+
+    client.get_pods
+  end
+
   def test_proxy_url
     stub_core_api_list
 
