@@ -11,15 +11,26 @@ on:
 jobs:
   build:
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
     strategy:
       matrix:
-        ruby: [ '2.5', '2.6', '2.7', '3.0', 'truffleruby-head' ]
+        ruby: [ '2.5', '2.6', '2.7', '3.0' ]
         os: ['ubuntu-latest', 'macos-latest']
         task: [test]
+        experimental: [false]
         include:
+        - os: ubuntu-latest
+          ruby: 'truffleruby-head'
+          experimental: true
+          task: test
+        - os: macos-latest
+          ruby: 'truffleruby-head'
+          experimental: true
+          task: test
         # run rubocop against lowest supported ruby
         - os: ubuntu-latest
           ruby: '2.5'
+          experimental: false
           task: rubocop
     name: ${{ matrix.os }} ${{ matrix.ruby }} rake ${{ matrix.task }}
     steps:
