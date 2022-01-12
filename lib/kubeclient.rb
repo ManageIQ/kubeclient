@@ -497,7 +497,7 @@ module Kubeclient
       response = handle_exception do
         faraday_client.patch(
           "#{ns_prefix}#{resource_name}/#{name}",
-          resource.to_json,
+          resource.to_h.to_json,
           { 'Content-Type' => 'application/apply-patch+yaml' }.merge(@headers)
         )
       end
