@@ -122,10 +122,7 @@ module Kubeclient
       @http_max_redirects = http_max_redirects
       @as = as
 
-      if (file = auth_options[:bearer_token_file]) # rubocop:disable Style/GuardClause
-        validate_bearer_token_file(file)
-        @auth_options[:bearer_token] = File.read(file).chomp
-      end
+      validate_bearer_token_file
     end
 
     def configure_faraday(&block)
@@ -368,6 +365,7 @@ module Kubeclient
     end
 
     def faraday_client
+      refresh_bearer_token_from_file
       @faraday_client ||= create_faraday_client
     end
 
@@ -689,7 +687,8 @@ module Kubeclient
       end
     end
 
-    def validate_bearer_token_file(file)
+    def validate_bearer_token_file
+      return unless (file = @auth_options[:bearer_token_file])
       raise ArgumentError, "Token file #{file} does not exist" unless File.file?(file)
       raise ArgumentError, "Token file #{file} cannot be read" unless File.readable?(file)
     end
@@ -705,6 +704,8 @@ module Kubeclient
     end
 
     def http_options(uri)
+      refresh_bearer_token_from_file
+
       options = {
         basic_auth_user: @auth_options[:username],
         basic_auth_password: @auth_options[:password],
@@ -726,6 +727,11 @@ module Kubeclient
       end
 
       options.merge(@socket_options)
+    end
+
+    def refresh_bearer_token_from_file
+      return unless (file = @auth_options[:bearer_token_file])
+      @auth_options[:bearer_token] = File.read(file).chomp
     end
 
     def json_headers
