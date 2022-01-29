@@ -29,7 +29,7 @@ module Kubeclient
         # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/Sigv4/Signer.html#presign_url-instance_method
         presigned_url_string = signer.presign_url(
           http_method: 'GET',
-          url: 'https://sts.amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15',
+          url: "https://sts.#{region}.amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15",
           body: '',
           credentials: credentials,
           expires_in: 60,
