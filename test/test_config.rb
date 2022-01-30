@@ -4,6 +4,8 @@ require_relative 'helper'
 require 'yaml'
 require 'open3'
 
+require 'openid_connect' # TODO: find out why removing tis makes the test fail when run on it's own
+
 # Testing Kubernetes client configuration
 class KubeclientConfigTest < MiniTest::Test
   def test_allinone

@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'helper'
+require 'openid_connect' # TODO: find out why removing tis makes the test fail when run on it's own
 
 # Service entity tests
 class TestService < MiniTest::Test
