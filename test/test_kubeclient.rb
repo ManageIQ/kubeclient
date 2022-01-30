@@ -848,7 +848,6 @@ class KubeclientTest < MiniTest::Test
     assert_equal('/api', client.api_endpoint.path)
     assert_equal('secret', client.ssl_options[:client_key])
     assert_equal('token', client.auth_options[:bearer_token])
-    assert_equal('Bearer token', client.headers[:Authorization])
   end
 
   def test_nil_items

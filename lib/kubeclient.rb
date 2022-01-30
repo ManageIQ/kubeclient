@@ -122,11 +122,9 @@ module Kubeclient
       @http_max_redirects = http_max_redirects
       @as = as
 
-      if auth_options[:bearer_token]
-        bearer_token(@auth_options[:bearer_token])
-      elsif auth_options[:bearer_token_file]
-        validate_bearer_token_file
-        bearer_token(File.read(@auth_options[:bearer_token_file]))
+      if (file = auth_options[:bearer_token_file]) # rubocop:disable Style/GuardClause
+        validate_bearer_token_file(file)
+        @auth_options[:bearer_token] = File.read(file).chomp
       end
     end
 
@@ -355,20 +353,22 @@ module Kubeclient
       }
 
       Faraday.new(url, options) do |connection|
-        if @auth_options[:username] && @auth_options[:password]
+        if @auth_options[:username]
           connection.basic_auth(@auth_options[:username], @auth_options[:password])
+        elsif @auth_options[:bearer_token]
+          connection.authorization(:Bearer, @auth_options[:bearer_token])
         end
+
         # hook for adding custom faraday configuration
         yield(connection) if block_given?
+
         connection.use(FaradayMiddleware::FollowRedirects, limit: @http_max_redirects)
         connection.response(:raise_error)
       end
     end
 
     def faraday_client
-      @faraday_client ||= begin
-        create_faraday_client
-      end
+      @faraday_client ||= create_faraday_client
     end
 
     # Accepts the following options:
@@ -417,7 +417,7 @@ module Kubeclient
 
       ns_prefix = build_namespace_prefix(options[:namespace])
       response = handle_exception do
-        faraday_client.get(ns_prefix + resource_name, params, @headers)
+        faraday_client.get(ns_prefix + resource_name, params)
       end
       format_response(options[:as] || @as, response.body, entity_type)
     end
@@ -429,7 +429,7 @@ module Kubeclient
     def get_entity(resource_name, name, namespace = nil, options = {})
       ns_prefix = build_namespace_prefix(namespace)
       response = handle_exception do
-        faraday_client.get("#{ns_prefix}#{resource_name}/#{name}", nil, @headers)
+        faraday_client.get("#{ns_prefix}#{resource_name}/#{name}")
       end
       format_response(options[:as] || @as, response.body)
     end
@@ -485,7 +485,7 @@ module Kubeclient
         faraday_client.patch(
           "#{ns_prefix}#{resource_name}/#{name}",
           patch.to_json,
-          { 'Content-Type' => "application/#{strategy}+json" }.merge(@headers)
+          { 'Content-Type' => "application/#{strategy}+json" }
         )
       end
       format_response(@as, response.body)
@@ -498,7 +498,7 @@ module Kubeclient
         faraday_client.patch(
           "#{ns_prefix}#{resource_name}/#{name}",
           resource.to_json,
-          { 'Content-Type' => 'application/apply-patch+yaml' }.merge(@headers)
+          { 'Content-Type' => 'application/apply-patch+yaml' }
         )
       end
       format_response(@as, response.body)
@@ -533,7 +533,7 @@ module Kubeclient
 
       ns = build_namespace_prefix(namespace)
       handle_exception do
-        faraday_client.get("#{ns}pods/#{pod_name}/log", params, @headers).body
+        faraday_client.get("#{ns}pods/#{pod_name}/log", params).body
       end
     end
 
@@ -584,7 +584,7 @@ module Kubeclient
 
     def api
       response = handle_exception do
-        create_faraday_client(@api_endpoint.to_s).get(nil, nil, @headers).body
+        create_faraday_client(@api_endpoint.to_s).get(nil).body
       end
       JSON.parse(response)
     end
@@ -671,12 +671,7 @@ module Kubeclient
     end
 
     def fetch_entities
-      JSON.parse(handle_exception { faraday_client.get(nil, nil, @headers).body })
-    end
-
-    def bearer_token(bearer_token)
-      @headers ||= {}
-      @headers[:Authorization] = "Bearer #{bearer_token}"
+      JSON.parse(handle_exception { faraday_client.get(nil).body })
     end
 
     def validate_auth_options(opts)
@@ -694,12 +689,9 @@ module Kubeclient
       end
     end
 
-    def validate_bearer_token_file
-      msg = "Token file #{@auth_options[:bearer_token_file]} does not exist"
-      raise ArgumentError, msg unless File.file?(@auth_options[:bearer_token_file])
-
-      msg = "Cannot read token file #{@auth_options[:bearer_token_file]}"
-      raise ArgumentError, msg unless File.readable?(@auth_options[:bearer_token_file])
+    def validate_bearer_token_file(file)
+      raise ArgumentError, "Token file #{file} does not exist" unless File.file?(file)
+      raise ArgumentError, "Token file #{file} cannot be read" unless File.readable?(file)
     end
 
     def return_or_yield_to_watcher(watcher, &block)
@@ -737,7 +729,7 @@ module Kubeclient
     end
 
     def json_headers
-      { 'Content-Type' => 'application/json' }.merge(@headers)
+      { 'Content-Type' => 'application/json' }
     end
   end
 end
