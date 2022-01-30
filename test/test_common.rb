@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'test_helper'
+require_relative 'helper'
 
 # Unit tests for the common module
 class CommonTest < MiniTest::Test

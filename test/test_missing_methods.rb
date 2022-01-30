@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'test_helper'
+require_relative 'helper'
 
 # Test method_missing, respond_to? and respond_to_missing behaviour
 class TestMissingMethods < MiniTest::Test

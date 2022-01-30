@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'test_helper'
+require_relative 'helper'
 
 # Replication Controller entity tests
 class TestReplicationController < MiniTest::Test
