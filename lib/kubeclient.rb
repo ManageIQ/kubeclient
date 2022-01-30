@@ -354,9 +354,9 @@ module Kubeclient
 
       Faraday.new(url, options) do |connection|
         if @auth_options[:username]
-          connection.basic_auth(@auth_options[:username], @auth_options[:password])
+          connection.request(:basic_auth, @auth_options[:username], @auth_options[:password])
         elsif @auth_options[:bearer_token]
-          connection.authorization(:Bearer, @auth_options[:bearer_token])
+          connection.request(:authorization, 'Bearer', @auth_options[:bearer_token])
         end
 
         # hook for adding custom faraday configuration
