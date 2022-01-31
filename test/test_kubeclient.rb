@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'test_helper'
+require_relative 'helper'
 
 # Kubernetes client entity tests
 class KubeclientTest < MiniTest::Test
@@ -45,7 +45,9 @@ class KubeclientTest < MiniTest::Test
 
   def test_not_upgraded_to_new_api
     e = assert_raises(ArgumentError) do
-      Kubeclient::Client.new('http://localhost:8080', foo: 1)
+      silence_stderr do
+        Kubeclient::Client.new('http://localhost:8080', foo: 1)
+      end
     end
     if RUBY_VERSION >= '3.0'
       assert_includes(e.message, 'wrong number of arguments')
@@ -933,5 +935,13 @@ class KubeclientTest < MiniTest::Test
   # hence need to create a deep_copy
   def deep_copy(hash)
     Marshal.load(Marshal.dump(hash))
+  end
+
+  def silence_stderr
+    old = $stderr
+    $stderr = StringIO.new
+    yield
+  ensure
+    $stderr = old
   end
 end

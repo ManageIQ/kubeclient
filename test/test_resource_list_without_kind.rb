@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'test_helper'
+require_relative 'helper'
 
 # Core api resource list without kind tests
 class TestResourceListWithoutKind < MiniTest::Test

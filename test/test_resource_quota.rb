@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'test_helper'
+require_relative 'helper'
 
 # ResourceQuota tests
 class TestResourceQuota < MiniTest::Test
