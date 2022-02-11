@@ -335,8 +335,8 @@ module Kubeclient
         .downcase
     end
 
-    def create_faraday_client(url = nil)
-      url = "#{@api_endpoint}/#{@api_version}" if url.nil?
+    def create_faraday_client
+      url = "#{@api_endpoint}/#{@api_version}"
       options = {
         proxy: @http_proxy_uri,
         request: {
@@ -584,7 +584,7 @@ module Kubeclient
 
     def api
       response = handle_exception do
-        create_faraday_client(@api_endpoint.to_s).get(nil).body
+        faraday_client.get(@api_endpoint).body
       end
       JSON.parse(response)
     end
