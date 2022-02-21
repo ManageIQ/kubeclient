@@ -6,13 +6,13 @@ require 'open3'
 class KubeclientConfigTest < MiniTest::Test
   def test_allinone
     config = Kubeclient::Config.read(config_file('allinone.kubeconfig'))
-    assert_equal(['default/localhost:8443/system:admin'], config.contexts)
+    assert_equal(['Default'], config.contexts)
     check_context(config.context, ssl: true)
   end
 
   def test_external
     config = Kubeclient::Config.read(config_file('external.kubeconfig'))
-    assert_equal(['default/localhost:8443/system:admin'], config.contexts)
+    assert_equal(['Default'], config.contexts)
     check_context(config.context, ssl: true)
   end
 
@@ -20,7 +20,7 @@ class KubeclientConfigTest < MiniTest::Test
     yaml = File.read(config_file('allinone.kubeconfig'))
     # A self-contained config shouldn't depend on kcfg_path.
     config = Kubeclient::Config.new(YAML.safe_load(yaml), nil)
-    assert_equal(['default/localhost:8443/system:admin'], config.contexts)
+    assert_equal(['Default'], config.contexts)
     check_context(config.context, ssl: true)
   end
 
@@ -46,7 +46,7 @@ class KubeclientConfigTest < MiniTest::Test
 
   def test_nouser
     config = Kubeclient::Config.read(config_file('nouser.kubeconfig'))
-    assert_equal(['default/localhost:8443/nouser'], config.contexts)
+    assert_equal(['default/localhost:6443/nouser'], config.contexts)
     check_context(config.context, ssl: false)
   end
 
@@ -177,7 +177,7 @@ class KubeclientConfigTest < MiniTest::Test
   private
 
   def check_context(context, ssl: true)
-    assert_equal('https://localhost:8443', context.api_endpoint)
+    assert_equal('https://localhost:6443', context.api_endpoint)
     assert_equal('v1', context.api_version)
     assert_equal('default', context.namespace)
     if ssl
@@ -185,16 +185,8 @@ class KubeclientConfigTest < MiniTest::Test
       assert_kind_of(OpenSSL::X509::Store, context.ssl_options[:cert_store])
       assert_kind_of(OpenSSL::X509::Certificate, context.ssl_options[:client_cert])
       assert_kind_of(OpenSSL::PKey::RSA, context.ssl_options[:client_key])
-      # When certificates expire one way to recreate them is using an old OpenShift 3.y tool:
-      #
-      #   $ oc adm ca create-master-certs --hostnames=localhost
-      #
-      # At the time of this writing the files to be updated are:
-      #
-      #   cp openshift.local.config/master/admin.kubeconfig test/config/allinone.kubeconfig
-      #   cp openshift.local.config/master/ca.crt           test/config/external-ca.pem
-      #   cp openshift.local.config/master/admin.crt        test/config/external-cert.pem
-      #   cp openshift.local.config/master/admin.key        test/config/external-key.rsa
+      # When certificates expire one way to recreate them is using a k0s single-node cluster:
+      #     test/config/update_certs_k0s.rb
       assert(context.ssl_options[:cert_store].verify(context.ssl_options[:client_cert]))
     else
       assert_equal(OpenSSL::SSL::VERIFY_NONE, context.ssl_options[:verify_ssl])
