@@ -65,6 +65,10 @@ module Kubeclient
           )
         end
 
+        if @http_options[:authorization]
+          client = client.auth(@http_options[:authorization])
+        end
+
         client
       end
 
