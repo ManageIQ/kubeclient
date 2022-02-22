@@ -62,6 +62,20 @@ module Kubeclient
       'continue'        => :continue
     }.freeze
 
+    DELETE_COLLECTION_ARGUMENTS = {
+      'continue'             => :continue,
+      'dryRun'               => :dry_run,
+      'fieldSelector'        => :field_selector,
+      'gracePeriodSeconds'   => :grace_period_seconds,
+      'labelSelector'        => :label_selector,
+      'limit'                => :limit,
+      'orphanDependents'     => :orphan_dependents,
+      'propagationPolicy'    => :propagation_policy,
+      'resourceVersion'      => :resource_version,
+      'resourceVersionMatch' => :resource_version_match,
+      'timeoutSeconds'       => :timeout_seconds
+    }.freeze
+
     WATCH_ARGUMENTS = {
       'labelSelector'   => :label_selector,
       'fieldSelector'   => :field_selector,
@@ -294,6 +308,12 @@ module Kubeclient
           delete_entity(entity.resource_name, name, namespace, **opts)
         end
 
+        # delete all entities of a type e.g. delete_pods, etc.
+        define_singleton_method("delete_#{entity.method_names[1]}") \
+        do |options = {}|
+          delete_collection(entity.entity_type, entity.resource_name, options)
+        end
+
         define_singleton_method("create_#{entity.method_names[0]}") do |entity_config|
           create_entity(entity.entity_type, entity.resource_name, entity_config)
         end
@@ -447,6 +467,32 @@ module Kubeclient
         end
       end
       format_response(@as, response.body)
+    end
+
+    # Accepts the following options:
+    #   :namespace (string) - the namespace of the entity.
+    #   :label_selector (string) - a selector to restrict the list of returned objects by labels.
+    #   :field_selector (string) - a selector to restrict the list of returned objects by fields.
+    #   :grace_period_seconds (integer) - the duration before an object should be deleted
+    #   :limit (integer) - a maximum number of items to return in each response
+    #   :orphan_dependents (bool) - should the dependent objects be orphaned
+    #   :propagation_policy (string) - one of Foreground|Background|Orphan
+    #   :resource_version (string) - sets a limit on the resource versions that can be served
+    #   :resource_version_match (string) - determines how the resource_version constraint will be applied
+    #   :timeout_seconds (integer) - limits the duraiton of the call
+    #   :continue (string) - a token used to retrieve the next chunk of entities
+    #   :as (:raw|:ros) - defaults to :ros
+    #     :raw - return the raw response body as a string
+    #     :ros - return a collection of RecursiveOpenStruct objects
+    def delete_collection(entity_type, resource_name, options = {})
+      params = {}
+      DELETE_COLLECTION_ARGUMENTS.each { |k, v| params[k] = options[v] if options[v] }
+
+      ns_prefix = build_namespace_prefix(options[:namespace])
+      response = handle_exception do
+        faraday_client.delete("#{ns_prefix}#{resource_name}", params)
+      end
+      format_response(options[:as] || @as, response.body, entity_type)
     end
 
     def create_entity(entity_type, resource_name, entity_config)

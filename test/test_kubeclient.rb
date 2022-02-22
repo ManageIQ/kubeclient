@@ -291,6 +291,54 @@ class KubeclientTest < MiniTest::Test
     assert_equal(%i[metadata spec status], response[:items].first.keys)
   end
 
+  def test_delete_collection
+    stub_core_api_list
+    stub_delete_pods
+
+    pods = client.delete_pods(namespace: 'foo')
+
+    refute_empty(pods)
+    assert_instance_of(Kubeclient::Common::EntityList, pods)
+    # Stripping of 'List' in collection.kind RecursiveOpenStruct mode only is historic.
+    assert_equal('Pod', pods.kind)
+    assert_equal(1, pods.size)
+    assert_instance_of(Kubeclient::Resource, pods[0])
+
+    assert_requested(:delete, 'http://localhost:8080/api/v1/namespaces/foo/pods', times: 1)
+  end
+
+  def test_delete_collection_raw
+    stub_core_api_list
+    stub_delete_pods
+
+    response = client.delete_pods(namespace: 'foo', as: :raw)
+
+    refute_empty(response)
+    assert_equal(open_test_file('pod_list.json').read, response)
+
+    assert_requested(:delete, 'http://localhost:8080/api/v1/namespaces/foo/pods', times: 1)
+  end
+
+  def test_delete_collection_parsed
+    stub_core_api_list
+    stub_delete_pods
+
+    response = client.delete_pods(namespace: 'foo', as: :parsed)
+    assert_equal(Hash, response.class)
+    assert_equal('PodList', response['kind'])
+    assert_equal(%w[metadata spec status], response['items'].first.keys)
+  end
+
+  def test_delete_collection_parsed_symbolized
+    stub_core_api_list
+    stub_delete_pods
+
+    response = client.delete_pods(namespace: 'foo', as: :parsed_symbolized)
+    assert_equal(Hash, response.class)
+    assert_equal('PodList', response[:kind])
+    assert_equal(%i[metadata spec status], response[:items].first.keys)
+  end
+
   def test_custom_faraday_config_options
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     expected_middlewares = [FaradayMiddleware::FollowRedirects, Faraday::Response::RaiseError]
@@ -924,6 +972,11 @@ class KubeclientTest < MiniTest::Test
   def stub_get_services
     stub_request(:get, %r{/services})
       .to_return(body: open_test_file('entity_list.json'), status: 200)
+  end
+
+  def stub_delete_pods
+    stub_request(:delete, %r{/pods})
+      .to_return(body: open_test_file('pod_list.json'), status: 200)
   end
 
   def client

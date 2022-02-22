@@ -454,6 +454,7 @@ watch_foos(name: 'name', **opts)                  # global single object
 
 delete_foo('name', 'namespace', opts)    # namespaced
 delete_foo('name', nil, opts)            # global
+delete_foos(namespace: 'ns', **opts)     # namespaced
 
 create_foo(Kubeclient::Resource.new({metadata: {name: 'name', namespace: 'namespace', ...}, ...}))
 create_foo(Kubeclient::Resource.new({metadata: {name: 'name', ...}, ...}))  # global
@@ -676,6 +677,36 @@ delete_options = Kubeclient::Resource.new(
 )
 client.delete_deployment(deployment_name, namespace, delete_options: delete_options)
 ```
+
+### Delete all instances of a specific entity type in a namespace
+Such as: `delete_pods`, `delete_secrets`, `delete_services`, `delete_nodes`, `delete_replication_controllers`, `delete_resource_quotas`, `delete_limit_ranges`, `delete_persistent_volumes`, `delete_persistent_volume_claims`, `delete_component_statuses`, `delete_service_accounts`
+
+Delete all entities of a specific type in a namespace, entities are returned in the same manner as for `get_services`:
+
+```ruby
+services = client.delete_services(namespace: 'development')
+```
+
+You can get entities which have specific labels by specifying a parameter named `label_selector` (named `labelSelector` in Kubernetes server):
+
+```ruby
+pods = client.delete_pods(namespace: 'development', label_selector: 'name=redis-master')
+```
+
+You can specify multiple labels (that option will return entities which have both labels:
+
+```ruby
+pods = client.delete_pods(namespace: 'default', label_selector: 'name=redis-master,app=redis')
+```
+
+There is also [a ability to filter by *some* fields](https://kubernetes.io/docs/concepts/overview/working-with-objects/field-selectors/).  Which fields are supported is not documented, you can try and see if you get an error...
+```ruby
+client.delete_pods(namespace: 'development', field_selector: 'spec.nodeName=master-0')
+```
+
+With default (`as: :ros`) return format, the returned object acts like an array of the individual pods, but also supports a `.resourceVersion` method.
+
+With `:parsed` and `:parsed_symbolized` formats, the returned data structure matches kubernetes list structure: it's a hash containing  `metadata` and `items` keys, the latter containing the individual pods.
 
 ### Create an entity
 For example: `create_pod pod_object`, `create_replication_controller rc_obj`, `create_secret secret_object`, `create_resource_quota resource_quota_object`, `create_limit_range limit_range_object`, `create_persistent_volume persistent_volume_object`, `create_persistent_volume_claim persistent_volume_claim_object`, `create_service_account service_account_object`
