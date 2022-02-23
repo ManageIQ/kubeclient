@@ -354,7 +354,9 @@ module Kubeclient
         if @auth_options[:username]
           connection.request(:basic_auth, @auth_options[:username], @auth_options[:password])
         elsif @auth_options[:bearer_token_file]
-          connection.request(:authorization, 'Bearer', -> { File.read(@auth_options[:bearer_token_file]).chomp })
+          connection.request(:authorization, 'Bearer', lambda do
+            File.read(@auth_options[:bearer_token_file]).chomp
+          end)
         elsif @auth_options[:bearer_token]
           connection.request(:authorization, 'Bearer', @auth_options[:bearer_token])
         end
@@ -709,7 +711,7 @@ module Kubeclient
       bearer_token = nil
       if @auth_options[:bearer_token_file]
         bearer_token_file = @auth_options[:bearer_token_file]
-        if File.file?(bearer_token_file) and File.readable?(bearer_token_file)
+        if File.file?(bearer_token_file) && File.readable?(bearer_token_file)
           token = File.read(bearer_token_file).chomp
           bearer_token = "Bearer #{token}"
         end
