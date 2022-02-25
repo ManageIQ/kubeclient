@@ -345,7 +345,8 @@ module Kubeclient
           cert_store: @ssl_options[:cert_store],
           client_cert: @ssl_options[:client_cert],
           client_key: @ssl_options[:client_key],
-          verify: @ssl_options[:verify_ssl]
+          verify: @ssl_options[:verify_ssl] != OpenSSL::SSL::VERIFY_NONE,
+          verify_mode: @ssl_options[:verify_ssl]
         }
       }
 
