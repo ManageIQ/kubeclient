@@ -22,7 +22,7 @@ CONTAINER = 'k0s'.freeze
 
 sh! "#{DOCKER} container inspect #{CONTAINER} --format='exists' ||
   #{DOCKER} run -d --name #{CONTAINER} --hostname k0s --privileged -v /var/lib/k0s -p 6443:6443 \
-  docker.io/k0sproject/k0s:v1.23.3-k0s.1"
+  ghcr.io/k0sproject/k0s/k0s:v1.23.3-k0s.1"
 
 # sh! "#{DOCKER} exec #{CONTAINER} kubectl config view --raw"
 # is another way to dump kubeconfig but succeeds with dummy output even before admin.conf exists;
