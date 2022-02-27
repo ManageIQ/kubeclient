@@ -41,6 +41,8 @@ class CreateGuestbookGo < MiniTest::Test
 
       client.delete_namespace(testing_ns.metadata.name)
     end
+  ensure
+    VCR.turn_off!
   end
 
   def delete_namespace(client, namespace_name)
