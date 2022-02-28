@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'googleauth', '~> 0.5.1'
   spec.add_development_dependency('mocha', '~> 1.5')
   spec.add_development_dependency 'openid_connect', '~> 1.1'
+  spec.add_development_dependency 'net-smtp'
 
   spec.add_dependency 'jsonpath', '~> 1.0'
   spec.add_dependency 'rest-client', '~> 2.0'
