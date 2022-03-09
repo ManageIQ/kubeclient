@@ -42,7 +42,7 @@ sleep(1) until sh?('curl --cacert test/config/external-ca.pem ' \
                         '--key test/config/external-key.rsa ' \
                         '--cert test/config/external-cert.pem  https://127.0.0.1:6443/healthz')
 
-sh! 'env KUBECLIENT_TEST_REAL_CLUSTER=true bundle exec rake test'
+sh! 'env KUBECLIENT_TEST_REAL_CLUSTER=true bundle exec rake --trace test'
 
 sh! "#{DOCKER} rm -f #{CONTAINER}"
 

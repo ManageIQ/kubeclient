@@ -16,11 +16,11 @@ jobs:
         ruby: [ '2.5', '2.6', '2.7', '3.0', '3.1', 'ruby-head', 'truffleruby-head' ]
         os_and_command:
         - os: 'macos-latest'
-          command: 'bundle exec rake test'
+          command: 'env TESTOPTS="--verbose" bundle exec rake --trace test'
         - os: ubuntu-latest
           # Sometimes minitest starts and then just hangs printing nothing.
           # Github by default kills after 6hours(!). Hopefully SIGTERM may let it print some details?
-          command: 'timeout --signal=TERM 3m test/config/update_certs_k0s.rb'
+          command: 'timeout --signal=TERM 3m env TESTOPTS="--verbose" test/config/update_certs_k0s.rb'
         include:
         # run rubocop against lowest supported ruby
         - os: ubuntu-latest
