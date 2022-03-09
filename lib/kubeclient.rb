@@ -353,6 +353,10 @@ module Kubeclient
       Faraday.new(url, options) do |connection|
         if @auth_options[:username]
           connection.request(:basic_auth, @auth_options[:username], @auth_options[:password])
+        elsif @auth_options[:bearer_token_file]
+          connection.request(:authorization, 'Bearer', lambda do
+            File.read(@auth_options[:bearer_token_file]).chomp
+          end)
         elsif @auth_options[:bearer_token]
           connection.request(:authorization, 'Bearer', @auth_options[:bearer_token])
         end
@@ -366,7 +370,6 @@ module Kubeclient
     end
 
     def faraday_client
-      refresh_bearer_token_from_file
       @faraday_client ||= create_faraday_client
     end
 
@@ -705,11 +708,21 @@ module Kubeclient
     end
 
     def http_options(uri)
-      refresh_bearer_token_from_file
+      bearer_token = nil
+      if @auth_options[:bearer_token_file]
+        bearer_token_file = @auth_options[:bearer_token_file]
+        if File.file?(bearer_token_file) && File.readable?(bearer_token_file)
+          token = File.read(bearer_token_file).chomp
+          bearer_token = "Bearer #{token}"
+        end
+      elsif @auth_options[:bearer_token]
+        bearer_token = "Bearer #{@auth_options[:bearer_token]}"
+      end
 
       options = {
         basic_auth_user: @auth_options[:username],
         basic_auth_password: @auth_options[:password],
+        authorization: bearer_token,
         headers: @headers,
         http_proxy_uri: @http_proxy_uri,
         http_max_redirects: http_max_redirects
@@ -728,11 +741,6 @@ module Kubeclient
       end
 
       options.merge(@socket_options)
-    end
-
-    def refresh_bearer_token_from_file
-      return unless (file = @auth_options[:bearer_token_file])
-      @auth_options[:bearer_token] = File.read(file).chomp
     end
 
     def json_headers
