@@ -16,7 +16,7 @@ jobs:
         ruby: [ '2.5', '2.6', '2.7', '3.0', '3.1', 'ruby-head', 'truffleruby-head' ]
         os_and_command:
         - os: 'macos-latest'
-          command: 'env TESTOPTS="--verbose" bundle exec rake --trace test'
+          command: 'env TESTOPTS="--verbose" bundle exec rake test'
         - os: ubuntu-latest
           # Sometimes minitest starts and then just hangs printing nothing.
           # Github by default kills after 6hours(!). Hopefully SIGTERM may let it print some details?

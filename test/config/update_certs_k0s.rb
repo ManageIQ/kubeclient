@@ -44,7 +44,7 @@ sleep(1) until sh?(
   '--cert test/config/external-cert.pem  https://127.0.0.1:6443/healthz'
 )
 
-sh! 'env KUBECLIENT_TEST_REAL_CLUSTER=true bundle exec rake --trace test'
+sh! 'env KUBECLIENT_TEST_REAL_CLUSTER=true bundle exec rake test'
 
 sh! "#{DOCKER} rm -f #{CONTAINER}"
 
