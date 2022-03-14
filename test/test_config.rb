@@ -211,10 +211,6 @@ class KubeclientConfigTest < MiniTest::Test
     end
   end
 
-  def config_file(name)
-    File.join(File.dirname(__FILE__), 'config', name)
-  end
-
   def stub_exec(command_regexp, creds, &block)
     st = Minitest::Mock.new
     st.expect(:success?, true)
