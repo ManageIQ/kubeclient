@@ -10,18 +10,23 @@ on:
     - '**'
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
+    runs-on: ${{ matrix.os_and_command.os }}
     strategy:
       matrix:
         ruby: [ '2.5', '2.6', '2.7', '3.0', '3.1', 'ruby-head', 'truffleruby-head' ]
-        os: ['ubuntu-latest', 'macos-latest']
-        task: [test]
+        os_and_command:
+        - os: 'macos-latest'
+          command: 'env TESTOPTS="--verbose" bundle exec rake test'
+        - os: ubuntu-latest
+          # Sometimes minitest starts and then just hangs printing nothing.
+          # Github by default kills after 6hours(!). Hopefully SIGTERM may let it print some details?
+          command: 'timeout --signal=TERM 3m env TESTOPTS="--verbose" test/config/update_certs_k0s.rb'
         include:
         # run rubocop against lowest supported ruby
         - os: ubuntu-latest
           ruby: '2.5'
-          task: rubocop
-    name: ${{ matrix.os }} ${{ matrix.ruby }} rake ${{ matrix.task }}
+          command: 'bundle exec rake rubocop'
+    name: ${{ matrix.os_and_command.os }} ${{ matrix.ruby }} rake ${{ matrix.os_and_command.command }}
     steps:
     - uses: actions/checkout@v2
     # actions/setup-ruby did not support truffle or bundler caching
@@ -31,5 +36,6 @@ jobs:
         bundler-cache: false # disable running 'bundle install' and caching installed gems see https://github.com/httprb/http/issues/572
     - run: gem install rake bundler
     - run: bundle install
-    - run: bundle exec rake ${{ matrix.task }}
+    - run: ${{ matrix.os_and_command.command }}
+    timeout-minutes: 10
 
