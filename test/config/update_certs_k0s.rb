@@ -22,7 +22,7 @@ CONTAINER = 'k0s'.freeze
 
 sh! "#{DOCKER} container inspect #{CONTAINER} --format='exists' ||
   #{DOCKER} run -d --name #{CONTAINER} --hostname k0s --privileged -v /var/lib/k0s -p 6443:6443 \
-  docker.io/k0sproject/k0s:v1.23.3-k0s.1"
+  ghcr.io/k0sproject/k0s/k0s:v1.23.3-k0s.1"
 
 # sh! "#{DOCKER} exec #{CONTAINER} kubectl config view --raw"
 # is another way to dump kubeconfig but succeeds with dummy output even before admin.conf exists;
@@ -36,6 +36,16 @@ sh! "#{DOCKER} exec #{CONTAINER} cat /var/lib/k0s/pki/ca.crt     > test/config/e
 sh! "#{DOCKER} exec #{CONTAINER} cat /var/lib/k0s/pki/admin.crt  > test/config/external-cert.pem"
 sh! "#{DOCKER} exec #{CONTAINER} cat /var/lib/k0s/pki/admin.key  > test/config/external-key.rsa"
 
-sh! 'bundle exec rake test'
+# Wait for apiserver to be up.  To speed startup, this only retries connection errors;
+# without `--fail-with-body` curl still returns 0 for well-formed 4xx or 5xx responses.
+sleep(1) until sh?(
+  'curl --cacert test/config/external-ca.pem ' \
+  '--key test/config/external-key.rsa ' \
+  '--cert test/config/external-cert.pem  https://127.0.0.1:6443/healthz'
+)
+
+sh! 'env KUBECLIENT_TEST_REAL_CLUSTER=true bundle exec rake test'
 
 sh! "#{DOCKER} rm -f #{CONTAINER}"
+
+puts 'If you run this only for tests, cleanup by running: git restore test/config/'
