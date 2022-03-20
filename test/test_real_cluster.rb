@@ -57,21 +57,72 @@ class KubeclientRealClusterTest < MiniTest::Test
     check_cert_accepted(client2)
   end
 
+  # Integration tests that check combined Config -> Client behavior wrt. `verify_ssl`.
+  # Quite redundant, but this was an embarrasing vulnerability so want to confirm...
+
   def test_real_cluster_concatenated_ca
     config = Kubeclient::Config.read(config_file('concatenated-ca.kubeconfig'))
     context = config.context
     client1 = Kubeclient::Client.new(
       HOSTNAME_COVERED_BY_CERT, 'v1',
-      ssl_options: context.ssl_options.merge(verify_ssl: OpenSSL::SSL::VERIFY_PEER),
-      auth_options: context.auth_options
+      ssl_options: context.ssl_options, auth_options: context.auth_options
     )
     check_cert_accepted(client1)
     client2 = Kubeclient::Client.new(
       HOSTNAME_NOT_ON_CERT, 'v1',
-      ssl_options: context.ssl_options.merge(verify_ssl: OpenSSL::SSL::VERIFY_PEER),
-      auth_options: context.auth_options
+      ssl_options: context.ssl_options, auth_options: context.auth_options
     )
     check_cert_rejected(client2)
+  end
+
+  def test_real_cluster_verify_ssl_with_ca
+    config = Kubeclient::Config.read(config_file('external.kubeconfig'))
+    context = config.context
+    client1 = Kubeclient::Client.new(
+      HOSTNAME_COVERED_BY_CERT, 'v1',
+      ssl_options: context.ssl_options, auth_options: context.auth_options
+    )
+    check_cert_accepted(client1)
+    client2 = Kubeclient::Client.new(
+      HOSTNAME_NOT_ON_CERT, 'v1',
+      ssl_options: context.ssl_options, auth_options: context.auth_options
+    )
+    check_cert_rejected(client2)
+  end
+
+  def test_real_cluster_verify_ssl_without_ca
+    config = Kubeclient::Config.read(config_file('external-without-ca.kubeconfig'))
+    context = config.context
+    # Hostname matches cert but the local cluster uses self-signed certs from custom CA,
+    # and this config omits CA data, so verification can't succeed.
+    client1 = Kubeclient::Client.new(
+      HOSTNAME_COVERED_BY_CERT, 'v1',
+      ssl_options: context.ssl_options, auth_options: context.auth_options
+    )
+    check_cert_rejected(client1)
+    client2 = Kubeclient::Client.new(
+      HOSTNAME_NOT_ON_CERT, 'v1',
+      ssl_options: context.ssl_options, auth_options: context.auth_options
+    )
+    check_cert_rejected(client2)
+  end
+
+  def test_real_cluster_insecure_without_ca
+    config = Kubeclient::Config.read(config_file('insecure.kubeconfig'))
+    context = config.context
+    # Hostname matches cert but the local cluster uses self-signed certs from custom CA,
+    # and this config omits CA data, so verification would fail;
+    # however, this config specifies `insecure-skip-tls-verify: true` so any cert goes.
+    client1 = Kubeclient::Client.new(
+      HOSTNAME_COVERED_BY_CERT, 'v1',
+      ssl_options: context.ssl_options, auth_options: context.auth_options
+    )
+    check_cert_accepted(client1)
+    client2 = Kubeclient::Client.new(
+      HOSTNAME_NOT_ON_CERT, 'v1',
+      ssl_options: context.ssl_options, auth_options: context.auth_options
+    )
+    check_cert_accepted(client2)
   end
 
   private
