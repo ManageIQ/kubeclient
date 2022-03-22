@@ -57,6 +57,23 @@ class KubeclientRealClusterTest < MiniTest::Test
     check_cert_accepted(client2)
   end
 
+  def test_real_cluster_concatenated_ca
+    config = Kubeclient::Config.read(config_file('concatenated-ca.kubeconfig'))
+    context = config.context
+    client1 = Kubeclient::Client.new(
+      HOSTNAME_COVERED_BY_CERT, 'v1',
+      ssl_options: context.ssl_options.merge(verify_ssl: OpenSSL::SSL::VERIFY_PEER),
+      auth_options: context.auth_options
+    )
+    check_cert_accepted(client1)
+    client2 = Kubeclient::Client.new(
+      HOSTNAME_NOT_ON_CERT, 'v1',
+      ssl_options: context.ssl_options.merge(verify_ssl: OpenSSL::SSL::VERIFY_PEER),
+      auth_options: context.auth_options
+    )
+    check_cert_rejected(client2)
+  end
+
   private
 
   # Test cert checking on discovery, CRUD, and watch code paths.

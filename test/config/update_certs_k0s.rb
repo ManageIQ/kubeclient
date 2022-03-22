@@ -33,6 +33,8 @@ sh! "#{DOCKER} exec #{CONTAINER} cat /var/lib/k0s/pki/admin.conf > test/config/a
 # The rest could easily be extracted from allinone.kubeconfig, but the test is more robust
 # if we don't reuse YAML and/or Kubeclient::Config parsing to construct test data.
 sh! "#{DOCKER} exec #{CONTAINER} cat /var/lib/k0s/pki/ca.crt     > test/config/external-ca.pem"
+sh! 'cat test/config/another-ca1.pem test/config/external-ca.pem '\
+    '    test/config/another-ca2.pem > test/config/concatenated-ca.pem'
 sh! "#{DOCKER} exec #{CONTAINER} cat /var/lib/k0s/pki/admin.crt  > test/config/external-cert.pem"
 sh! "#{DOCKER} exec #{CONTAINER} cat /var/lib/k0s/pki/admin.key  > test/config/external-key.rsa"
 

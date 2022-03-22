@@ -44,6 +44,12 @@ class KubeclientConfigTest < MiniTest::Test
     end
   end
 
+  def test_concatenated_ca
+    config = Kubeclient::Config.read(config_file('concatenated-ca.kubeconfig'))
+    assert_equal(['Default'], config.contexts)
+    check_context(config.context, ssl: true)
+  end
+
   def test_nouser
     config = Kubeclient::Config.read(config_file('nouser.kubeconfig'))
     assert_equal(['default/localhost:6443/nouser'], config.contexts)
