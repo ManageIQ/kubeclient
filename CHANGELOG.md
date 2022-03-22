@@ -4,6 +4,21 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
+## Unreleased 4.9.z
+
+### Fixed
+
+- `Config`: fixed parsing of `certificate-authority` file containing concatenation of
+  several certificates.  Previously, server's cert was checked against only first CA cert,
+  resulting in possible "certificate verify failed" errors.
+
+  An important use case is a chain of root & intermediate cert(s) - necessary when cluster's CA
+  itself is signed by another custom CA.
+  But also helps when you simply concatenate independent certs. (#461, #552)
+
+  - Still broken (#460): inline `certificate-authority-data` is still parsed using `add_cert`
+    method that handles only one cert.
+
 ## 4.9.2 — 2021-05-30
 
 ### Added
