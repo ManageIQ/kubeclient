@@ -2,5 +2,5 @@
 
 # Kubernetes REST-API Client
 module Kubeclient
-  VERSION = '4.9.2'
+  VERSION = '4.9.3'
 end

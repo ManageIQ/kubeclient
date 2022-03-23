@@ -10,6 +10,12 @@ The client supports GET, POST, PUT, DELETE on all the entities available in kube
 The client currently supports Kubernetes REST api version v1.
 To learn more about groups and versions in kubernetes refer to [k8s docs](https://kubernetes.io/docs/api/)
 
+## VULNERABILITY❗
+
+If you use `Kubeclient::Config`, all gem versions released before 2022 could return incorrect `ssl_options[:verify_ssl]`,
+endangering your connection and cluster credentials.
+See https://github.com/ManageIQ/kubeclient/issues/554 for details and which versions got a fix.
+
 ## Installation
 
 Add this line to your application's Gemfile:

@@ -63,13 +63,16 @@ module Kubeclient
 
       ssl_options = {}
 
+      ssl_options[:verify_ssl] = if cluster['insecure-skip-tls-verify'] == true
+                                   OpenSSL::SSL::VERIFY_NONE
+                                 else
+                                   OpenSSL::SSL::VERIFY_PEER
+                                 end
+
       if cluster_ca_data?(cluster)
         cert_store = OpenSSL::X509::Store.new
         populate_cert_store_from_cluster_ca_data(cluster, cert_store)
-        ssl_options[:verify_ssl] = OpenSSL::SSL::VERIFY_PEER
         ssl_options[:cert_store] = cert_store
-      else
-        ssl_options[:verify_ssl] = OpenSSL::SSL::VERIFY_NONE
       end
 
       unless client_cert_data.nil?

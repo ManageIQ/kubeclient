@@ -4,9 +4,53 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
-## Unreleased
+## Unreleased — to become 5.y.z
+
 ### Changed
 - `Kubeclient::Client.new` now always requires an api version, use for example: `Kubeclient::Client.new(uri, 'v1')`
+
+## 4.9.3 — 2021-03-23
+
+### Fixed
+
+- VULNERABILITY FIX: Previously, whenever kubeconfig did not define custom CA
+  (normal situation for production clusters with public domain and certificate!),
+  `Config` was returning ssl_options[:verify_ssl] hard-coded to `VERIFY_NONE` :-(
+
+  Assuming you passed those ssl_options to Kubeclient::Client, this means that
+  instead of checking server's certificate against your system CA store,
+  it would accept ANY certificate, allowing easy man-in-the middle attacks.
+
+  This is especially dangerous with user/password or token credentials
+  because MITM attacker could simply steal those credentials to the cluster
+  and do anything you could do on the cluster.
+
+  This was broken IN ALL RELEASES MADE BEFORE 2022, ever since
+  [`Kubeclient::Config` was created](https://github.com/ManageIQ/kubeclient/pull/127/files#diff-32e70f2f6781a9e9c7b83ae5e7eaf5ffd068a05649077fa38f6789e72f3de837R41-R48).
+
+  [#554](https://github.com/ManageIQ/kubeclient/issues/554).
+
+- Bug fix: kubeconfig `insecure-skip-tls-verify` field was ignored.
+  When kubeconfig did define custom CA, `Config` was returning hard-coded `VERIFY_PEER`.
+
+  Now we honor it, return `VERIFY_NONE` iff kubeconfig has explicit
+  `insecure-skip-tls-verify: true`, otherwise `VERIFY_PEER`.
+
+  [#555](https://github.com/ManageIQ/kubeclient/issues/555).
+
+- `Config`: fixed parsing of `certificate-authority` file containing concatenation of
+  several certificates.  Previously, server's cert was checked against only first CA cert,
+  resulting in possible "certificate verify failed" errors.
+
+  An important use case is a chain of root & intermediate cert(s) - necessary when cluster's CA
+  itself is signed by another custom CA.
+  But also helps when you simply concatenate independent certs. (#461, #552)
+
+  - Still broken (#460): inline `certificate-authority-data` is still parsed using `add_cert`
+    method that handles only one cert.
+
+These don't affect code that supplies `Client` parameters directly,
+only code that uses `Config`.
 
 ## 4.9.2 — 2021-05-30
 
