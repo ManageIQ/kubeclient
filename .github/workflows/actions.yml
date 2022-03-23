@@ -14,19 +14,32 @@ jobs:
     runs-on: ${{ matrix.os_and_command.os }}
     strategy:
       matrix:
-        ruby: [ '2.5', '2.6', '2.7', '3.0', '3.1', 'ruby-head', 'truffleruby-head' ]
+        ruby: [ '2.5', '2.6', '2.7', '3.0', '3.1', 'ruby-head' ]
+        # The k0s script does more testing but needs docker, only works on ubuntu.
         os_and_command:
-        - os: 'macos-latest'
+        - os: macos-latest
+          command: 'env TESTOPTS="--verbose" bundle exec rake test'
+        - os: windows-latest
           command: 'env TESTOPTS="--verbose" bundle exec rake test'
         - os: ubuntu-latest
           # Sometimes minitest starts and then just hangs printing nothing.
           # Github by default kills after 6hours(!). Hopefully SIGTERM may let it print some details?
           command: 'timeout --signal=TERM 3m env TESTOPTS="--verbose" test/config/update_certs_k0s.rb'
         include:
-        # run rubocop against lowest supported ruby
-        - os: ubuntu-latest
-          ruby: '2.5'
-          command: 'bundle exec rake rubocop'
+        # As of 2022 Aug, truffleruby-dev-builder had no build for windows.
+        - ruby: 'truffleruby-head'
+          os_and_command:
+          - os: macos-latest
+            command: 'env TESTOPTS="--verbose" bundle exec rake test'
+        - ruby: 'truffleruby-head'
+          os_and_command:
+            os: ubuntu-latest
+            command: 'timeout --signal=TERM 3m env TESTOPTS="--verbose" test/config/update_certs_k0s.rb'
+        # Run rubocop in 1 job only, against lowest supported ruby.
+        - ruby: '2.5'
+          os_and_command:
+          - os: ubuntu-latest
+            command: 'bundle exec rake rubocop'
     name: ${{ matrix.os_and_command.os }} ${{ matrix.ruby }} rake ${{ matrix.os_and_command.command }}
     steps:
     - uses: actions/checkout@v2
