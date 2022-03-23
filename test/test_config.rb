@@ -7,13 +7,48 @@ class KubeclientConfigTest < MiniTest::Test
   def test_allinone
     config = Kubeclient::Config.read(config_file('allinone.kubeconfig'))
     assert_equal(['Default'], config.contexts)
-    check_context(config.context, ssl: true)
+    check_context(config.context, ssl: true, custom_ca: true, client_cert: true)
   end
 
   def test_external
     config = Kubeclient::Config.read(config_file('external.kubeconfig'))
     assert_equal(['Default'], config.contexts)
-    check_context(config.context, ssl: true)
+    check_context(config.context, ssl: true, custom_ca: true, client_cert: true)
+  end
+
+  def test_explicit_secure
+    config = Kubeclient::Config.read(config_file('secure.kubeconfig'))
+    assert_equal(['Default'], config.contexts)
+    # Same as external.kubeconfig, but with explicit `insecure-skip-tls-verify: false`
+    check_context(config.context, ssl: true, custom_ca: true, client_cert: true)
+  end
+
+  def test_external_public_ca
+    config = Kubeclient::Config.read(config_file('external-without-ca.kubeconfig'))
+    assert_equal(['Default'], config.contexts)
+    # Same as external.kubeconfig, no custom CA data (cluster has a publicly trusted cert)
+    check_context(config.context, ssl: true, custom_ca: false, client_cert: true)
+  end
+
+  def test_secure_public_ca
+    config = Kubeclient::Config.read(config_file('secure-without-ca.kubeconfig'))
+    assert_equal(['Default'], config.contexts)
+    # no custom CA data + explicit `insecure-skip-tls-verify: false`
+    check_context(config.context, ssl: true, custom_ca: false, client_cert: true)
+  end
+
+  def test_insecure
+    config = Kubeclient::Config.read(config_file('insecure.kubeconfig'))
+    assert_equal(['Default'], config.contexts)
+    # Has explicit `insecure-skip-tls-verify: false`
+    check_context(config.context, ssl: false, custom_ca: false, client_cert: true)
+  end
+
+  def test_insecure_custom_ca
+    config = Kubeclient::Config.read(config_file('insecure-custom-ca.kubeconfig'))
+    assert_equal(['Default'], config.contexts)
+    # Has explicit `insecure-skip-tls-verify: false`
+    check_context(config.context, ssl: false, custom_ca: true, client_cert: true)
   end
 
   def test_allinone_nopath
@@ -21,7 +56,7 @@ class KubeclientConfigTest < MiniTest::Test
     # A self-contained config shouldn't depend on kcfg_path.
     config = Kubeclient::Config.new(YAML.safe_load(yaml), nil)
     assert_equal(['Default'], config.contexts)
-    check_context(config.context, ssl: true)
+    check_context(config.context, ssl: true, custom_ca: true, client_cert: true)
   end
 
   def test_external_nopath
@@ -53,7 +88,7 @@ class KubeclientConfigTest < MiniTest::Test
   def test_nouser
     config = Kubeclient::Config.read(config_file('nouser.kubeconfig'))
     assert_equal(['default/localhost:6443/nouser'], config.contexts)
-    check_context(config.context, ssl: false)
+    check_context(config.context, ssl: true, custom_ca: false, client_cert: false)
   end
 
   def test_user_token
@@ -61,7 +96,7 @@ class KubeclientConfigTest < MiniTest::Test
     assert_equal(['localhost/system:admin:token', 'localhost/system:admin:userpass'],
                  config.contexts)
     context = config.context('localhost/system:admin:token')
-    check_context(context, ssl: false)
+    check_context(context, ssl: true, custom_ca: false, client_cert: false)
     assert_equal('0123456789ABCDEF0123456789ABCDEF', context.auth_options[:bearer_token])
   end
 
@@ -70,7 +105,7 @@ class KubeclientConfigTest < MiniTest::Test
     assert_equal(['localhost/system:admin:token', 'localhost/system:admin:userpass'],
                  config.contexts)
     context = config.context('localhost/system:admin:userpass')
-    check_context(context, ssl: false)
+    check_context(context, ssl: true, custom_ca: false, client_cert: false)
     assert_equal('admin', context.auth_options[:username])
     assert_equal('pAssw0rd123', context.auth_options[:password])
   end
@@ -98,21 +133,21 @@ class KubeclientConfigTest < MiniTest::Test
     # A bare command name in config means search PATH, so it's executed as bare command.
     stub_exec(%r{^example-exec-plugin$}, creds) do
       context = config.context('localhost/system:admin:exec-search-path')
-      check_context(context, ssl: false)
+      check_context(context, ssl: true, custom_ca: false, client_cert: false)
       assert_equal(token, context.auth_options[:bearer_token])
     end
 
     # A relative path is taken relative to the dir of the kubeconfig.
     stub_exec(%r{.*config/dir/example-exec-plugin$}, creds) do
       context = config.context('localhost/system:admin:exec-relative-path')
-      check_context(context, ssl: false)
+      check_context(context, ssl: true, custom_ca: false, client_cert: false)
       assert_equal(token, context.auth_options[:bearer_token])
     end
 
     # An absolute path is taken as-is.
     stub_exec(%r{^/abs/path/example-exec-plugin$}, creds) do
       context = config.context('localhost/system:admin:exec-absolute-path')
-      check_context(context, ssl: false)
+      check_context(context, ssl: true, custom_ca: false, client_cert: false)
       assert_equal(token, context.auth_options[:bearer_token])
     end
   end
@@ -182,20 +217,33 @@ class KubeclientConfigTest < MiniTest::Test
 
   private
 
-  def check_context(context, ssl: true)
+  def check_context(context, ssl: true, custom_ca: true, client_cert: true)
     assert_equal('https://localhost:6443', context.api_endpoint)
     assert_equal('v1', context.api_version)
     assert_equal('default', context.namespace)
-    if ssl
-      assert_equal(OpenSSL::SSL::VERIFY_PEER, context.ssl_options[:verify_ssl])
+    if custom_ca
       assert_kind_of(OpenSSL::X509::Store, context.ssl_options[:cert_store])
+    else
+      assert_nil(context.ssl_options[:cert_store])
+    end
+    if client_cert
       assert_kind_of(OpenSSL::X509::Certificate, context.ssl_options[:client_cert])
       assert_kind_of(OpenSSL::PKey::RSA, context.ssl_options[:client_key])
-      # When certificates expire one way to recreate them is using a k0s single-node cluster:
-      #     test/config/update_certs_k0s.rb
-      assert(context.ssl_options[:cert_store].verify(context.ssl_options[:client_cert]))
+      if custom_ca
+        # When certificates expire one way to recreate them is using a k0s single-node cluster:
+        #     test/config/update_certs_k0s.rb
+        assert(context.ssl_options[:cert_store].verify(context.ssl_options[:client_cert]))
+      end
     else
-      assert_equal(OpenSSL::SSL::VERIFY_NONE, context.ssl_options[:verify_ssl])
+      assert_nil(context.ssl_options[:client_cert])
+      assert_nil(context.ssl_options[:client_key])
+    end
+    if ssl
+      assert_equal(OpenSSL::SSL::VERIFY_PEER, context.ssl_options[:verify_ssl],
+                   'expected VERIFY_PEER')
+    else
+      assert_equal(OpenSSL::SSL::VERIFY_NONE, context.ssl_options[:verify_ssl],
+                   'expected VERIFY_NONE')
     end
   end
 
