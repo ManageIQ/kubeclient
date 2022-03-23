@@ -1,3 +1,6 @@
+AllCops:
+  DisplayCopNames: true
+  TargetRubyVersion: 2.2 # Oldest version kubeclient supports
 MethodLength:
   Enabled: false
 ClassLength:
@@ -7,6 +10,26 @@ Metrics/AbcSize:
 Metrics/LineLength:
   Max: 100
 Metrics/ParameterLists:
-  Max: 8
+  Max: 5
+  CountKeywordArgs: false
 Metrics/CyclomaticComplexity:
   Max: 8
+Metrics/PerceivedComplexity:
+  Max: 8
+Metrics/ModuleLength:
+  Enabled: false
+Style/MethodCallWithArgsParentheses:
+  Enabled: true
+  IgnoredMethods: [require, raise, include, attr_reader, refute, assert]
+  Exclude: [Gemfile, Rakefile, kubeclient.gemspec, Gemfile.dev.rb]
+Metrics/BlockLength:
+  Exclude: [kubeclient.gemspec]
+Security/MarshalLoad:
+  Exclude: [test/**/*]
+Style/FileName:
+  Exclude: [Gemfile, Rakefile, Gemfile.dev.rb]
+Style/MethodCallWithArgsParentheses:
+  IgnoredMethods:
+  - require_relative
+Style/RegexpLiteral:
+  Enabled: false
