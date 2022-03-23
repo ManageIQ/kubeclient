@@ -154,7 +154,7 @@ class KubeclientRealClusterTest < MiniTest::Test
       sleep(1)
       watcher.finish
     end
-    watcher.each do |_notice|
+    watcher.each do |_notice| # rubocop:disable Lint/UnreachableLoop
       break
     end
     thread.join
