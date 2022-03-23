@@ -13,8 +13,7 @@ To learn more about groups and versions in kubernetes refer to [k8s docs](https:
 
 If you use `Kubeclient::Config`, all gem versions released before 2022 could return incorrect `ssl_options[:verify_ssl]`,
 endangering your connection and cluster credentials.
-See [latest CHANGELOG.md](https://github.com/ManageIQ/kubeclient/blob/master/CHANGELOG.md) for details and which versions got a fix.
-Open an issue if you want a backport to another version.
+See https://github.com/ManageIQ/kubeclient/issues/554 for details and which versions got a fix.
 
 ## Installation
 
