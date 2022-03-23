@@ -23,11 +23,15 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
   This was broken IN ALL RELEASES MADE BEFORE 2022, ever since
   [`Kubeclient::Config` was created](https://github.com/ManageIQ/kubeclient/pull/127/files#diff-32e70f2f6781a9e9c7b83ae5e7eaf5ffd068a05649077fa38f6789e72f3de837R41-R48).
 
+  [#554](https://github.com/ManageIQ/kubeclient/issues/554).
+
 - Bug fix: kubeconfig `insecure-skip-tls-verify` field was ignored.
   When kubeconfig did define custom CA, `Config` was returning hard-coded `VERIFY_PEER`.
 
   Now we honor it, return `VERIFY_NONE` iff kubeconfig has explicit
   `insecure-skip-tls-verify: true`, otherwise `VERIFY_PEER`.
+
+  [#555](https://github.com/ManageIQ/kubeclient/issues/555).
 
 - `Config`: fixed parsing of `certificate-authority` file containing concatenation of
   several certificates.  Previously, server's cert was checked against only first CA cert,
