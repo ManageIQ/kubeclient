@@ -79,6 +79,7 @@ module Kubeclient
       end
 
       def build_client_options
+        @http_options[:headers][:Authorization] = "Bearer #{File.read(@http_options[:bearer_token_file])}" if @http_options[:bearer_token_file]
         client_options = {
           headers: @http_options[:headers],
           proxy: using_proxy

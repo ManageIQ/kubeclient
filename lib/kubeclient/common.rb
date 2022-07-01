@@ -36,6 +36,8 @@ module Kubeclient
     DEFAULT_HTTP_PROXY_URI = nil
     DEFAULT_HTTP_MAX_REDIRECTS = 10
 
+    DEFAULT_BEARER_TOKEN_FILE = '/var/run/secrets/kubernetes.io/serviceaccount/token'
+
     SEARCH_ARGUMENTS = {
       'labelSelector'   => :label_selector,
       'fieldSelector'   => :field_selector,
@@ -78,7 +80,7 @@ module Kubeclient
       @api_version = version
       @headers = {}
       @ssl_options = ssl_options
-      @auth_options = auth_options
+      @auth_options = Marshal.load(Marshal.dump(auth_options))
       @socket_options = socket_options
       # Allow passing partial timeouts hash, without unspecified
       # @timeouts[:foo] == nil resulting in infinite timeout.
@@ -87,11 +89,25 @@ module Kubeclient
       @http_max_redirects = http_max_redirects
       @as = as
 
+      @log = Logger.new(STDOUT)
+      @log.formatter = proc do |severity, datetime, progname, msg|
+          "#{datetime} [#{severity}]: #{msg}\n"
+      end
+
       if auth_options[:bearer_token]
         bearer_token(@auth_options[:bearer_token])
-      elsif auth_options[:bearer_token_file]
+      end
+      if auth_options[:bearer_token_file]
         validate_bearer_token_file
+        @log.info("Reading bearer token from #{@auth_options[:bearer_token_file]}")
         bearer_token(File.read(@auth_options[:bearer_token_file]))
+      elsif File.file?(DEFAULT_BEARER_TOKEN_FILE)
+        @auth_options[:bearer_token_file] = DEFAULT_BEARER_TOKEN_FILE
+        validate_bearer_token_file
+        @log.info("Reading bearer token from default location #{DEFAULT_BEARER_TOKEN_FILE}")
+        bearer_token(File.read(@auth_options[:bearer_token_file]))
+      else
+        @log.info("bearer_token_file path not provided. Kubeclient will not be able to refresh the token if it expires")
       end
     end
 
@@ -134,6 +150,11 @@ module Kubeclient
       load_entities
       define_entity_methods
       @discovered = true
+    end
+
+    def get_headers
+      bearer_token(File.read(@auth_options[:bearer_token_file])) if @auth_options[:bearer_token_file]
+      @headers
     end
 
     def self.parse_definition(kind, name)
@@ -349,7 +370,7 @@ module Kubeclient
       ns_prefix = build_namespace_prefix(options[:namespace])
       response = handle_exception do
         rest_client[ns_prefix + resource_name]
-          .get({ 'params' => params }.merge(@headers))
+          .get({ 'params' => params }.merge(get_headers))
       end
       format_response(options[:as] || @as, response.body, entity_type)
     end
@@ -362,7 +383,7 @@ module Kubeclient
       ns_prefix = build_namespace_prefix(namespace)
       response = handle_exception do
         rest_client[ns_prefix + resource_name + "/#{name}"]
-          .get(@headers)
+          .get(get_headers)
       end
       format_response(options[:as] || @as, response.body)
     end
@@ -378,7 +399,7 @@ module Kubeclient
           rs.options.merge(
             method: :delete,
             url: rs.url,
-            headers: { 'Content-Type' => 'application/json' }.merge(@headers),
+            headers: { 'Content-Type' => 'application/json' }.merge(get_headers),
             payload: payload
           )
         )
@@ -400,7 +421,7 @@ module Kubeclient
       hash[:apiVersion] = @api_group + @api_version
       response = handle_exception do
         rest_client[ns_prefix + resource_name]
-          .post(hash.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
+          .post(hash.to_json, { 'Content-Type' => 'application/json' }.merge(get_headers))
       end
       format_response(@as, response.body)
     end
@@ -410,7 +431,7 @@ module Kubeclient
       ns_prefix = build_namespace_prefix(entity_config[:metadata][:namespace])
       response = handle_exception do
         rest_client[ns_prefix + resource_name + "/#{name}"]
-          .put(entity_config.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
+          .put(entity_config.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(get_headers))
       end
       format_response(@as, response.body)
     end
@@ -421,7 +442,7 @@ module Kubeclient
         rest_client[ns_prefix + resource_name + "/#{name}"]
           .patch(
             patch.to_json,
-            { 'Content-Type' => "application/#{strategy}+json" }.merge(@headers)
+            { 'Content-Type' => "application/#{strategy}+json" }.merge(get_headers)
           )
       end
       format_response(@as, response.body)
@@ -434,7 +455,7 @@ module Kubeclient
         rest_client[ns_prefix + resource_name + "/#{name}"]
           .patch(
             resource.to_json,
-            { 'Content-Type' => 'application/apply-patch+yaml' }.merge(@headers)
+            { 'Content-Type' => 'application/apply-patch+yaml' }.merge(get_headers)
           )
       end
       format_response(@as, response.body)
@@ -468,7 +489,7 @@ module Kubeclient
       ns = build_namespace_prefix(namespace)
       handle_exception do
         rest_client[ns + "pods/#{pod_name}/log"]
-          .get({ 'params' => params }.merge(@headers))
+          .get({ 'params' => params }.merge(get_headers))
       end
     end
 
@@ -506,7 +527,7 @@ module Kubeclient
       ns_prefix = build_namespace_prefix(template[:metadata][:namespace])
       response = handle_exception do
         rest_client[ns_prefix + 'processedtemplates']
-          .post(template.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(@headers))
+          .post(template.to_h.to_json, { 'Content-Type' => 'application/json' }.merge(get_headers))
       end
       JSON.parse(response)
     end
@@ -519,7 +540,7 @@ module Kubeclient
     end
 
     def api
-      response = handle_exception { create_rest_client.get(@headers) }
+      response = handle_exception { create_rest_client.get(get_headers) }
       JSON.parse(response)
     end
 
@@ -593,7 +614,7 @@ module Kubeclient
     end
 
     def fetch_entities
-      JSON.parse(handle_exception { rest_client.get(@headers) })
+      JSON.parse(handle_exception { rest_client.get(get_headers) })
     end
 
     def bearer_token(bearer_token)
@@ -638,11 +659,11 @@ module Kubeclient
       options = {
         basic_auth_user: @auth_options[:username],
         basic_auth_password: @auth_options[:password],
-        headers: @headers,
+        headers: get_headers,
         http_proxy_uri: @http_proxy_uri,
         http_max_redirects: http_max_redirects
       }
-
+      options[:bearer_token_file] = @auth_options[:bearer_token_file] if @auth_options[:bearer_token_file]
       if uri.scheme == 'https'
         options[:ssl] = {
           ca_file: @ssl_options[:ca_file],
