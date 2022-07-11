@@ -1,7 +1,7 @@
 require_relative 'test_helper'
 require 'googleauth'
 
-Unit tests for the ApplicationDefaultCredentials token provider
+# Unit tests for the ApplicationDefaultCredentials token provider
 class GoogleApplicationDefaultCredentialsTest < MiniTest::Test
   def test_token
     auth = Minitest::Mock.new
