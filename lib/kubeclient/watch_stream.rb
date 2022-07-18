@@ -65,8 +65,19 @@ module Kubeclient
           )
         end
 
-        if @http_options[:authorization]
-          client = client.auth(@http_options[:authorization])
+        bearer_token = nil
+        if @http_options[:bearer_token_file]
+          bearer_token_file = @http_options[:bearer_token_file]
+          if File.file?(bearer_token_file) && File.readable?(bearer_token_file)
+            token = File.read(bearer_token_file).chomp
+            bearer_token = "Bearer #{token}"
+          end
+        elsif @http_options[:bearer_token]
+          bearer_token = "Bearer #{@http_options[:bearer_token]}"
+        end
+
+        if bearer_token
+          client = client.auth(bearer_token)
         end
 
         client
