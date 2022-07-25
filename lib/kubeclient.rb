@@ -754,24 +754,14 @@ module Kubeclient
     end
 
     def http_options(uri)
-      bearer_token = nil
-      if @auth_options[:bearer_token_file]
-        bearer_token_file = @auth_options[:bearer_token_file]
-        if File.file?(bearer_token_file) && File.readable?(bearer_token_file)
-          token = File.read(bearer_token_file).chomp
-          bearer_token = "Bearer #{token}"
-        end
-      elsif @auth_options[:bearer_token]
-        bearer_token = "Bearer #{@auth_options[:bearer_token]}"
-      end
-
       options = {
         basic_auth_user: @auth_options[:username],
         basic_auth_password: @auth_options[:password],
-        authorization: bearer_token,
         headers: @headers,
         http_proxy_uri: @http_proxy_uri,
-        http_max_redirects: http_max_redirects
+        http_max_redirects: http_max_redirects,
+        bearer_token_file: @auth_options[:bearer_token_file],
+        bearer_token: @auth_options[:bearer_token],
       }
 
       if uri.scheme == 'https'
