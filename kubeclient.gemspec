@@ -34,5 +34,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'faraday', '~> 1.1'
   spec.add_dependency 'faraday_middleware', '~> 1.0'
   spec.add_dependency 'recursive-open-struct', '~> 1.1', '>= 1.1.1'
-  spec.add_dependency 'http', '>= 3.0', '< 5.0'
+  spec.add_dependency 'http', '>= 3.0', '< 6.0'
 end
