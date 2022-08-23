@@ -734,6 +734,45 @@ class KubeclientTest < MiniTest::Test
     assert_equal(1, pods.size)
   end
 
+  def test_refresh_api_bearer_token_file
+    stub_core_api_list
+    file = Tempfile.new('token')
+    begin
+      file.write("valid_token")
+      file.rewind
+      client = Kubeclient::Client.new(
+        'http://localhost:8080/api/', 'v1',
+        auth_options: { bearer_token_file: file.path }
+      )
+      stub_token = stub_request(:get, 'http://localhost:8080/api/v1/pods')
+      .with(headers: { Authorization: 'Bearer valid_token' })
+      .to_return(body: open_test_file('pod_list.json'), status: 200)
+
+      pods = client.get_pods
+
+      assert_equal('Pod', pods.kind)
+      assert_equal(1, pods.size)
+
+      remove_request_stub(stub_token)
+
+      file.write("rotated_token")
+      file.close
+
+      stub_token = stub_request(:get, 'http://localhost:8080/api/v1/pods')
+      .with(headers: { Authorization: 'Bearer rotated_token' })
+      .to_return(body: open_test_file('pod_list.json'), status: 200)
+
+      pods = client.get_pods
+
+      assert_equal('Pod', pods.kind)
+      assert_equal(1, pods.size)
+      
+    ensure
+      file.close
+      file.unlink   # deletes the temp file
+    end
+  end
+
   def test_proxy_url
     stub_core_api_list
 
