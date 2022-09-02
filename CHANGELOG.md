@@ -9,7 +9,21 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 ### Changed
 - `Kubeclient::Client.new` now always requires an api version, use for example: `Kubeclient::Client.new(uri, 'v1')`
 
-## 4.9.3 — 2021-03-23
+## 4.10.0 — 2022-08-29
+
+### Added
+
+- When using `:bearer_token_file`, re-read the file on every request. (#566 closed #561)
+
+  Kubernetes version 1.21 graduated [BoundServiceAccountTokenVolume feature][] to beta
+  and enabled it by default, so standard in-cluster auth now uses short-lived tokens.
+
+  This changes allows a long-lived `Client` object to keep working when the token file gets
+  rotated.  It's not optimized at all, if you feel the performance overhead, please report!
+
+  [BoundServiceAccountTokenVolume feature]: https://github.com/kubernetes/enhancements/issues/542
+
+## 4.9.3 — 2022-03-23
 
 ### Fixed
 
