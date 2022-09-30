@@ -87,18 +87,11 @@ module Kubeclient
       @http_max_redirects = http_max_redirects
       @as = as
 
-      @log = Logger.new(STDOUT)
-      @log.formatter = proc do |severity, datetime, progname, msg|
-          "#{datetime} [#{severity}]: #{msg}\n"
-      end
-
       if auth_options[:bearer_token_file]
         validate_bearer_token_file
-        @log.info("Reading bearer token from #{@auth_options[:bearer_token_file]}")
         bearer_token(File.read(@auth_options[:bearer_token_file]))
       elsif auth_options[:bearer_token]
         bearer_token(@auth_options[:bearer_token])
-        @log.info("bearer_token_file path not provided. Kubeclient will not be able to refresh the token if it expires")
       end
     end
 
