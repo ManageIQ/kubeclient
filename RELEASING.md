@@ -4,10 +4,6 @@
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 At some point in time it is decided to release version x.y.z.
 
-```bash
-RELEASE_BRANCH="master"
-```
-
 ## 0. (once) Install gem-release, needed for several commands here:
 
 ```bash
@@ -16,13 +12,17 @@ gem install gem-release
 
 ## 1. PR(s) for changelog & bump
 
+```bash
+RELEASE_BRANCH="master"
+RELEASE_VERSION=x.y.z
+
+git checkout -b "release-$RELEASE_VERSION" $RELEASE_BRANCH
+```
+
 Edit `CHANGELOG.md` as necessary.  Even if all included changes remembered to update it, you should replace "Unreleased" section header with appropriate "x.y.z — 20yy-mm-dd" header.
 
 Bump `lib/kubeclient/version.rb` manually, or by using:
 ```bash
-RELEASE_VERSION=x.y.z
-
-git checkout -b "release-$RELEASE_VERSION" $RELEASE_BRANCH
 # Won't work with uncommitted changes, you have to commit the changelog first.
 gem bump --version $RELEASE_VERSION
 git show # View version bump change.
@@ -46,7 +46,7 @@ Make sure we're locally after the bump PR *merge commit*:
 ```bash
 git checkout $RELEASE_BRANCH
 git status # Make sure there are no local changes
-git pull --ff-only https://github.com/abonas/kubeclient $RELEASE_BRANCH
+git pull --ff-only https://github.com/ManageIQ/kubeclient $RELEASE_BRANCH
 git log -n1
 ```
 
