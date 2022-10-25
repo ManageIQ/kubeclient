@@ -9,6 +9,12 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 ### Changed
 - `Kubeclient::Client.new` now always requires an api version, use for example: `Kubeclient::Client.new(uri, 'v1')`
 
+## 4.10.1 — 2022-10-01
+
+### Removed
+
+- Dropped debug logging about bearer token options that was added in 4.10.0. (#577)
+
 ## 4.10.0 — 2022-08-29
 
 ### Added

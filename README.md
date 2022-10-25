@@ -99,8 +99,8 @@ client = Kubeclient::Client.new(
 ### Authentication
 
 If you are using basic authentication or bearer tokens as described
-[here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/authentication.md) then you can specify one
-of the following:
+[here](https://github.com/GoogleCloudPlatform/kubernetes/blob/master/docs/authentication.md)
+then you can specify one of the following:
 
 ```ruby
 auth_options = {
@@ -112,7 +112,7 @@ client = Kubeclient::Client.new(
 )
 ```
 
-or
+or (fixed token, if it expires it's up to you to create a new `Client` object):
 
 ```ruby
 auth_options = {
@@ -123,7 +123,7 @@ client = Kubeclient::Client.new(
 )
 ```
 
-or
+or (will automatically re-read the token if file is updated):
 
 ```ruby
 auth_options = {
