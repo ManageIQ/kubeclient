@@ -113,18 +113,18 @@ class TestWatch < MiniTest::Test
     watcher = client.watch_pods(as: :raw)
 
     begin
-      file.write("valid_token")
+      file.write('valid_token')
       file.rewind
       stub_token = stub_request(:get, %r{/watch/pods})
-        .with(headers: { Authorization: 'Bearer valid_token' })
-        .to_return(body: open_test_file('watch_stream.json'), status: 200)
+                   .with(headers: { Authorization: 'Bearer valid_token' })
+                   .to_return(body: open_test_file('watch_stream.json'), status: 200)
 
       got = nil
       watcher.each { |notice| got = notice }
       assert_match(/\A{"type":"DELETED"/, got)
       remove_request_stub(stub_token)
 
-      file.write("rotated_token")
+      file.write('rotated_token')
       file.close
       stub_request(:get, %r{/watch/pods})
         .with(headers: { Authorization: 'Bearer rotated_token' })
@@ -134,8 +134,8 @@ class TestWatch < MiniTest::Test
       watcher.each { |notice| got = notice }
       assert_match(/\A{"type":"DELETED"/, got)
     ensure
-        file.close
-        file.unlink   # deletes the temp file
+      file.close
+      file.unlink # deletes the temp file
     end
   end
 
@@ -145,16 +145,19 @@ class TestWatch < MiniTest::Test
     file = Tempfile.new('token')
     client = Kubeclient::Client.new(
       'http://localhost:8080/api/', 'v1',
-      auth_options: { bearer_token: "valid_token" }
+      auth_options: { bearer_token: 'valid_token' }
     )
 
-    stub_token = stub_request(:get, %r{/watch/pods})
+    stub_request(:get, %r{/watch/pods})
       .with(headers: { Authorization: 'Bearer valid_token' })
       .to_return(body: open_test_file('watch_stream.json'), status: 200)
 
     got = nil
     client.watch_pods(as: :raw).each { |notice| got = notice }
     assert_match(/\A{"type":"DELETED"/, got)
+  ensure
+    file.close
+    file.unlink # deletes the temp file
   end
 
   # Ensure that WatchStream respects a format that's not JSON
