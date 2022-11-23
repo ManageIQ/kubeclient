@@ -1,5 +1,5 @@
 AllCops:
-  TargetRubyVersion: 2.5 # Oldest version kubeclient supports
+  TargetRubyVersion: 2.7 # Oldest version kubeclient supports
   NewCops: enable
 Metrics/MethodLength:
   Enabled: false
