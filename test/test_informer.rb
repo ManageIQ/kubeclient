@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 require_relative 'helper'
+require 'stringio'
+require 'logger'
 
 # tests with_retries in kubeclient.rb
 class RetryTest < MiniTest::Test
@@ -9,6 +11,7 @@ class RetryTest < MiniTest::Test
     skip if RUBY_ENGINE == 'truffleruby' # TODO: race condition in truffle-ruby fails random tests
     @slept = []
     stub_core_api_list
+    logger.expects(:error).with { |m| raise "Error: #{m}" }.never # catch problems early
   end
 
   # prevent leftover threads from causing trouble
@@ -105,10 +108,13 @@ class RetryTest < MiniTest::Test
       status: 200
     )
 
+    # start watchers
     seen1 = []
     seen2 = []
     seeer1 = Thread.new { informer.watch { |n| seen1 << n; break } }
     seeer2 = Thread.new { informer.watch { |n| seen2 << n; break } }
+
+    # wait for them to be registered and ready to receive items
     sleep(0.01) until informer.instance_variable_get(:@watching).size == 2
 
     with_worker do
@@ -150,7 +156,11 @@ class RetryTest < MiniTest::Test
   end
 
   def informer
-    @informer ||= Kubeclient::Informer.new(client, 'pods')
+    @informer ||= Kubeclient::Informer.new(client, 'pods', logger: logger)
+  end
+
+  def logger
+    @logger ||= Logger.new('/dev/null')
   end
 
   def pods_reply
