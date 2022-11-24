@@ -2,5 +2,5 @@
 
 # Kubernetes REST-API Client
 module Kubeclient
-  VERSION = '4.10.1'.freeze
+  VERSION = '4.10.1'
 end
