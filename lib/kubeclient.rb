@@ -225,7 +225,7 @@ module Kubeclient
           # So don't expect full last word to match.
           /^(?<prefix>.*[A-Z])(?<singular_suffix>[^A-Z]*)$/ =~ kind # "NetworkP", "olicy"
           if name.start_with?(prefix.downcase)
-            plural_suffix = name[prefix.length..-1] # "olicies"
+            plural_suffix = name[prefix.length..] # "olicies"
             prefix_underscores = underscore_entity(prefix) # "network_p"
             method_names = [
               prefix_underscores + singular_suffix, # "network_policy"
@@ -482,7 +482,8 @@ module Kubeclient
     #   :orphan_dependents (bool) - should the dependent objects be orphaned
     #   :propagation_policy (string) - one of Foreground|Background|Orphan
     #   :resource_version (string) - sets a limit on the resource versions that can be served
-    #   :resource_version_match (string) - determines how the resource_version constraint will be applied
+    #   :resource_version_match (string) - determines how the resource_version constraint
+    #     will be applied
     #   :timeout_seconds (integer) - limits the duraiton of the call
     #   :continue (string) - a token used to retrieve the next chunk of entities
     #   :as (:raw|:ros) - defaults to :ros
@@ -761,7 +762,7 @@ module Kubeclient
         http_proxy_uri: @http_proxy_uri,
         http_max_redirects: http_max_redirects,
         bearer_token_file: @auth_options[:bearer_token_file],
-        bearer_token: @auth_options[:bearer_token],
+        bearer_token: @auth_options[:bearer_token]
       }
 
       if uri.scheme == 'https'
