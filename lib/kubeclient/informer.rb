@@ -65,7 +65,7 @@ module Kubeclient
     end
 
     def watch_to_update_cache
-      watcher = @client.watch_entities(@resource_name, watch: true, resource_version: @started)
+      watcher = @client.watch_entities(@resource_name, watch: true, resource_version: @started, timeoutSeconds: 380)
       stop_reason = 'disconnect'
 
       # stop watcher without using timeout

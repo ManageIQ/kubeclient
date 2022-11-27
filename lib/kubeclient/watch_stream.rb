@@ -11,6 +11,7 @@ module Kubeclient
         @http_client = nil
         @http_options = http_options
         @http_options[:http_max_redirects] ||= Kubeclient::Client::DEFAULT_HTTP_MAX_REDIRECTS
+        @http_options[:keep_alive_timeout] ||= Kubeclient::Client::DEFAULT_KEEP_ALIVE_TIMEOUT
         @formatter = formatter
       end
 
