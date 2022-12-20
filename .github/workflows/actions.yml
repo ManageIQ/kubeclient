@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os_and_command.os }}
     strategy:
       matrix:
-        ruby: [ '2.5', '2.6', '2.7', '3.0', '3.1', 'ruby-head', 'truffleruby-head' ]
+        ruby: [ '2.7', '3.0', '3.1', 'ruby-head', 'truffleruby-head' ]
         os_and_command:
         - os: macos-latest
           command: 'env TESTOPTS="--verbose" bundle exec rake test'
@@ -27,7 +27,7 @@ jobs:
         include:
         # run rubocop against lowest supported ruby
         - os: ubuntu-latest
-          ruby: '2.5'
+          ruby: '2.7'
           command: 'bundle exec rake rubocop'
     name: ${{ matrix.os_and_command.os }} ${{ matrix.ruby }} rake ${{ matrix.os_and_command.command }}
     steps:

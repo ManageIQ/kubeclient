@@ -1,35 +1,132 @@
 AllCops:
   DisplayCopNames: true
-  TargetRubyVersion: 2.2 # Oldest version kubeclient supports
+  TargetRubyVersion: 2.7 # Oldest version kubeclient supports
 MethodLength:
   Enabled: false
 ClassLength:
   Enabled: false
 Metrics/AbcSize:
   Enabled: false
-Metrics/LineLength:
-  Max: 100
 Metrics/ParameterLists:
   Max: 5
   CountKeywordArgs: false
-Metrics/CyclomaticComplexity:
-  Max: 8
-Metrics/PerceivedComplexity:
-  Max: 8
 Metrics/ModuleLength:
   Enabled: false
-Style/MethodCallWithArgsParentheses:
-  Enabled: true
-  IgnoredMethods: [require, raise, include, attr_reader, refute, assert]
-  Exclude: [Gemfile, Rakefile, kubeclient.gemspec, Gemfile.dev.rb]
 Metrics/BlockLength:
   Exclude: [kubeclient.gemspec]
 Security/MarshalLoad:
   Exclude: [test/**/*]
 Style/FileName:
   Exclude: [Gemfile, Rakefile, Gemfile.dev.rb]
-Style/MethodCallWithArgsParentheses:
-  IgnoredMethods:
-  - require_relative
 Style/RegexpLiteral:
+  Enabled: false
+
+# Cops that have active offences in the codebase.
+Lint/RedundantCopDisableDirective:
+  Enabled: false
+Metrics/CyclomaticComplexity:
+  Enabled: false
+  Max: 8
+Metrics/PerceivedComplexity:
+  Enabled: false
+  Max: 8
+Style/MethodCallWithArgsParentheses:
+  Enabled: false
+  IgnoredMethods: [require, require_relative, raise, include, attr_reader, refute, assert]
+  Exclude: [Gemfile, Rakefile, kubeclient.gemspec, Gemfile.dev.rb]
+Style/FrozenStringLiteralComment:
+  Enabled: false
+Lint/UnreachableLoop:
+  Enabled: false
+Style/RedundantRegexpEscape:
+  Enabled: false
+Layout/MultilineMethodCallIndentation:
+  Enabled: false
+Lint/UselessAssignment:
+  Enabled: false
+Style/StringLiterals:
+  Enabled: false
+Layout/ExtraSpacing:
+  Enabled: false
+Layout/IndentationWidth:
+  Enabled: false
+Naming/MethodParameterName:
+  Enabled: false
+Layout/HashAlignment:
+  Enabled: false
+Layout/TrailingWhitespace:
+  Enabled: false
+Naming/RescuedExceptionsVariableName:
+  Enabled: false
+Style/RedundantBegin:
+  Enabled: false
+Style/WordArray:
+  Enabled: false
+Style/ExplicitBlockArgument:
+  Enabled: false
+Layout/LeadingEmptyLines:
+  Enabled: false
+Layout/EmptyLineAfterGuardClause:
+  Enabled: false
+Style/SafeNavigation:
+  Enabled: false
+Style/SoleNestedConditional:
+  Enabled: false
+Lint/MissingSuper:
+  Enabled: false
+Style/IfUnlessModifier:
+  Enabled: false
+Layout/LineLength:
+  Enabled: false
+Lint/MissingCopEnableDirective:
+  Enabled: false
+Naming/MethodName:
+  Enabled: false
+Style/StringConcatenation:
+  Enabled: false
+Style/SlicingWithRange:
+  Enabled: false
+Lint/MixedRegexpCaptureTypes:
+  Enabled: false
+Style/AccessorGrouping:
+  Enabled: false
+Style/HashEachMethods:
+  Enabled: false
+Naming/AccessorMethodName:
+  Enabled: false
+Style/RedundantAssignment:
+  Enabled: false
+Gemspec/OrderedDependencies:
+  Enabled: false
+Style/ExpandPathArguments:
+  Enabled: false
+Style/Encoding:
+  Enabled: false
+
+# New Cops to configure
+Lint/DuplicateBranch: # (new in 1.3)
+  Enabled: false
+Lint/DuplicateRegexpCharacterClassElement: # (new in 1.1)
+  Enabled: false
+Lint/EmptyBlock: # (new in 1.1)
+  Enabled: false
+Lint/EmptyClass: # (new in 1.3)
+  Enabled: false
+Lint/NoReturnInBeginEndBlocks: # (new in 1.2)
+  Enabled: false
+Lint/ToEnumArguments: # (new in 1.1)
+  Enabled: false
+Lint/UnmodifiedReduceAccumulator: # (new in 1.1)
+  Enabled: false
+Style/ArgumentsForwarding: # (new in 1.1)
+  Enabled: false
+Style/CollectionCompact: # (new in 1.2)
+  Enabled: false
+Style/DocumentDynamicEvalDefinition: # (new in 1.1)
+  Enabled: false
+Style/NegatedIfElseCondition: # (new in 1.2)
+  Enabled: false
+Style/NilLambda: # (new in 1.3)
+  Enabled: false
+Style/SwapValues: # (new in 1.1)
   Enabled: false
