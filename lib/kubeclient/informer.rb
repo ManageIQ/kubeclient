@@ -65,17 +65,17 @@ module Kubeclient
     end
 
     def watch_to_update_cache
-      watcher = @client.watch_entities(@resource_name, watch: true, resource_version: @started)
+      @watcher = @client.watch_entities(@resource_name, watch: true, resource_version: @started)
       stop_reason = 'disconnect'
 
       # stop watcher without using timeout
       Thread.new do
         sleep(@reconcile_timeout)
         stop_reason = 'reconcile'
-        watcher.finish
+        @watcher.finish
       end
 
-      watcher.each do |notice|
+      @watcher.each do |notice|
         case notice[:type]
         when 'ADDED', 'MODIFIED' then @cache[cache_key(notice[:object])] = notice[:object]
         when 'DELETED' then @cache.delete(cache_key(notice[:object]))

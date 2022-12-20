@@ -141,7 +141,8 @@ class RetryTest < MiniTest::Test
 
   def with_worker
     informer.start_worker
-    sleep(0.03) # wait for worker to watch
+    sleep(0.01) until informer.instance_variable_get(:@watcher) # wait for worker to watch
+    sleep(0.01) # give some time for threads to store
     yield
   ensure
     informer.stop_worker
