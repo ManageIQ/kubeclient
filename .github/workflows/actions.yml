@@ -27,7 +27,7 @@ jobs:
         include:
         # run rubocop against lowest supported ruby
         - os: ubuntu-latest
-          ruby: '2.5'
+          ruby: '2.7'
           command: 'bundle exec rake rubocop'
     name: ${{ matrix.os_and_command.os }} ${{ matrix.ruby }} rake ${{ matrix.os_and_command.command }}
     steps:
