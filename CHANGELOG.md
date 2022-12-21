@@ -4,6 +4,18 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
+## 4.11.0 — 2022-12-22
+
+### Removed
+
+- Dropped support for EOL Ruby versions 2.5, 2.6. (#589)
+
+### Added
+
+- Relaxed dependency on `http` gem (used for watches) to allow 5.y.z versions. (#589)
+
+  - Specifically, http 5.1.1 may fix issues watching with IPv6. (#585)
+
 ## 4.10.1 — 2022-10-01
 
 ### Removed
