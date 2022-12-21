@@ -9,6 +9,25 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 ### Changed
 - `Kubeclient::Client.new` now always requires an api version, use for example: `Kubeclient::Client.new(uri, 'v1')`
 
+### TODO: lots of changes on master branch missing here!
+
+----
+
+NOTE: newest 4.y.z versions sometimes missing here — see CHANGELOG.md on `v4.y` branch:
+https://github.com/ManageIQ/kubeclient/blob/v4.y/CHANGELOG.md
+
+## 4.11.0 — 2022-12-22
+
+### Removed
+
+- Dropped support for EOL Ruby versions 2.5, 2.6. (#589)
+
+### Added
+
+- Relaxed dependency on `http` gem (used for watches) to allow 5.y.z versions. (#589)
+
+  - Specifically, http 5.1.1 may fix issues watching with IPv6. (#585)
+
 ## 4.10.1 — 2022-10-01
 
 ### Removed
