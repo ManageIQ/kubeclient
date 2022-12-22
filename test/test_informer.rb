@@ -4,8 +4,7 @@ require_relative 'helper'
 require 'stringio'
 require 'logger'
 
-# tests with_retries in kubeclient.rb
-class RetryTest < MiniTest::Test
+class TestInformer < MiniTest::Test
   def setup
     super
     skip if RUBY_ENGINE == 'truffleruby' # TODO: race condition in truffle-ruby fails random tests
@@ -87,14 +86,14 @@ class RetryTest < MiniTest::Test
       status: 200
     )
     slept = []
-    informer.stubs(:sleep).with { |x| slept << x; sleep(0.01) }
+    informer.stubs(:sleep).with { |x| slept << x; sleep(0.02) }
 
     with_worker do
       assert_equal(['a'], informer.list.map { |p| p.metadata.name })
-      sleep(0.05)
+      sleep(0.2) # should give us 5+ restarts (each timeout is 1 sleep and 1 sleep before restart)
     end
 
-    assert slept.size >= 2, slept
+    assert slept.size >= 4, slept
     assert_requested(list, at_least_times: 2)
     assert_requested(watch, at_least_times: 2)
   end
@@ -131,10 +130,14 @@ class RetryTest < MiniTest::Test
   def test_timeout
     timeout = 0.1
     informer.instance_variable_set(:@reconcile_timeout, timeout)
-    stub_list
+    list = stub_list
     Kubeclient::Common::WatchStream.any_instance.expects(:finish)
-    stub_request(:get, %r{/v1/watch/pods})
+    watch = stub_request(:get, %r{/v1/watch/pods})
+
     with_worker { sleep(timeout * 1.9) }
+
+    assert_requested(list)
+    assert_requested(watch)
   end
 
   private
