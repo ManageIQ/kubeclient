@@ -893,6 +893,19 @@ informer.list # all current pods
 informer.watch { |notice|  } # watch for changes (hides restarts and errors)
 ```
 
+To pass custom options to the list and watch request, like setting namespace, the
+initializer accepts `options` keyword:
+
+```ruby
+informer = Kubeclient::Informer.new(
+  client,
+  "pods",
+  options: { namespace: "some-namespace" },
+  reconcile_timeout: 15 * 60,
+  logger: Logger.new(STDOUT)
+)
+```
+
 ## Contributing
 
 1. Fork it ( https://github.com/[my-github-username]/kubeclient/fork )

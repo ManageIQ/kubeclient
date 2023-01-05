@@ -29,6 +29,20 @@ class TestInformer < MiniTest::Test
     assert_requested(watch, times: 1)
   end
 
+  def test_passing_options
+    @informer = Kubeclient::Informer.new(client, 'pods', logger: logger,
+                                         options: { namespace: 'my-namespace' })
+    list = stub_request(:get, %r{/v1/namespaces/my-namespace/pods})
+           .to_return(body: pods_reply.to_json, status: 200)
+    watch = stub_request(:get, %r{/v1/watch/namespaces/my-namespace/pods})
+            .to_return(body: '', status: 200)
+    with_worker do
+      assert_equal(['a'], informer.list.map { |p| p.metadata.name })
+    end
+    assert_requested(list, times: 1)
+    assert_requested(watch, times: 1)
+  end
+
   def test_watches_for_updates
     lock = Mutex.new
     lock.lock
