@@ -25,32 +25,26 @@ module Kubeclient
     def start_worker
       @stopped = false
       @worker = Thread.new do
-        loop do
+        until @stopped
           begin
             fill_cache
-            watch_to_update_cache
+            stop_reason = watch_to_update_cache
+            @logger&.info("watch restarted: #{stop_reason}")
           rescue StandardError => e
             # need to keep retrying since we work in the background
             @logger&.error("ignoring error during background work #{e}")
           ensure
             sleep(1) # do not overwhelm the api-server if we are somehow broken
           end
-          break if @stopped
         end
       end
       sleep(0.01) until @cache || @stopped
     end
 
     def stop_worker
-      @stopped = true
-      [@waiter, @worker].compact.each do |thread|
-        begin
-          thread.run # cancel sleep so either the loop sleep or the timeout sleep are interrupted
-        rescue ThreadError
-          # thread was already dead
-        end
-        thread.join
-      end
+      @stopped = true # mark that any threads should be stopped if it is running
+      pass_and_run(@worker) # skip the end loop sleep
+      @worker.join
     end
 
     private
@@ -80,38 +74,57 @@ module Kubeclient
     end
 
     def watch_to_update_cache
+      watcher_with_timeout do |watcher|
+        stop_reason = 'disconnect'
+
+        watcher.each do |notice|
+          case notice[:type]
+          when 'ADDED', 'MODIFIED' then @cache[cache_key(notice[:object])] = notice[:object]
+          when 'DELETED' then @cache.delete(cache_key(notice[:object]))
+          when 'ERROR'
+            stop_reason = 'error'
+            break
+          else
+            @logger&.error("Unsupported event type #{notice[:type]}")
+          end
+          @watching.each { |q| q << notice }
+        end
+
+        stop_reason
+      end
+    end
+
+    def watcher_with_timeout
       watch_options = @options.merge(watch: true, resource_version: @started)
       @watcher = @client.watch_entities(@resource_name, watch_options)
-      stop_reason = 'disconnect'
+      timeout_deadline = Time.now + @reconcile_timeout
+      watcher_finished = false
 
-      # stop watcher without using timeout
-      @waiter = Thread.new do
-        sleep(@reconcile_timeout)
-        stop_reason = 'reconcile'
-        @watcher.finish
-      end
-
-      @watcher.each do |notice|
-        case notice[:type]
-        when 'ADDED', 'MODIFIED' then @cache[cache_key(notice[:object])] = notice[:object]
-        when 'DELETED' then @cache.delete(cache_key(notice[:object]))
-        when 'ERROR'
-          stop_reason = 'error'
-          break
-        else
-          @logger&.error("Unsupported event type #{notice[:type]}")
+      finisher_thread = Thread.new do
+        sleep(0.5) until @stopped || watcher_finished || Time.now > timeout_deadline
+        # loop calling finish until the actual method has
+        # exited, since watcher.each may be called after the
+        # finish in this thread is called
+        loop do
+          @watcher.finish
+          break if watcher_finished
+          sleep(0.5)
         end
-        @watching.each { |q| q << notice }
       end
-      @logger&.info("watch restarted: #{stop_reason}")
 
-      # wake the waiter unless it's dead so it does not hang around
-      begin
-        Thread.pass # make sure we get into the sleep state of the waiter
-        @waiter.run
-      rescue ThreadError # rubocop:disable Lint/SuppressedException
-      end
-      @waiter.join
+      stop_reason = yield(@watcher)
+      Time.now > timeout_deadline ? 'reconcile' : stop_reason # return the reason
+    ensure
+      watcher_finished = true
+      pass_and_run(finisher_thread) # skip the sleep to evaluate exit condition
+      finisher_thread.join
+    end
+
+    def pass_and_run(thread)
+      Thread.pass
+      thread.run
+    rescue ThreadError
+      # thread was already dead
     end
   end
 end
