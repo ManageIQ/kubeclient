@@ -95,19 +95,21 @@ class TestInformer < MiniTest::Test
 
   def test_restarts_on_error
     list = stub_list
-    watch = stub_request(:get, %r{/v1/watch/pods}).to_return(
-      body: { type: 'ERROR' }.to_json << "\n",
-      status: 200
-    )
-    slept = []
-    informer.stubs(:sleep).with { |x| slept << x; sleep(0.02) }
+    watch_requests = []
+    watch = stub_request(:get, %r{/v1/watch/pods}).to_return do |request|
+      watch_requests << request
+      {
+        body: { type: 'ERROR' }.to_json << "\n",
+        status: 200
+      }
+    end
+    informer.stubs(:sleep).with { sleep(0.02) }
 
     with_worker do
       assert_equal(['a'], informer.list.map { |p| p.metadata.name })
-      sleep(0.2) # should give us 5+ restarts (each timeout is 1 sleep and 1 sleep before restart)
+      sleep(0.2) until watch_requests.count > 2 # wait for few restarts
     end
 
-    assert slept.size >= 4, slept
     assert_requested(list, at_least_times: 2)
     assert_requested(watch, at_least_times: 2)
   end
@@ -154,6 +156,70 @@ class TestInformer < MiniTest::Test
     assert_requested(watch)
   end
 
+  # test condition that can happen when client calls stop_worker
+  # immediatelly after return from start_worker
+  # (e.g. in case data from initial list are satisfactory)
+  def test_stop_before_watcher_each_race_condition
+    stub_list
+
+    # pause watcher to give time to call the stop_worker
+    watcher_instance = WatcherMock.new
+    watcher_instance.paused = true
+    client.stubs(:watch_entities).returns(watcher_instance)
+
+    informer.start_worker
+
+    # wait until execution is at watcher.each
+    sleep(0.1) until watcher_instance.waiting
+
+    # stop worker
+    stop_thread = Thread.new do
+      informer.stop_worker
+    end
+
+    # unpause watcher after stop is set to true
+    sleep(0.1) until informer.instance_variable_get('@stopped')
+    watcher_instance.paused = false
+
+    # wait for stop to return
+    stop_thread.join
+    assert_equal(watcher_instance.finished, true)
+  end
+
+  def test_stop_before_watcher_created_race_condition
+    stub_list
+    stub_request(:get, %r{/v1/watch/pods}).to_return(body: '', status: 200)
+
+    # pause before creating the watcher
+    paused = true
+    waiting = false
+    watcher_instance = WatcherMock.new
+
+    client.stubs(:watch_entities).with do
+      waiting = true
+      sleep(0.1) while paused
+      true
+    end.returns(watcher_instance)
+
+    informer.start_worker
+
+    # wait until execution is at client.watch_entities
+    sleep(0.1) until waiting
+
+    # stop worker
+    stop_thread = Thread.new do
+      informer.stop_worker
+    end
+
+    # unpause watch_entities after stop is set to true
+    sleep(0.1) until informer.instance_variable_get('@stopped')
+    paused = false
+
+    # wait for stop to return
+    stop_thread.join
+    assert_equal(watcher_instance.finished, true)
+  end
+
   private
 
   def with_worker
@@ -186,5 +252,23 @@ class TestInformer < MiniTest::Test
       metadata: { resourceVersion: 1 },
       items: [{ metadata: { name: 'a', uid: 'id1' } }]
     }
+  end
+
+  class WatcherMock
+    attr_accessor :finished
+    attr_accessor :waiting
+    attr_accessor :paused
+
+    def finish
+      @finished = true
+    end
+
+    def each
+      @waiting = true
+      sleep(0.1) while @paused
+
+      @finished = false
+      sleep(0.1) until @finished # simulate blocking for receiving events forever (until finished)
+    end
   end
 end

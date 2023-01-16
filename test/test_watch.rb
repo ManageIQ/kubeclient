@@ -238,4 +238,85 @@ class TestWatch < MiniTest::Test
 
     assert_requested(:get, "#{api_host}/v1/watch/events", times: 1)
   end
+
+  def test_watch_finish_when_response_connection_open
+    server = start_http_server do |request, io|
+      io << "HTTP/1.1 200 OK\r\n"
+      io << "Content-Type: application/json\r\n"
+      if request[0] == "GET /api/v1 HTTP/1.1\r\n"
+        io << "\r\n"
+        io.write(open_test_file('core_api_resource_list.json').read)
+        next
+      else
+        io << "Transfer-Encoding: chunked\r\n"
+        io << "\r\n"
+        until io.closed?
+          open_test_file('watch_stream.json').each_line do |line|
+            http_send_chunk(io, line)
+            sleep(1)
+          end
+        end
+      end
+    end
+
+    # WebMock with "allow_localhost" is still interfering
+    # with the connections and breaks streaming
+    WebMock.disable!
+
+    received_notices = []
+    client = Kubeclient::Client.new("#{server[:url]}/api", 'v1')
+    watcher = client.watch_pods
+    watcher_thread = Thread.new do
+      watcher.each do |notice|
+        received_notices << notice
+      end
+    end
+
+    sleep(0.1) until received_notices.count > 1
+    watcher.finish
+    sleep(0.1) while watcher_thread.alive?
+    assert_equal(watcher_thread.alive?, false)
+  ensure
+    WebMock.enable!
+    server[:server].close
+  end
+
+  private
+
+  def start_http_server(host: '127.0.0.1', port: Random.rand(1000..10_999))
+    server = TCPServer.new(host, port)
+
+    Thread.new do
+      until server.closed?
+        client = server.accept
+
+        # loop thru request headers
+        request = []
+        loop do
+          request << client.gets
+          break if request[-1] == "\r\n"
+        end
+
+        begin
+          yield(request, client)
+        ensure
+          client.close
+        end
+      end
+    end
+
+    {
+      server: server,
+      host: host,
+      port: port,
+      url: "http://#{host}:#{port}"
+    }
+  end
+
+  def http_send_chunk(io, data)
+    io << "#{data.size.to_s(16)}\r\n"
+    io.write(data)
+    io << "\r\n"
+    io.flush
+  end
 end
