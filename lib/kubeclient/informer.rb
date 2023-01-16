@@ -1,7 +1,7 @@
 module Kubeclient
   # caches results for multiple consumers to share and keeps them updated with a watch
   class Informer
-    def initialize(client, resource_name, reconcile_timeout: 15 * 60, logger: nil)
+    def initialize(client, resource_name, options: {}, reconcile_timeout: 15 * 60, logger: nil)
       @client = client
       @resource_name = resource_name
       @reconcile_timeout = reconcile_timeout
@@ -10,6 +10,7 @@ module Kubeclient
       @started = nil
       @stopped = false
       @watching = []
+      @options = options
     end
 
     def list
@@ -70,7 +71,8 @@ module Kubeclient
     end
 
     def fill_cache
-      reply = @client.get_entities(nil, @resource_name, raw: true, resource_version: '0')
+      get_options = @options.merge(raw: true, resource_version: '0')
+      reply = @client.get_entities(nil, @resource_name, get_options)
       @cache = reply[:items].each_with_object({}) do |item, h|
         h[cache_key(item)] = item
       end
@@ -78,7 +80,8 @@ module Kubeclient
     end
 
     def watch_to_update_cache
-      @watcher = @client.watch_entities(@resource_name, watch: true, resource_version: @started)
+      watch_options = @options.merge(watch: true, resource_version: @started)
+      @watcher = @client.watch_entities(@resource_name, watch_options)
       stop_reason = 'disconnect'
 
       # stop watcher without using timeout
