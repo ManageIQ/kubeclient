@@ -368,7 +368,8 @@ module Kubeclient
           client_key: @ssl_options[:client_key],
           verify: @ssl_options[:verify_ssl] != OpenSSL::SSL::VERIFY_NONE,
           verify_mode: @ssl_options[:verify_ssl]
-        }
+        },
+        headers: @headers
       }
 
       Faraday.new(url, options) do |connection|
