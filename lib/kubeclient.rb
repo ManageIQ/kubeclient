@@ -750,14 +750,18 @@ module Kubeclient
     def configure_impersonation_headers
       return unless (auth_as = @auth_options[:as])
       @headers[:'Impersonate-User'] = auth_as
-      if (auth_as_groups = @auth_options[:as_groups])
-        @headers[:'Impersonate-Group'] = Array(auth_as_groups).join
+      if (as_groups = @auth_options[:as_groups])
+        # Faraday joins multi-value headers with commas, which is not same as having
+        # multiple headers with the same name, as required by the k8s API
+        raise ArgumentError, 'Multiple as_groups are not supported' if as_groups.count > 1
+        @headers[:'Impersonate-Group'] = as_groups[0]
       end
-      if (auth_as_uid = @auth_options[:as_uid])
-        @headers[:'Impersonate-Uid'] = auth_as_uid
+      if (as_uid = @auth_options[:as_uid])
+        @headers[:'Impersonate-Uid'] = as_uid
       end
-      @auth_options[:as_user_extra]&.each do |k, v|
-        @headers[:"Impersonate-Extra-#{k}"] = Array(v).join
+      @auth_options[:as_user_extra]&.each do |extra_name, values|
+        raise ArgumentError, 'Multivalue as_user_extra fields are not supported' if values.count > 1
+        @headers[:"Impersonate-Extra-#{extra_name}"] = values[0]
       end
     end
 

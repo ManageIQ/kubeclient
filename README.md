@@ -455,6 +455,9 @@ client = Kubeclient::Client.new(
 )
 ```
 
+Note that only one group and one value per each extra field are currently supported. Using list of multiple values
+will result in `ArgumentError`.
+
 ### Supported kubernetes versions
 
 We try to support the last 3 minor versions, matching the [official support policy for Kubernetes](https://github.com/kubernetes/community/blob/master/contributors/design-proposals/release/versioning.md#supported-releases-and-component-skew).

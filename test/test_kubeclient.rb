@@ -842,17 +842,18 @@ class KubeclientTest < MiniTest::Test
   end
 
   def test_impersonate
-    stub_request(:get, 'http://localhost:8080/api/v1/pods')
-      .with(
-        headers: {
-          Authorization: 'Bearer valid_token',
-          'Impersonate-Extra-Reason': 'baz',
-          'Impersonate-Group': 'bar',
-          'Impersonate-User': 'foo',
-          'Impersonate-Uid': '123'
-        }
-      )
-      .to_return(body: { items: [] }.to_json)
+    pods_stub = stub_request(:get, 'http://localhost:8080/api/v1/pods')
+                .with(
+                  headers: {
+                    Authorization: 'Bearer valid_token',
+                    'Impersonate-Extra-Reason': 'reason-1',
+                    'Impersonate-Extra-Scopes': 'scope-1',
+                    'Impersonate-Group': 'bar',
+                    'Impersonate-User': 'foo',
+                    'Impersonate-Uid': '123'
+                  }
+                )
+                .to_return(body: { items: [] }.to_json)
     stub_request(:get, %r{/api/v1$})
       .with(headers: { Authorization: 'Bearer valid_token' })
       .to_return(body: open_test_file('core_api_resource_list.json'))
@@ -864,12 +865,29 @@ class KubeclientTest < MiniTest::Test
         bearer_token: 'valid_token',
         as: 'foo',
         as_groups: ['bar'],
-        as_user_extra: { 'reason' => ['baz'] },
+        as_user_extra: { 'reason' => ['reason-1'], 'scopes' => ['scope-1'] },
         as_uid: '123'
       }
     )
 
     client.get_pods
+    assert_requested(pods_stub)
+  end
+
+  def test_impersonate_limitations
+    assert_raises(ArgumentError) do
+      Kubeclient::Client.new(
+        'http://localhost:8080/api/',
+        'v1',
+        auth_options: {
+          bearer_token: 'valid_token',
+          as: 'foo',
+          as_groups: ['bar', 'baz'],
+          as_user_extra: { 'reason' => ['reason-1', 'reason-2'] },
+          as_uid: '123'
+        }
+      )
+    end
   end
 
   def test_proxy_url
