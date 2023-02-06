@@ -281,6 +281,36 @@ class TestWatch < MiniTest::Test
     server[:server].close
   end
 
+  def test_watch_impersonation_headers
+    stub_core_api_list
+    watch_stub = stub_request(:get, %r{/watch/pods})
+                 .with(
+                   headers: {
+                     'Impersonate-User' => 'admin',
+                     'Impersonate-Group' => 'system:masters',
+                     'Impersonate-Extra-Reason' => 'admin access',
+                     'Impersonate-Extra-Scope' => 'foo'
+                   }
+                 )
+                 .to_return(body: open_test_file('watch_stream.json'), status: 200)
+
+    client = Kubeclient::Client.new(
+      'http://localhost:8080/api/',
+      'v1',
+      auth_options: {
+        as: 'admin',
+        as_groups: ['system:masters'],
+        as_user_extra: {
+          'reason' => ['admin access'],
+          'scope' => ['foo']
+        }
+      }
+    )
+    yielded = []
+    client.watch_pods { |notice| yielded << notice.type }
+    assert_requested(watch_stub)
+  end
+
   private
 
   def start_http_server(host: '127.0.0.1', port: Random.rand(1000..10_999))
