@@ -246,6 +246,19 @@ class KubeclientConfigTest < MiniTest::Test
     )
   end
 
+  def test_impersonate_empty_groups
+    parsed = YAML.safe_load(File.read(config_file('impersonate-empty-groups.kubeconfig')))
+    config = Kubeclient::Config.new(parsed, nil)
+    assert_equal(
+      {
+        as: 'foo',
+        as_groups: [],
+        as_user_extra: { 'reason' => [] }
+      },
+      config.context(config.contexts.first).auth_options
+    )
+  end
+
   private
 
   def check_context(context, ssl: true, custom_ca: true, client_cert: true)

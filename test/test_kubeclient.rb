@@ -874,6 +874,36 @@ class KubeclientTest < MiniTest::Test
     assert_requested(pods_stub)
   end
 
+  def test_impersonate_empty_groups
+    pods_headers = nil
+    pods_stub = stub_request(:get, 'http://localhost:8080/api/v1/pods')
+                .with { |request| pods_headers = request.headers }
+                .to_return(body: { items: [] }.to_json)
+    stub_request(:get, %r{/api/v1$})
+      .with(headers: { Authorization: 'Bearer valid_token' })
+      .to_return(body: open_test_file('core_api_resource_list.json'))
+
+    client = Kubeclient::Client.new(
+      'http://localhost:8080/api/',
+      'v1',
+      auth_options: {
+        bearer_token: 'valid_token',
+        as: 'foo',
+        as_groups: [],
+        as_user_extra: { 'reason' => [], 'scopes' => [] },
+        as_uid: '123'
+      }
+    )
+
+    client.get_pods
+    assert_requested(pods_stub)
+    assert_includes(pods_headers, 'Impersonate-User')
+    assert_includes(pods_headers, 'Impersonate-Uid')
+    refute_includes(pods_headers, 'Impersonate-Groups')
+    refute_includes(pods_headers, 'Impersonate-Extra-Reason')
+    refute_includes(pods_headers, 'Impersonate-Extra-Scopes')
+  end
+
   def test_impersonate_limitations
     assert_raises(ArgumentError) do
       Kubeclient::Client.new(
