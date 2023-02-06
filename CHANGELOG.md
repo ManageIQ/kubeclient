@@ -6,6 +6,9 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 
 ## Unreleased — to become 5.y.z
 
+### Added
+- Added impersonation support. Limited to at most 1 group in `as_groups` and 1 value for each `as_user_extra` field. (#600)
+
 ### Changed
 - `Kubeclient::Client.new` now always requires an api version, use for example: `Kubeclient::Client.new(uri, 'v1')`
 
