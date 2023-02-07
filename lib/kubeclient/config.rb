@@ -60,6 +60,7 @@ module Kubeclient
       client_cert_data = fetch_user_cert_data(user)
       client_key_data  = fetch_user_key_data(user)
       auth_options     = fetch_user_auth_options(user)
+      auth_options.merge!(fetch_user_impersonate_options(user))
 
       ssl_options = {}
 
@@ -183,6 +184,14 @@ module Kubeclient
           options[attr.to_sym] = user[attr] if user.key?(attr)
         end
       end
+      options
+    end
+
+    def fetch_user_impersonate_options(user)
+      options = {}
+      options[:as] = user['as'] if user.key?('as')
+      options[:as_groups] = user['as-groups'] if user.key?('as-groups')
+      options[:as_user_extra] = user['as-user-extra'] if user.key?('as-user-extra')
       options
     end
 

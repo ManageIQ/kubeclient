@@ -137,6 +137,7 @@ module Kubeclient
       @as = as
 
       validate_bearer_token_file
+      configure_impersonation_headers
     end
 
     def configure_faraday(&block)
@@ -367,7 +368,8 @@ module Kubeclient
           client_key: @ssl_options[:client_key],
           verify: @ssl_options[:verify_ssl] != OpenSSL::SSL::VERIFY_NONE,
           verify_mode: @ssl_options[:verify_ssl]
-        }
+        },
+        headers: @headers
       }
 
       Faraday.new(url, options) do |connection|
@@ -742,6 +744,25 @@ module Kubeclient
       return unless (file = @auth_options[:bearer_token_file])
       raise ArgumentError, "Token file #{file} does not exist" unless File.file?(file)
       raise ArgumentError, "Token file #{file} cannot be read" unless File.readable?(file)
+    end
+
+    # following https://kubernetes.io/docs/reference/access-authn-authz/authentication/#user-impersonation
+    def configure_impersonation_headers
+      return unless (auth_as = @auth_options[:as])
+      @headers[:'Impersonate-User'] = auth_as
+      if (as_groups = @auth_options[:as_groups])
+        # Faraday joins multi-value headers with commas, which is not same as having
+        # multiple headers with the same name, as required by the k8s API
+        raise ArgumentError, 'Multiple as_groups are not supported' if as_groups.count > 1
+        @headers[:'Impersonate-Group'] = as_groups[0]
+      end
+      if (as_uid = @auth_options[:as_uid])
+        @headers[:'Impersonate-Uid'] = as_uid
+      end
+      @auth_options[:as_user_extra]&.each do |extra_name, values|
+        raise ArgumentError, 'Multivalue as_user_extra fields are not supported' if values.count > 1
+        @headers[:"Impersonate-Extra-#{extra_name}"] = values[0]
+      end
     end
 
     def return_or_yield_to_watcher(watcher, &block)
