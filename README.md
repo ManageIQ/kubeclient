@@ -1,8 +1,8 @@
 # Kubeclient
 
 [![Gem Version](https://badge.fury.io/rb/kubeclient.svg)](http://badge.fury.io/rb/kubeclient)
-[![Build Status](https://github.com/abonas/kubeclient/actions/workflows/actions.yml/badge.svg)](https://github.com/abonas/kubeclient/actions?branch=master)
-[![Code Climate](https://codeclimate.com/github/abonas/kubeclient.svg)](https://codeclimate.com/github/abonas/kubeclient)
+[![Build Status](https://github.com/ManageIQ/kubeclient/actions/workflows/actions.yml/badge.svg)](https://github.com/ManageIQ/kubeclient/actions?branch=master)
+[![Code Climate](https://codeclimate.com/github/ManageIQ/kubeclient.svg)](https://codeclimate.com/github/ManageIQ/kubeclient)
 [![Downloads rate by version](https://img.shields.io/badge/downloads%20rate-by%20version-blue)](https://ui.honeycomb.io/ruby-together/datasets/rubygems.org/result/7mZHKUfmHkj)
 
 A Ruby client for Kubernetes REST api.
@@ -398,7 +398,7 @@ using `kubectl`.
 
 #### How to manually renew expired credentials
 
-Kubeclient [does not yet](https://github.com/abonas/kubeclient/issues/393) help with this.
+Kubeclient [does not yet](https://github.com/ManageIQ/kubeclient/issues/393) help with this.
 
 The division of labor between `Config` and `Context` objects may change, for now please make no assumptions at which stage `exec:` and `auth-provider:` are handled and whether they're cached.
 The currently guaranteed way to renew is create a new `Config` object.
@@ -497,7 +497,7 @@ apply_foo(Kubeclient::Resource.new({metadata: {name: 'name', namespace: 'namespa
 apply_foo(Kubeclient::Resource.new({metadata: {name: 'name', ...}, ...}), field_manager: 'myapp', **opts)  # global
 ```
 
-These grew to be quite inconsistent :confounded:, see https://github.com/abonas/kubeclient/issues/312 and https://github.com/abonas/kubeclient/issues/332 for improvement plans.
+These grew to be quite inconsistent :confounded:, see https://github.com/ManageIQ/kubeclient/issues/312 and https://github.com/ManageIQ/kubeclient/issues/332 for improvement plans.
 
 ### Get all instances of a specific entity type
 Such as: `get_pods`, `get_secrets`, `get_services`, `get_nodes`, `get_replication_controllers`, `get_resource_quotas`, `get_limit_ranges`, `get_persistent_volumes`, `get_persistent_volume_claims`, `get_component_statuses`, `get_service_accounts`
