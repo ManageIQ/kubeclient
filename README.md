@@ -2,7 +2,7 @@
 
 [![Gem Version](https://badge.fury.io/rb/kubeclient.svg)](http://badge.fury.io/rb/kubeclient)
 [![Build Status](https://github.com/abonas/kubeclient/actions/workflows/actions.yml/badge.svg)](https://github.com/abonas/kubeclient/actions?branch=master)
-[![Code Climate](https://img.shields.io/codeclimate/maintainability/abonas/kubeclient)](https://codeclimate.com/github/abonas/kubeclient)
+[![Code Climate](https://codeclimate.com/github/abonas/kubeclient.svg)](https://codeclimate.com/github/abonas/kubeclient)
 [![Downloads rate by version](https://img.shields.io/badge/downloads%20rate-by%20version-blue)](https://ui.honeycomb.io/ruby-together/datasets/rubygems.org/result/7mZHKUfmHkj)
 
 A Ruby client for Kubernetes REST api.
