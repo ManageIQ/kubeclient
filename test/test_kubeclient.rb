@@ -4,6 +4,9 @@ require_relative 'helper'
 
 # Kubernetes client entity tests
 class KubeclientTest < MiniTest::Test
+  class TestFaradayMiddleware # rubocop:disable Lint/EmptyClass:
+  end
+
   def test_json
     our_object = Kubeclient::Resource.new
     our_object.foo = 'bar'
@@ -341,12 +344,12 @@ class KubeclientTest < MiniTest::Test
 
   def test_custom_faraday_config_options
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
-    expected_middlewares = [FaradayMiddleware::FollowRedirects, Faraday::Response::RaiseError]
+    expected_middlewares = [Faraday::FollowRedirects::Middleware, Faraday::Response::RaiseError]
     expected_middlewares.each do |klass|
       assert(client.faraday_client.builder.handlers.include?(klass))
     end
-    client.configure_faraday { |connection| connection.use(Faraday::Request::Retry) }
-    expected_middlewares << Faraday::Request::Retry
+    client.configure_faraday { |connection| connection.use(TestFaradayMiddleware) }
+    expected_middlewares << TestFaradayMiddleware
     expected_middlewares.each do |klass|
       assert(client.faraday_client.builder.handlers.include?(klass))
     end

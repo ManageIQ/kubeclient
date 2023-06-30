@@ -14,3 +14,4 @@
 mkmf.log
 *.idea*
 /Gemfile.dev.rb
+/test/gemfiles/*.lock

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 require 'faraday'
-require 'faraday_middleware'
+require 'faraday/follow_redirects'
 require 'json'
 require 'net/http'
 
@@ -374,7 +374,14 @@ module Kubeclient
 
       Faraday.new(url, options) do |connection|
         if @auth_options[:username]
-          connection.request(:basic_auth, @auth_options[:username], @auth_options[:password])
+          if Faraday::VERSION.start_with?('1.')
+            connection.request(:basic_auth, @auth_options[:username], @auth_options[:password])
+          else
+            connection.request(
+              :authorization, :basic,
+              @auth_options[:username], @auth_options[:password]
+            )
+          end
         elsif @auth_options[:bearer_token_file]
           connection.request(:authorization, 'Bearer', lambda do
             File.read(@auth_options[:bearer_token_file]).chomp
@@ -386,7 +393,7 @@ module Kubeclient
         # hook for adding custom faraday configuration
         yield(connection) if block_given?
 
-        connection.use(FaradayMiddleware::FollowRedirects, limit: @http_max_redirects)
+        connection.use(Faraday::FollowRedirects::Middleware, limit: @http_max_redirects)
         connection.response(:raise_error)
       end
     end
