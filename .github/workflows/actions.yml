@@ -31,7 +31,7 @@ jobs:
           command: 'bundle exec rake rubocop'
     name: ${{ matrix.os_and_command.os }} ${{ matrix.ruby }} rake ${{ matrix.os_and_command.command }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     # actions/setup-ruby did not support truffle or bundler caching
     - uses: ruby/setup-ruby@v1
       with:
