@@ -34,7 +34,7 @@ jobs:
     env:
       BUNDLE_GEMFILE: ${{ matrix.gemfile }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     # actions/setup-ruby did not support truffle or bundler caching
     - uses: ruby/setup-ruby@v1
       with:
