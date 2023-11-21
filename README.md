@@ -221,7 +221,7 @@ client = Kubeclient::Client.new(
 
 ### Timeouts
 
-Watching configures the socket to never time out (however, sooner or later all watches terminate).
+Watching configures the socket to never time out by default (however, sooner or later all watches terminate).
 
 One-off actions like `.get_*`, `.delete_*` have a configurable timeout:
 ```ruby
@@ -622,6 +622,13 @@ You can use `allow_watch_bookmarks: true` to get `BOOKMARK` events returned regu
 ```ruby
 client.watch_pods allow_watch_bookmarks: true do |notice|
   # process notice data
+end
+```
+
+To limit the maximum duration of a watch on the server, pass the `timeout_seconds:` param.
+```ruby
+client.watch_pods(timeout_seconds: 120, namespace: ns) do |notice|
+  ...
 end
 ```
 

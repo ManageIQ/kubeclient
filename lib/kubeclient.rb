@@ -77,10 +77,11 @@ module Kubeclient
     }.freeze
 
     WATCH_ARGUMENTS = {
-      'labelSelector'   => :label_selector,
-      'fieldSelector'   => :field_selector,
-      'resourceVersion' => :resource_version,
-      'allowWatchBookmarks' => :allow_watch_bookmarks
+      'labelSelector'       => :label_selector,
+      'fieldSelector'       => :field_selector,
+      'resourceVersion'     => :resource_version,
+      'allowWatchBookmarks' => :allow_watch_bookmarks,
+      'timeoutSeconds'      => :timeout_seconds
     }.freeze
 
     attr_reader :api_endpoint
@@ -408,6 +409,7 @@ module Kubeclient
     #   :label_selector (string) - a selector to restrict the list of returned objects by labels.
     #   :field_selector (string) - a selector to restrict the list of returned objects by fields.
     #   :resource_version (string) - shows changes that occur after passed version of a resource.
+    #   :timeout_seconds (integer) - limits the duration of the call
     #   :as (:raw|:ros) - defaults to :ros
     #     :raw - return the raw response body as a string
     #     :ros - return a collection of RecursiveOpenStruct objects
@@ -493,7 +495,7 @@ module Kubeclient
     #   :resource_version (string) - sets a limit on the resource versions that can be served
     #   :resource_version_match (string) - determines how the resource_version constraint
     #     will be applied
-    #   :timeout_seconds (integer) - limits the duraiton of the call
+    #   :timeout_seconds (integer) - limits the duration of the call
     #   :continue (string) - a token used to retrieve the next chunk of entities
     #   :as (:raw|:ros) - defaults to :ros
     #     :raw - return the raw response body as a string
