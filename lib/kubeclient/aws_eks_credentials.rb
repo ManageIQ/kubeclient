@@ -7,7 +7,7 @@ module Kubeclient
     end
 
     class << self
-      def token(credentials, eks_cluster, region: 'us-east-1')
+      def token(credentials, eks_cluster, region: 'us-east-1', is_credentials_provider: false)
         begin
           require 'aws-sigv4'
           require 'base64'
@@ -20,11 +20,19 @@ module Kubeclient
         end
         # https://github.com/aws/aws-sdk-ruby/pull/1848
         # Get a signer
-        signer = Aws::Sigv4::Signer.new(
-          service: 'sts',
-          region: region,
-          credentials: credentials
-        )
+        if is_credentials_provider
+          signer = Aws::Sigv4::Signer.new(
+            service: 'sts',
+            region: region,
+            credentials_provider: credentials
+          )
+        else
+          signer = Aws::Sigv4::Signer.new(
+            service: 'sts',
+            region: region,
+            credentials: credentials
+          )
+        end
 
         # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/Sigv4/Signer.html#presign_url-instance_method
         presigned_url_string = signer.presign_url(
