@@ -39,7 +39,7 @@ module Kubeclient
           http_method: 'GET',
           url: "https://sts.#{region}.amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15",
           body: '',
-          credentials: credentials,
+          credentials: is_credentials_provider ? credentials.credentials : credentials,
           expires_in: 60,
           headers: {
             'X-K8s-Aws-Id' => eks_cluster
