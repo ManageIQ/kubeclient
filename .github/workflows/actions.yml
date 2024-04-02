@@ -40,7 +40,6 @@ jobs:
       with:
         ruby-version: ${{ matrix.ruby }}
         bundler-cache: false # disable running 'bundle install' and caching installed gems see https://github.com/httprb/http/issues/572
-    - run: gem install rake bundler
     - run: bundle install
     - run: ${{ matrix.os_and_command.command }}
     timeout-minutes: 10
