@@ -20,26 +20,28 @@ module Kubeclient
         end
         # https://github.com/aws/aws-sdk-ruby/pull/1848
         # Get a signer
-        if credentials.respond_to?(:credentials)
-          signer = Aws::Sigv4::Signer.new(
-            service: 'sts',
-            region: region,
-            credentials_provider: credentials
-          )
-        else
-          signer = Aws::Sigv4::Signer.new(
-            service: 'sts',
-            region: region,
-            credentials: credentials
-          )
-        end
+        signer = if credentials.respond_to?(:credentials)
+                   Aws::Sigv4::Signer.new(
+                     service: 'sts',
+                     region: region,
+                     credentials_provider: credentials
+                   )
+                 else
+                   Aws::Sigv4::Signer.new(
+                     service: 'sts',
+                     region: region,
+                     credentials: credentials
+                   )
+                 end
+
+        credentials = credentials.credentials if credentials.respond_to?(:credentials)
 
         # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/Sigv4/Signer.html#presign_url-instance_method
         presigned_url_string = signer.presign_url(
           http_method: 'GET',
           url: "https://sts.#{region}.amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15",
           body: '',
-          credentials: credentials.respond_to?(:credentials) ? credentials.credentials : credentials,
+          credentials: credentials,
           expires_in: 60,
           headers: {
             'X-K8s-Aws-Id' => eks_cluster
