@@ -7,7 +7,7 @@ module Kubeclient
     end
 
     class << self
-      def token(credentials, eks_cluster, region: 'us-east-1', is_credentials_provider: false)
+      def token(credentials, eks_cluster, region: 'us-east-1')
         begin
           require 'aws-sigv4'
           require 'base64'
@@ -20,7 +20,7 @@ module Kubeclient
         end
         # https://github.com/aws/aws-sdk-ruby/pull/1848
         # Get a signer
-        if is_credentials_provider
+        if credentials.respond_to?(:credentials)
           signer = Aws::Sigv4::Signer.new(
             service: 'sts',
             region: region,
@@ -39,7 +39,7 @@ module Kubeclient
           http_method: 'GET',
           url: "https://sts.#{region}.amazonaws.com/?Action=GetCallerIdentity&Version=2011-06-15",
           body: '',
-          credentials: is_credentials_provider ? credentials.credentials : credentials,
+          credentials: credentials.respond_to?(:credentials) ? credentials.credentials : credentials,
           expires_in: 60,
           headers: {
             'X-K8s-Aws-Id' => eks_cluster
