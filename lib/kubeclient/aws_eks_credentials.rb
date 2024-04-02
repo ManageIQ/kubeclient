@@ -20,11 +20,21 @@ module Kubeclient
         end
         # https://github.com/aws/aws-sdk-ruby/pull/1848
         # Get a signer
-        signer = Aws::Sigv4::Signer.new(
-          service: 'sts',
-          region: region,
-          credentials: credentials
-        )
+        signer = if credentials.respond_to?(:credentials)
+                   Aws::Sigv4::Signer.new(
+                     service: 'sts',
+                     region: region,
+                     credentials_provider: credentials
+                   )
+                 else
+                   Aws::Sigv4::Signer.new(
+                     service: 'sts',
+                     region: region,
+                     credentials: credentials
+                   )
+                 end
+
+        credentials = credentials.credentials if credentials.respond_to?(:credentials)
 
         # https://docs.aws.amazon.com/sdk-for-ruby/v3/api/Aws/Sigv4/Signer.html#presign_url-instance_method
         presigned_url_string = signer.presign_url(
