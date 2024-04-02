@@ -313,10 +313,14 @@ require 'aws-sdk-core'
 credentials = Aws::Credentials.new(access_key, secret_key)
 # Or a profile
 credentials = Aws::SharedCredentials.new(profile_name: 'default').credentials
+# Or for an STS Assumed Role Credentials or any other credential Provider other than Static Credentials
+credentials = Aws::AssumeRoleCredentials.new({ client: sts_client, role_arn: role_arn, role_session_name: session_name })
 
+# Kubeclient Auth Options
 auth_options = {
   bearer_token: Kubeclient::AmazonEksCredentials.token(credentials, eks_cluster_name)
 }
+
 client = Kubeclient::Client.new(
   eks_cluster_https_endpoint, 'v1', auth_options: auth_options
 )
