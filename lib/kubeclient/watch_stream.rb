@@ -65,22 +65,25 @@ module Kubeclient
           )
         end
 
-        bearer_token = nil
-        if @http_options[:bearer_token_file]
-          bearer_token_file = @http_options[:bearer_token_file]
-          if File.file?(bearer_token_file) && File.readable?(bearer_token_file)
-            token = File.read(bearer_token_file).chomp
-            bearer_token = "Bearer #{token}"
-          end
-        elsif @http_options[:bearer_token]
-          bearer_token = "Bearer #{@http_options[:bearer_token]}"
-        end
-
-        if bearer_token
-          client = client.auth(bearer_token)
+        if (bearer_token = extract_bearer_token)
+          client = client.auth("Bearer #{bearer_token}")
         end
 
         client
+      end
+
+      def extract_bearer_token
+        if (bearer_token_file = @http_options[:bearer_token_file])
+          if File.file?(bearer_token_file) && File.readable?(bearer_token_file)
+            File.read(bearer_token_file).chomp
+          end
+        elsif @http_options[:bearer_token]
+          if @http_options[:bearer_token].respond_to?(:call)
+            @http_options[:bearer_token].call
+          else
+            @http_options[:bearer_token]
+          end
+        end
       end
 
       def using_proxy
