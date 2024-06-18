@@ -4,6 +4,23 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
+## 4.12.0 - 2024-06-18
+
+### Added
+- Add test coverage for Ruby 3.2 (#615)
+- Allow a region when getting a signer for Aws::Sts (#507)
+- Update the AWS STS endpoint to be regional as the method is now regional (#528)
+- Assume role support for aws eks credentials (#630)
+
+### Fixed
+- [v4.y] Regenerated expired test TLS certs by running `test/config/update_certs_k0s.rb`.
+- [v4.y] Regenerated expired test TLS certs (#611)
+- Regenerated expired test TLS certs (#632)
+
+### Changed
+- Update actions/checkout (#590)
+- chore(deps): update actions/checkout action to v4 (#619)
+
 ## 4.11.0 — 2022-12-22
 
 ### Removed
