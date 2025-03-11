@@ -8,6 +8,7 @@ on:
 jobs:
   ci:
     strategy:
+      fail-fast: false
       matrix:
         ruby:
         - '3.1'
