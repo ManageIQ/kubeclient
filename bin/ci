@@ -1,0 +1,11 @@
+#!/bin/bash
+
+set -e
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    bundle exec rake test
+else
+    # Sometimes minitest starts and then just hangs printing nothing.
+    # GitHub by default kills after 6hours(!). Hopefully SIGTERM may let it print some details?
+    timeout --signal=TERM 3m env test/config/update_certs_k0s.rb
+fi

@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 # https://docs.k0sproject.io/latest/k0s-in-docker/
-# Runs in --prividged mode, only run this if you trust the k0s distribution.
+# Runs in --privileged mode, only run this if you trust the k0s distribution.
 
 require 'English'
 
