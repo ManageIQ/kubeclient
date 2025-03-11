@@ -1,13 +1,10 @@
 name: CI
 on:
   push:
-    branches:
-    - '**'
-    tags:
-    - '**'
   pull_request:
-    branches:
-    - '**'
+  workflow_dispatch:
+  schedule:
+  - cron: '0 0 * * 0'
 jobs:
   build:
     runs-on: ${{ matrix.os_and_command.os }}
