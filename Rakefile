@@ -4,7 +4,7 @@ require 'bundler/gem_tasks'
 require 'rubocop/rake_task'
 require 'yaml'
 
-task default: %i[test rubocop] # same as .github/workflows/actions.yml
+task default: %i[test rubocop]
 
 begin
   fork { nil }

@@ -1,7 +1,7 @@
 # Kubeclient
 
 [![Gem Version](https://badge.fury.io/rb/kubeclient.svg)](http://badge.fury.io/rb/kubeclient)
-[![Build Status](https://github.com/ManageIQ/kubeclient/actions/workflows/actions.yml/badge.svg)](https://github.com/ManageIQ/kubeclient/actions?branch=master)
+[![Build Status](https://github.com/ManageIQ/kubeclient/actions/workflows/ci.yml/badge.svg)](https://github.com/ManageIQ/kubeclient/actions?branch=master)
 [![Code Climate](https://codeclimate.com/github/ManageIQ/kubeclient.svg)](https://codeclimate.com/github/ManageIQ/kubeclient)
 [![Downloads rate by version](https://img.shields.io/badge/downloads%20rate-by%20version-blue)](https://ui.honeycomb.io/ruby-together/datasets/rubygems.org/result/7mZHKUfmHkj)
 
