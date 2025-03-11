@@ -9,12 +9,19 @@ task default: %i[test rubocop]
 begin
   fork { nil }
 rescue NotImplementedError
-  # jruby and windows can't fork so use vanilla rake instead
+  # jruby, truffleruby, and windows can't fork so use vanilla rake instead
+  warn 'warn: fork is not implemented on this Ruby, falling back to vanilla rake'
   require 'rake/testtask'
+  Rake::TestTask.new do |t|
+    t.libs << 'test'
+    t.test_files = FileList['test/test_*.rb']
+    t.verbose = true
+  end
 else
   desc 'Run each test in isolation'
   task :test do
     sh 'forking-test-runner test/test_* --helper test/helper.rb --verbose'
   end
 end
+
 RuboCop::RakeTask.new
