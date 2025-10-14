@@ -13,7 +13,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: "3.3"
+        ruby-version: "3.4.7"
         bundler-cache: true
     - name: Check k0s Certs
       id: check-certs-expired
