@@ -1,0 +1,35 @@
+name: Update k0s Certs
+
+on:
+  workflow_dispatch:
+  schedule:
+  - cron: '0 0 1 * 0'
+
+jobs:
+  update-certs-k0s:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v5
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: "3.3"
+        bundler-cache: true
+    - name: Update k0s Certs
+      run: bundle exec ruby test/config/update_certs_k0s.rb
+    - name: Create Pull Request
+      uses: peter-evans/create-pull-request@v7
+      with:
+        add-paths: |
+          test/config
+        commit-message: Update k0s Certs
+        branch: update_k0s_certs
+        author: ManageIQ Bot <bot@manageiq.org>
+        committer: ManageIQ Bot <bot@manageiq.org>
+        assignees: agrare
+        delete-branch: true
+        labels: enhancement
+        push-to-fork: miq-bot/kubeclient
+        title: Update k0s Certs
+        body: Update the saved kubeclient certificates
+        token: ${{ secrets.PR_TOKEN }}
