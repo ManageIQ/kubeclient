@@ -3,7 +3,7 @@ name: Update k0s Certs
 on:
   workflow_dispatch:
   schedule:
-  - cron: '0 0 1 * 0'
+  - cron: '0 0 1 * *'
 
 jobs:
   update-certs-k0s:
