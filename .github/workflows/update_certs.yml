@@ -15,13 +15,19 @@ jobs:
       with:
         ruby-version: "3.3"
         bundler-cache: true
+    - name: Check k0s Certs
+      id: check-certs-expired
+      run: bundle exec ruby test/config/test_k0s_certs_expired.rb
+      continue-on-error: true
     - name: Update k0s Certs
+      if: steps.check-certs-expired.outcome == 'failure'
       run: bundle exec ruby test/config/update_certs_k0s.rb
     - name: Create Pull Request
       uses: peter-evans/create-pull-request@v7
+      if: steps.check-certs-expired.outcome == 'failure'
       with:
         add-paths: |
-          test/config
+          test/config/*
         commit-message: Update k0s Certs
         branch: update_k0s_certs
         author: ManageIQ Bot <bot@manageiq.org>
@@ -29,7 +35,7 @@ jobs:
         assignees: agrare
         delete-branch: true
         labels: enhancement
-        push-to-fork: miq-bot/kubeclient
+        push-to-fork: miq_bot/kubeclient
         title: Update k0s Certs
         body: Update the saved kubeclient certificates
         token: ${{ secrets.PR_TOKEN }}
