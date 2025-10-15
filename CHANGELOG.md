@@ -4,6 +4,18 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
+## 4.13.0 - 2025-10-15
+### Added
+- [v4.y] Add cgi gem to devel dependencies (#672)
+
+### Changed
+- [v4.y] use frozen strings (#668)
+- [v4.y] Exclude windows-latest from truffleruby testing (#675)
+- [v4.y] Add 3.3 and 3.4 to CI matrix (#671)
+
+### Fixed
+- [v4.y] Update k0s certs for CI (#671)
+
 ## 4.12.0 - 2024-06-18
 
 ### Added
