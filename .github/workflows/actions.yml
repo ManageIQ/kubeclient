@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os_and_command.os }}
     strategy:
       matrix:
-        ruby: [ '2.7', '3.0', '3.1', '3.2', 'ruby-head', 'truffleruby-head' ]
+        ruby: [ '2.7', '3.0', '3.1', '3.2', 'ruby-head' ]
         os_and_command:
         - os: macos-latest
           command: 'env TESTOPTS="--verbose" bundle exec rake test'
@@ -29,6 +29,9 @@ jobs:
         - os: ubuntu-latest
           ruby: '2.7'
           command: 'bundle exec rake rubocop'
+        - os: ubuntu-latest
+          ruby: 'truffleruby-head'
+          command: 'timeout --signal=TERM 3m env TESTOPTS="--verbose" test/config/update_certs_k0s.rb'
     name: ${{ matrix.os_and_command.os }} ${{ matrix.ruby }} rake ${{ matrix.os_and_command.command }}
     steps:
     - uses: actions/checkout@v4
@@ -40,4 +43,3 @@ jobs:
     - run: bundle install
     - run: ${{ matrix.os_and_command.command }}
     timeout-minutes: 10
-
