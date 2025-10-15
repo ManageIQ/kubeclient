@@ -29,6 +29,10 @@ jobs:
         - os: ubuntu-latest
           ruby: '2.7'
           command: 'bundle exec rake rubocop'
+        exclude:
+        - os_and_command:
+            os: windows-latest
+          ruby: 'truffleruby-head'
     name: ${{ matrix.os_and_command.os }} ${{ matrix.ruby }} rake ${{ matrix.os_and_command.command }}
     steps:
     - uses: actions/checkout@v4
@@ -40,4 +44,3 @@ jobs:
     - run: bundle install
     - run: ${{ matrix.os_and_command.command }}
     timeout-minutes: 10
-
