@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require_relative 'test_helper'
 
 # Test method_missing, respond_to? and respond_to_missing behaviour
