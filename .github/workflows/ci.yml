@@ -36,6 +36,7 @@ jobs:
         bundler-cache: true
     - name: Run tests
       run: bin/ci
+      continue-on-error: ${{ matrix.ruby == 'truffleruby-head' }}
   lint:
     runs-on: ubuntu-latest
     steps:
