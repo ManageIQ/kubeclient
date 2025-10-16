@@ -2,7 +2,8 @@
 
 set -e
 
-if [[ "$OSTYPE" == "darwin"* ]]; then
+echo $OSTYPE
+if [[ "$OSTYPE" != "linux-gnu" ]]; then
     bundle exec rake test
 else
     # Sometimes minitest starts and then just hangs printing nothing.
