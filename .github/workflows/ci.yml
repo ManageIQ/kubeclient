@@ -23,6 +23,10 @@ jobs:
         os:
         - macos-latest
         - ubuntu-latest
+        - windows-latest
+        exclude:
+        - os: windows-latest
+          ruby: truffleruby-head
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     env:
