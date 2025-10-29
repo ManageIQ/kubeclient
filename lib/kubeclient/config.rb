@@ -173,7 +173,9 @@ module Kubeclient
 
     def fetch_user_auth_options(user)
       options = {}
-      if user.key?('token')
+      if user.key?('tokenFile')
+        options[:bearer_token_file] = user['tokenFile']
+      elsif user.key?('token')
         options[:bearer_token] = user['token']
       elsif user.key?('exec_result') && user['exec_result'].key?('token')
         options[:bearer_token] = user['exec_result']['token']
