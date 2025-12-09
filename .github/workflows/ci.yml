@@ -1,10 +1,18 @@
 name: CI
 on:
-  push:
   pull_request:
-  workflow_dispatch:
+  push:
+    branches-ignore:
+    - dependabot/*
+    - renovate/*
   schedule:
-  - cron: '0 0 * * 0'
+  - cron: 0 0 * * 0
+  workflow_dispatch:
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+permissions:
+  contents: read
 jobs:
   ci:
     strategy:
@@ -23,7 +31,7 @@ jobs:
         os:
         - macos-latest
         - ubuntu-latest
-    runs-on: ${{ matrix.os }}
+    runs-on: "${{ matrix.os }}"
     timeout-minutes: 10
     env:
       BUNDLE_GEMFILE: test/gemfiles/Gemfile.${{ matrix.gemfile }}
@@ -32,7 +40,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: ${{ matrix.ruby }}
+        ruby-version: "${{ matrix.ruby }}"
         bundler-cache: true
     - name: Run tests
       run: bin/ci
@@ -43,7 +51,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: '3.1' # Run rubocop against lowest supported ruby
+        ruby-version: '3.3'
         bundler-cache: true
     - name: Run rubocop
       run: bundle exec rake rubocop
