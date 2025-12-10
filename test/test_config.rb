@@ -180,23 +180,14 @@ class KubeclientConfigTest < MiniTest::Test
     Kubeclient::GoogleApplicationDefaultCredentials.expects(:token).returns('token1').once
     parsed = load_yaml(config_file('gcpauth.kubeconfig'))
     config = Kubeclient::Config.new(parsed, nil)
-    config.context(config.contexts.first)
-  end
-
-  # Each call to .context() obtains a new token, calling .auth_options doesn't change anything.
-  # NOTE: this is not a guarantee, may change, just testing current behavior.
-  def test_gcp_default_auth_renew
-    Kubeclient::GoogleApplicationDefaultCredentials.expects(:token).returns('token1').once
-    parsed = load_yaml(config_file('gcpauth.kubeconfig'))
-    config = Kubeclient::Config.new(parsed, nil)
     context = config.context(config.contexts.first)
-    assert_equal({ bearer_token: 'token1' }, context.auth_options)
-    assert_equal({ bearer_token: 'token1' }, context.auth_options)
+
+    assert_respond_to(context.auth_options[:bearer_token], :call)
+    assert_equal('token1', context.auth_options[:bearer_token].call)
 
     Kubeclient::GoogleApplicationDefaultCredentials.expects(:token).returns('token2').once
-    context2 = config.context(config.contexts.first)
-    assert_equal({ bearer_token: 'token2' }, context2.auth_options)
-    assert_equal({ bearer_token: 'token1' }, context.auth_options)
+
+    assert_equal('token2', context.auth_options[:bearer_token].call)
   end
 
   def test_gcp_command_auth
@@ -213,7 +204,25 @@ class KubeclientConfigTest < MiniTest::Test
       .returns('token1')
       .once
     config = Kubeclient::Config.read(config_file('gcpcmdauth.kubeconfig'))
-    config.context(config.contexts.first)
+    context = config.context(config.contexts.first)
+
+    assert_respond_to(context.auth_options[:bearer_token], :call)
+    assert_equal('token1', context.auth_options[:bearer_token].call)
+
+    Kubeclient::GCPCommandCredentials
+      .expects(:token)
+      .with(
+        'access-token' => '<fake_token>',
+        'cmd-args' => 'config config-helper --format=json',
+        'cmd-path' => '/path/to/gcloud',
+        'expiry' => '2019-04-09 19:26:18 UTC',
+        'expiry-key' => '{.credential.token_expiry}',
+        'token-key' => '{.credential.access_token}'
+      )
+      .returns('token2')
+      .once
+
+    assert_equal('token2', context.auth_options[:bearer_token].call)
   end
 
   def test_oidc_auth_provider
@@ -230,7 +239,24 @@ class KubeclientConfigTest < MiniTest::Test
       .once
     parsed = YAML.safe_load(File.read(config_file('oidcauth.kubeconfig')))
     config = Kubeclient::Config.new(parsed, nil)
-    config.context(config.contexts.first)
+    context = config.context(config.contexts.first)
+
+    assert_respond_to(context.auth_options[:bearer_token], :call)
+    assert_equal('token1', context.auth_options[:bearer_token].call)
+
+    Kubeclient::OIDCAuthProvider
+      .expects(:token)
+      .with(
+        'client-id' => 'fake-client-id',
+        'client-secret' => 'fake-client-secret',
+        'id-token' => 'fake-id-token',
+        'idp-issuer-url' => 'https://accounts.google.com',
+        'refresh-token' => 'fake-refresh-token'
+      )
+      .returns('token2')
+      .once
+
+    assert_equal('token2', context.auth_options[:bearer_token].call)
   end
 
   def test_impersonate
