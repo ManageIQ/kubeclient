@@ -40,7 +40,7 @@ module Kubeclient
       def expired?(id_token, discovery)
         decoded_token = OpenIDConnect::ResponseObject::IdToken.decode(
           id_token,
-          discovery.jwks
+          discovery
         )
         # If token expired or expiring within 60 seconds
         Time.now.to_i + 60 > decoded_token.exp.to_i
