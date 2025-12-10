@@ -1,10 +1,13 @@
 name: Update k0s Certs
-
 on:
-  workflow_dispatch:
   schedule:
-  - cron: '0 0 1 * *'
-
+  - cron: 0 0 1 * *
+  workflow_dispatch:
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+permissions:
+  contents: read
 jobs:
   update-certs-k0s:
     runs-on: ubuntu-latest
@@ -13,7 +16,7 @@ jobs:
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
-        ruby-version: "3.3"
+        ruby-version: '3.3'
         bundler-cache: true
     - name: Check k0s Certs
       id: check-certs-expired
@@ -26,8 +29,7 @@ jobs:
       uses: peter-evans/create-pull-request@v7
       if: steps.check-certs-expired.outcome == 'failure'
       with:
-        add-paths: |
-          test/config/*
+        add-paths: test/config/*
         commit-message: Update k0s Certs
         branch: update_k0s_certs
         author: ManageIQ Bot <bot@manageiq.org>
@@ -38,4 +40,4 @@ jobs:
         push-to-fork: miq_bot/kubeclient
         title: Update k0s Certs
         body: Update the saved kubeclient certificates
-        token: ${{ secrets.PR_TOKEN }}
+        token: "${{ secrets.PR_TOKEN }}"
