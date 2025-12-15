@@ -26,7 +26,7 @@ jobs:
       if: steps.check-certs-expired.outcome == 'failure'
       run: bundle exec ruby test/config/update_certs_k0s.rb
     - name: Create Pull Request
-      uses: peter-evans/create-pull-request@v7
+      uses: peter-evans/create-pull-request@v8
       if: steps.check-certs-expired.outcome == 'failure'
       with:
         add-paths: test/config/*
