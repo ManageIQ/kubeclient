@@ -844,6 +844,38 @@ class KubeclientTest < MiniTest::Test
     assert_equal(1, pods.size)
   end
 
+  def test_api_bearer_token_file_refreshes
+    stub_core_api_list
+
+    file = File.join(File.dirname(__FILE__), 'valid_token_file')
+    client = Kubeclient::Client.new(
+      'http://localhost:8080/api/', 'v1',
+      auth_options: { bearer_token_file: file }
+    )
+
+    first_request = stub_request(:get, 'http://localhost:8080/api/v1/pods')
+                    .with(headers: { Authorization: 'Bearer valid_token' })
+                    .to_return(body: '{}', status: 200)
+
+    client.get_pods
+
+    assert_requested(first_request)
+
+    WebMock.reset!
+
+    File.open(file, 'w') { |f| f.puts('another_valid_token') }
+
+    second_request = stub_request(:get, 'http://localhost:8080/api/v1/pods')
+                     .with(headers: { Authorization: 'Bearer another_valid_token' })
+                     .to_return(body: '{}', status: 200)
+
+    client.get_pods
+
+    assert_requested(second_request)
+  ensure
+    File.open(file, 'w') { |f| f.puts('valid_token') }
+  end
+
   def test_impersonate
     pods_stub = stub_request(:get, 'http://localhost:8080/api/v1/pods')
                 .with(

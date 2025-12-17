@@ -199,9 +199,9 @@ module Kubeclient
       case auth_provider['name']
       when 'gcp'
         config = expand_command_option(auth_provider['config'], 'cmd-path')
-        Kubeclient::GCPAuthProvider.token(config)
+        -> { Kubeclient::GCPAuthProvider.token(config) }
       when 'oidc'
-        Kubeclient::OIDCAuthProvider.token(auth_provider['config'])
+        -> { Kubeclient::OIDCAuthProvider.token(auth_provider['config']) }
       end
     end
 
