@@ -8,12 +8,16 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 
 ### Added
 - Added impersonation support. Limited to at most 1 group in `as_groups` and 1 value for each `as_user_extra` field. (#600)
+- Test coverage for Ruby 3.2 (#614)
 
 ### Changed
 - `Kubeclient::Client.new` now always requires an api version, use for example: `Kubeclient::Client.new(uri, 'v1')`
 - `faraday` is used as HTTP client instead of `rest_client`, supports both `1.x` and `2.x` `faraday` versions
+- Added `options` argument to `Kubeclient::Informer` to support adding additional options such as `namespace` #(598)
 
-### TODO: lots of changes on master branch missing here!
+### Fixed
+- `informer.stop_worker` race condition when called immediately after `start_worker` (#597)
+- Test TLS certs have been regenerated (#610)
 
 ----
 
