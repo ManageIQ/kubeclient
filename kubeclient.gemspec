@@ -25,7 +25,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'minitest', '~> 5.15.0'
   spec.add_development_dependency 'minitest-rg'
   spec.add_development_dependency 'mutex_m', '~> 0.3'
-  spec.add_development_dependency 'webmock', '~> 3.0'
+  spec.add_development_dependency 'webmock', '>= 3.26.2', '< 4.0'
   spec.add_development_dependency 'rubocop', '~> 1.3.0' # locked to minor so new cops don't slip in
   spec.add_development_dependency 'googleauth', '~> 1.3'
   spec.add_development_dependency('mocha', '~> 1.5')
@@ -36,5 +36,5 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'faraday', '>= 1.1', '< 3.0'
   spec.add_dependency 'faraday-follow_redirects', '>= 0.3.0'
   spec.add_dependency 'recursive-open-struct', '>= 1.1.1', '< 3.0'
-  spec.add_dependency 'http', '>= 3.0', '< 6.0'
+  spec.add_dependency 'http', '>= 3.0', '< 7.0'
 end
