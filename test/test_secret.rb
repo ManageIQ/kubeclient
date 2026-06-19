@@ -3,7 +3,7 @@
 require_relative 'helper'
 
 # Namespace entity tests
-class TestSecret < MiniTest::Test
+class TestSecret < Minitest::Test
   def test_get_secret_v1
     stub_core_api_list
     stub_request(:get, %r{/secrets})

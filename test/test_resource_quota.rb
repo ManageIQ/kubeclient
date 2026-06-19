@@ -3,7 +3,7 @@
 require_relative 'helper'
 
 # ResourceQuota tests
-class TestResourceQuota < MiniTest::Test
+class TestResourceQuota < Minitest::Test
   def test_get_from_json_v1
     stub_core_api_list
     stub_request(:get, %r{/resourcequotas})

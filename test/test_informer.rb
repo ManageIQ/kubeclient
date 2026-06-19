@@ -4,7 +4,7 @@ require_relative 'helper'
 require 'stringio'
 require 'logger'
 
-class TestInformer < MiniTest::Test
+class TestInformer < Minitest::Test
   def setup
     super
     skip if RUBY_ENGINE == 'truffleruby' # TODO: race condition in truffle-ruby fails random tests

@@ -3,7 +3,7 @@
 require_relative 'helper'
 
 # Pod log tests
-class TestPodLog < MiniTest::Test
+class TestPodLog < Minitest::Test
   def test_get_pod_log
     stub_request(:get, %r{/namespaces/default/pods/[a-z0-9-]+/log})
       .to_return(body: open_test_file('pod_log.txt'), status: 200)

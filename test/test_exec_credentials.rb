@@ -4,7 +4,7 @@ require_relative 'helper'
 require 'open3'
 
 # Unit tests for the ExecCredentials provider
-class ExecCredentialsTest < MiniTest::Test
+class ExecCredentialsTest < Minitest::Test
   def test_exec_opts_missing
     expected_msg =
       'exec options are required'

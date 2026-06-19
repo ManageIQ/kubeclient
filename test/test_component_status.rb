@@ -3,7 +3,7 @@
 require_relative 'helper'
 
 # ComponentStatus tests
-class TestComponentStatus < MiniTest::Test
+class TestComponentStatus < Minitest::Test
   def test_get_from_json_v3
     stub_core_api_list
     stub_request(:get, %r{/componentstatuses})

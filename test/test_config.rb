@@ -7,7 +7,7 @@ require 'open3'
 require 'openid_connect' # TODO: find out why removing tis makes the test fail when run on it's own
 
 # Testing Kubernetes client configuration
-class KubeclientConfigTest < MiniTest::Test
+class KubeclientConfigTest < Minitest::Test
   def test_allinone
     config = Kubeclient::Config.read(config_file('allinone.kubeconfig'))
     assert_equal(['Default'], config.contexts)

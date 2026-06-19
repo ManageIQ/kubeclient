@@ -3,7 +3,7 @@
 require_relative 'helper'
 
 # Kubernetes client entity tests
-class KubeclientTest < MiniTest::Test
+class KubeclientTest < Minitest::Test
   class TestFaradayMiddleware # rubocop:disable Lint/EmptyClass:
   end
 

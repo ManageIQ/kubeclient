@@ -6,7 +6,7 @@ require_relative 'helper'
 # This is one of the unusual `kind`s that are already plural (https://github.com/kubernetes/kubernetes/issues/8115).
 # We force singular in method names like 'create_endpoint',
 # but `kind` should remain plural as in kubernetes.
-class TestSecurityContextConstraints < MiniTest::Test
+class TestSecurityContextConstraints < Minitest::Test
   def test_create_security_context_constraint
     stub_request(:get, %r{/apis/security.openshift.io/v1$}).to_return(
       body: open_test_file('security.openshift.io_api_resource_list.json'),

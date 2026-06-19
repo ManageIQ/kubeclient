@@ -3,7 +3,7 @@
 require_relative 'helper'
 
 # Core api resource list without kind tests
-class TestResourceListWithoutKind < MiniTest::Test
+class TestResourceListWithoutKind < Minitest::Test
   def test_get_from_json_api_v1
     stub_request(:get, %r{/api/v1$})
       .to_return(body: open_test_file('core_api_resource_list_without_kind.json'), status: 200)

@@ -1,6 +1,6 @@
 require_relative 'helper'
 
-class KubeclientRealClusterTest < MiniTest::Test
+class KubeclientRealClusterTest < Minitest::Test
   # Tests here actually connect to a cluster!
   # For simplicity, these tests use same config/*.kubeconfig files as test_config.rb,
   # so are intended to run from config/update_certs_k0s.rb script.

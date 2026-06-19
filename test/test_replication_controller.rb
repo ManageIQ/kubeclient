@@ -3,7 +3,7 @@
 require_relative 'helper'
 
 # Replication Controller entity tests
-class TestReplicationController < MiniTest::Test
+class TestReplicationController < Minitest::Test
   def test_get_from_json_v1
     stub_core_api_list
     stub_request(:get, %r{/replicationcontrollers})

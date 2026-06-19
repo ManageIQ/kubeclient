@@ -6,7 +6,7 @@ require_relative 'helper'
 # This is one of the unusual `kind`s that are already plural (https://github.com/kubernetes/kubernetes/issues/8115).
 # We force singular in method names like 'create_endpoint',
 # but `kind` should remain plural as in kubernetes.
-class TestEndpoint < MiniTest::Test
+class TestEndpoint < Minitest::Test
   def test_create_endpoint
     stub_core_api_list
     testing_ep = Kubeclient::Resource.new

@@ -2,6 +2,7 @@
 
 require 'bundler/setup'
 require 'minitest/autorun'
+require 'minitest/mock'
 require 'minitest/rg'
 require 'webmock/minitest'
 require 'mocha/minitest'
@@ -10,7 +11,7 @@ require_relative '../lib/kubeclient'
 
 Thread.abort_on_exception = true
 
-MiniTest::Test.class_eval do
+Minitest::Test.class_eval do
   # Assumes test files will be in a subdirectory with the same name as the
   # file suffix.  e.g. a file named foo.json would be a "json" subdirectory.
   def open_test_file(name)

@@ -3,7 +3,7 @@
 require_relative 'helper'
 
 # Unit tests for the common module
-class CommonTest < MiniTest::Test
+class CommonTest < Minitest::Test
   class ClientStub < Kubeclient::Client
   end
 
