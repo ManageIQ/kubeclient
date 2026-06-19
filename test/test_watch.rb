@@ -3,7 +3,7 @@
 require_relative 'helper'
 
 # Watch entity tests
-class TestWatch < MiniTest::Test
+class TestWatch < Minitest::Test
   def test_watch_pod_success
     stub_core_api_list
 

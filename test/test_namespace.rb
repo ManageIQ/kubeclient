@@ -3,7 +3,7 @@
 require_relative 'helper'
 
 # Namespace entity tests
-class TestNamespace < MiniTest::Test
+class TestNamespace < Minitest::Test
   def test_get_namespace_v1
     stub_core_api_list
     stub_request(:get, %r{/namespaces})

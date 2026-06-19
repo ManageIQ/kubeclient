@@ -3,7 +3,7 @@
 require_relative 'helper'
 
 # Node entity tests
-class TestNode < MiniTest::Test
+class TestNode < Minitest::Test
   def test_get_from_json_v1
     stub_core_api_list
     stub_request(:get, %r{/nodes})

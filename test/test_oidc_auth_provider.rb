@@ -3,7 +3,7 @@
 require_relative 'helper'
 require 'openid_connect'
 
-class OIDCAuthProviderTest < MiniTest::Test
+class OIDCAuthProviderTest < Minitest::Test
   def setup
     super()
     @client_id = 'client_id'

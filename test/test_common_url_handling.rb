@@ -3,7 +3,7 @@
 require_relative 'helper'
 
 # URLHandling tests
-class TestCommonUrlHandling < MiniTest::Test
+class TestCommonUrlHandling < Minitest::Test
   def test_no_path_in_uri
     client = Kubeclient::Client.new('http://localhost:8080', 'v1')
     faraday_client = client.faraday_client

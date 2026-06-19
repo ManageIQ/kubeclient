@@ -3,7 +3,7 @@
 require_relative 'helper'
 
 # Process Template tests
-class TestProcessTemplate < MiniTest::Test
+class TestProcessTemplate < Minitest::Test
   def test_process_template
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')
     template = {}

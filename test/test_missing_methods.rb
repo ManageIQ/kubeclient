@@ -3,7 +3,7 @@
 require_relative 'helper'
 
 # Test method_missing, respond_to? and respond_to_missing behaviour
-class TestMissingMethods < MiniTest::Test
+class TestMissingMethods < Minitest::Test
   def test_missing
     stub_core_api_list
     client = Kubeclient::Client.new('http://localhost:8080/api/', 'v1')

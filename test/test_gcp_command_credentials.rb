@@ -4,7 +4,7 @@ require_relative 'helper'
 require 'open3'
 
 # Unit tests for the GCPCommandCredentials token provider
-class GCPCommandCredentialsTest < MiniTest::Test
+class GCPCommandCredentialsTest < Minitest::Test
   def test_token
     opts = {
       'cmd-args' => 'config config-helper --format=json',
