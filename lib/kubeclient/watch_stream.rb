@@ -18,7 +18,11 @@ module Kubeclient
         @finished = false
 
         @http_client = build_client
-        response = @http_client.request(:get, @uri, build_client_options)
+        response = if HTTP::VERSION >= '6'
+                     @http_client.request(:get, @uri, **build_client_options)
+                   else
+                     @http_client.request(:get, @uri, build_client_options)
+                   end
         unless response.code < 300
           raise Kubeclient::HttpError.new(response.code, response.reason, response)
         end
