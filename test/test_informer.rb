@@ -244,7 +244,7 @@ class TestInformer < Minitest::Test
   end
 
   def logger
-    @logger ||= Logger.new('/dev/null')
+    @logger ||= Logger.new(File::NULL)
   end
 
   def pods_reply

@@ -7,7 +7,7 @@ module Kubeclient
   class Resource < RecursiveOpenStruct
     def initialize(hash = nil, args = {})
       args[:recurse_over_arrays] = true
-      super(hash, args)
+      super
     end
   end
 end

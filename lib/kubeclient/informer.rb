@@ -17,8 +17,8 @@ module Kubeclient
       @cache.values
     end
 
-    def watch(&block)
-      with_watching(&block)
+    def watch(&)
+      with_watching(&)
     end
 
     # not implicit so users know they have to `stop`
@@ -67,8 +67,8 @@ module Kubeclient
     def fill_cache
       get_options = @options.merge(raw: true, resource_version: '0')
       reply = @client.get_entities(nil, @resource_name, get_options)
-      @cache = reply[:items].each_with_object({}) do |item, h|
-        h[cache_key(item)] = item
+      @cache = reply[:items].to_h do |item|
+        [cache_key(item), item]
       end
       @started = reply.dig(:metadata, :resourceVersion)
     end
