@@ -3,7 +3,7 @@
 module Kubeclient
   # Uses OIDC id-tokens and refreshes them if they are stale.
   class OIDCAuthProvider
-    class OpenIDConnectDependencyError < LoadError # rubocop:disable Lint/InheritException
+    class OpenIDConnectDependencyError < LoadError
     end
 
     class << self

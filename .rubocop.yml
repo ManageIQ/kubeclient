@@ -1,6 +1,8 @@
 AllCops:
   TargetRubyVersion: 3.3 # Oldest version kubeclient supports
   NewCops: enable
+Gemspec/DevelopmentDependencies:
+  EnforcedStyle: gemspec
 Metrics/MethodLength:
   Enabled: false
 Metrics/ClassLength:
@@ -22,6 +24,8 @@ Style/MethodCallWithArgsParentheses:
   Enabled: true
   AllowedMethods: [require, raise, include, attr_reader, refute, assert, require_relative]
   Exclude: [Gemfile, Rakefile, kubeclient.gemspec, Gemfile.dev.rb]
+Style/OpenStructUse:
+  Enabled: false
 Metrics/BlockLength:
   Exclude: [kubeclient.gemspec]
 Security/MarshalLoad:

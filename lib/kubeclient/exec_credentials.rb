@@ -72,7 +72,7 @@ module Kubeclient
         api_version = opts['apiVersion']
         if api_version && api_version != creds['apiVersion']
           raise "exec plugin is configured to use API version #{api_version}, " \
-            "plugin returned version #{creds['apiVersion']}"
+                "plugin returned version #{creds['apiVersion']}"
         end
 
         validate_credentials_status(creds['status'])
@@ -82,7 +82,7 @@ module Kubeclient
       def map_env(env)
         return {} unless env
 
-        Hash[env.map { |e| [e['name'], e['value']] }]
+        env.to_h { |e| [e['name'], e['value']] }
       end
     end
   end

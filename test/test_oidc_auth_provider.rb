@@ -5,7 +5,7 @@ require 'openid_connect'
 
 class OIDCAuthProviderTest < Minitest::Test
   def setup
-    super()
+    super
     @client_id = 'client_id'
     @client_secret = 'client_secret'
     @idp_issuer_url = 'idp_issuer_url'
