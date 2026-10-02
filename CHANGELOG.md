@@ -4,7 +4,7 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
-## Unreleased — to become 5.y.z
+## Unreleased
 
 ### Added
 - Added impersonation support. Limited to at most 1 group in `as_groups` and 1 value for each `as_user_extra` field. (#600)
@@ -20,10 +20,34 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 
 ### TODO: lots of changes on master branch missing here!
 
-----
+## 4.13.0 - 2025-10-15
+### Added
+- [v4.y] Add cgi gem to devel dependencies (#672)
 
-NOTE: newest 4.y.z versions sometimes missing here — see CHANGELOG.md on `v4.y` branch:
-https://github.com/ManageIQ/kubeclient/blob/v4.y/CHANGELOG.md
+### Changed
+- [v4.y] use frozen strings (#668)
+- [v4.y] Exclude windows-latest from truffleruby testing (#675)
+- [v4.y] Add 3.3 and 3.4 to CI matrix (#671)
+
+### Fixed
+- [v4.y] Update k0s certs for CI (#671)
+
+## 4.12.0 - 2024-06-18
+
+### Added
+- Add test coverage for Ruby 3.2 (#615)
+- Allow a region when getting a signer for Aws::Sts (#507)
+- Update the AWS STS endpoint to be regional as the method is now regional (#528)
+- Assume role support for aws eks credentials (#630)
+
+### Fixed
+- [v4.y] Regenerated expired test TLS certs by running `test/config/update_certs_k0s.rb`.
+- [v4.y] Regenerated expired test TLS certs (#611)
+- Regenerated expired test TLS certs (#632)
+
+### Changed
+- Update actions/checkout (#590)
+- chore(deps): update actions/checkout action to v4 (#619)
 
 ## 4.11.0 — 2022-12-22
 
