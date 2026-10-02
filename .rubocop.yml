@@ -20,7 +20,7 @@ Metrics/ModuleLength:
   Enabled: false
 Style/MethodCallWithArgsParentheses:
   Enabled: true
-  IgnoredMethods: [require, raise, include, attr_reader, refute, assert, require_relative]
+  AllowedMethods: [require, raise, include, attr_reader, refute, assert, require_relative]
   Exclude: [Gemfile, Rakefile, kubeclient.gemspec, Gemfile.dev.rb]
 Metrics/BlockLength:
   Exclude: [kubeclient.gemspec]
