@@ -95,7 +95,7 @@ module Kubeclient
     def initialize(
       uri,
       version,
-      **options
+      **
     )
       unless version.is_a?(String)
         raise ArgumentError, "second argument must be an api version like 'v1'"
@@ -104,7 +104,7 @@ module Kubeclient
         uri,
         '/api',
         version,
-        **options
+        **
       )
     end
 
@@ -133,7 +133,7 @@ module Kubeclient
       # Allow passing partial timeouts hash, without unspecified
       # @timeouts[:foo] == nil resulting in infinite timeout.
       @timeouts = DEFAULT_TIMEOUTS.merge(timeouts)
-      @http_proxy_uri = http_proxy_uri ? http_proxy_uri.to_s : nil
+      @http_proxy_uri = http_proxy_uri&.to_s
       @http_max_redirects = http_max_redirects
       @as = as
 
@@ -141,14 +141,14 @@ module Kubeclient
       configure_impersonation_headers
     end
 
-    def configure_faraday(&block)
-      @faraday_client = create_faraday_client(&block)
+    def configure_faraday(&)
+      @faraday_client = create_faraday_client(&)
     end
 
-    def method_missing(method_sym, *args, &block)
+    def method_missing(method_sym, *, &)
       if discovery_needed?(method_sym)
         discover
-        send(method_sym, *args, &block)
+        send(method_sym, *, &)
       else
         super
       end
@@ -282,7 +282,7 @@ module Kubeclient
       namespace.to_s.empty? ? '' : "namespaces/#{namespace}/"
     end
 
-    # rubocop:disable  Metrics/BlockLength
+    # rubocop:disable-next  Metrics/BlockLength
     def define_entity_methods
       @entities.each_value do |entity|
         # get all entities of a type e.g. get_nodes, get_pods, etc.
@@ -344,7 +344,6 @@ module Kubeclient
         end
       end
     end
-    # rubocop:enable  Metrics/BlockLength
 
     # Inspired by https://stackoverflow.com/questions/1509915/converting-camel-case-to-underscore-case-in-ruby
     def self.underscore_entity(entity_name)
@@ -415,7 +414,7 @@ module Kubeclient
     #     :ros - return a collection of RecursiveOpenStruct objects
     # Accepts an optional block, that will be called with each entity,
     # otherwise returns a WatchStream
-    def watch_entities(resource_name, options = {}, &block)
+    def watch_entities(resource_name, options = {}, &)
       ns = build_namespace_prefix(options[:namespace])
 
       path = "watch/#{ns}#{resource_name}"
@@ -432,7 +431,7 @@ module Kubeclient
         formatter: ->(value) { format_response(options[:as] || @as, value) }
       )
 
-      return_or_yield_to_watcher(watcher, &block)
+      return_or_yield_to_watcher(watcher, &)
     end
 
     # Accepts the following options:
@@ -597,7 +596,7 @@ module Kubeclient
       end
     end
 
-    def watch_pod_log(pod_name, namespace, container: nil, &block)
+    def watch_pod_log(pod_name, namespace, container: nil, &)
       # Adding the "follow=true" query param tells the Kubernetes API to keep
       # the connection open and stream updates to the log.
       params = { follow: true }
@@ -612,7 +611,7 @@ module Kubeclient
       watcher = Kubeclient::Common::WatchStream.new(
         uri, http_options(uri), formatter: ->(value) { value }
       )
-      return_or_yield_to_watcher(watcher, &block)
+      return_or_yield_to_watcher(watcher, &)
     end
 
     def proxy_url(kind, name, port, namespace = '')
@@ -649,8 +648,6 @@ module Kubeclient
       JSON.parse(response)
     end
 
-    private
-
     IRREGULAR_NAMES = {
       # In a few cases, the given kind itself is still plural.
       # https://github.com/kubernetes/kubernetes/issues/8115
@@ -658,6 +655,9 @@ module Kubeclient
       'SecurityContextConstraints' => %w[security_context_constraint
                                          security_context_constraints]
     }.freeze
+    private_constant :IRREGULAR_NAMES
+
+    private
 
     def build_http_conflict_reason(e)
       json_response =
@@ -695,12 +695,12 @@ module Kubeclient
         if list_type
           resource_version =
             result.fetch('resourceVersion') do
-              result.fetch('metadata', {}).fetch('resourceVersion', nil)
+              result.dig('metadata', 'resourceVersion')
             end
 
           # If 'limit' was passed save the continue token
           # see https://kubernetes.io/docs/reference/using-api/api-concepts/#retrieving-large-results-sets-in-chunks
-          continue = result.fetch('metadata', {}).fetch('continue', nil)
+          continue = result.dig('metadata', 'continue')
 
           # result['items'] might be nil due to https://github.com/kubernetes/kubernetes/issues/13096
           collection = result['items'].to_a.map { |item| Kubeclient::Resource.new(item) }
@@ -741,10 +741,10 @@ module Kubeclient
       if %i[bearer_token bearer_token_file username].count { |key| opts[key] } > 1
         raise(
           ArgumentError,
-          'Invalid auth options: specify only one of username/password,' \
-          ' bearer_token or bearer_token_file'
+          'Invalid auth options: specify only one of username/password, ' \
+          'bearer_token or bearer_token_file'
         )
-      elsif %i[username password].count { |key| opts[key] } == 1
+      elsif %i[username password].one? { |key| opts[key] }
         raise ArgumentError, 'Basic auth requires both username & password'
       end
     end
@@ -774,11 +774,11 @@ module Kubeclient
       end
     end
 
-    def return_or_yield_to_watcher(watcher, &block)
+    def return_or_yield_to_watcher(watcher, &)
       return watcher unless block_given?
 
       begin
-        watcher.each(&block)
+        watcher.each(&)
       ensure
         watcher.finish
       end

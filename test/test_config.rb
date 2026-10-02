@@ -143,9 +143,9 @@ class KubeclientConfigTest < Minitest::Test
   def test_user_exec
     token = '0123456789ABCDEF0123456789ABCDEF'
     creds = {
-      'apiVersion': 'client.authentication.k8s.io/v1beta1',
-      'status': {
-        'token': token
+      apiVersion: 'client.authentication.k8s.io/v1beta1',
+      status: {
+        token: token
       }
     }
 
@@ -245,13 +245,13 @@ class KubeclientConfigTest < Minitest::Test
       )
       .returns('token1')
       .once
-    parsed = YAML.safe_load(File.read(config_file('oidcauth.kubeconfig')))
+    parsed = YAML.safe_load_file(config_file('oidcauth.kubeconfig'))
     config = Kubeclient::Config.new(parsed, nil)
     config.context(config.contexts.first)
   end
 
   def test_impersonate
-    parsed = YAML.safe_load(File.read(config_file('impersonate.kubeconfig')))
+    parsed = YAML.safe_load_file(config_file('impersonate.kubeconfig'))
     config = Kubeclient::Config.new(parsed, nil)
     assert_equal(
       {
@@ -264,7 +264,7 @@ class KubeclientConfigTest < Minitest::Test
   end
 
   def test_impersonate_empty_groups
-    parsed = YAML.safe_load(File.read(config_file('impersonate-empty-groups.kubeconfig')))
+    parsed = YAML.safe_load_file(config_file('impersonate-empty-groups.kubeconfig'))
     config = Kubeclient::Config.new(parsed, nil)
     assert_equal(
       {
@@ -307,7 +307,7 @@ class KubeclientConfigTest < Minitest::Test
     end
   end
 
-  def stub_exec(command_regexp, creds, &block)
+  def stub_exec(command_regexp, creds, &)
     st = Minitest::Mock.new
     st.expect(:success?, true)
 
@@ -316,14 +316,14 @@ class KubeclientConfigTest < Minitest::Test
       [JSON.dump(creds), nil, st]
     end
 
-    Open3.stub(:capture3, capture3_stub, &block)
+    Open3.stub(:capture3, capture3_stub, &)
   end
 
   def load_yaml(file_name)
     if RUBY_VERSION >= '2.6'
-      YAML.safe_load(File.read(file_name), permitted_classes: [Date, Time])
+      YAML.safe_load_file(file_name, permitted_classes: [Date, Time])
     else
-      YAML.safe_load(File.read(file_name), [Date, Time])
+      YAML.safe_load_file(file_name, [Date, Time])
     end
   end
 end

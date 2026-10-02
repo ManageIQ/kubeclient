@@ -38,9 +38,9 @@ module Kubeclient
     def self.read(filename)
       parsed =
         if RUBY_VERSION >= '2.6'
-          YAML.safe_load(File.read(filename), permitted_classes: [Date, Time])
+          YAML.safe_load_file(filename, permitted_classes: [Date, Time])
         else
-          YAML.safe_load(File.read(filename), [Date, Time])
+          YAML.safe_load_file(filename, [Date, Time])
         end
       Config.new(parsed, File.dirname(filename))
     end

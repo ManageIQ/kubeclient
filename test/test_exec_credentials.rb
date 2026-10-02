@@ -214,8 +214,8 @@ class ExecCredentialsTest < Minitest::Test
     st = Minitest::Mock.new
     st.expect(:success?, true)
 
-    expected_msg = "exec plugin is configured to use API version #{expected_version}," \
-      " plugin returned version #{api_version}"
+    expected_msg = "exec plugin is configured to use API version #{expected_version}, " \
+                   "plugin returned version #{api_version}"
 
     Open3.stub(:capture3, [creds, nil, st]) do
       exception = assert_raises(RuntimeError) do

@@ -21,8 +21,8 @@ class TestEndpoint < Minitest::Test
     ]
 
     req_body = '{"metadata":{"name":"myendpoint","namespace":"default"},' \
-      '"subsets":[{"addresses":[{"ip":"172.17.0.25"}],"ports":[{"name":"https",' \
-      '"port":6443,"protocol":"TCP"}]}],"kind":"Endpoints","apiVersion":"v1"}'
+               '"subsets":[{"addresses":[{"ip":"172.17.0.25"}],"ports":[{"name":"https",' \
+               '"port":6443,"protocol":"TCP"}]}],"kind":"Endpoints","apiVersion":"v1"}'
 
     stub_request(:post, 'http://localhost:8080/api/v1/namespaces/default/endpoints')
       .with(body: req_body)

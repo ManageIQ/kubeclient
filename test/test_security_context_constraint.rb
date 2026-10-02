@@ -25,8 +25,8 @@ class TestSecurityContextConstraints < Minitest::Test
       }
     )
     req_body = '{"metadata":{"name":"teleportation"},"runAsUser":{"type":"MustRunAs"},' \
-      '"seLinuxContext":{"type":"MustRunAs"},' \
-      '"kind":"SecurityContextConstraints","apiVersion":"security.openshift.io/v1"}'
+               '"seLinuxContext":{"type":"MustRunAs"},' \
+               '"kind":"SecurityContextConstraints","apiVersion":"security.openshift.io/v1"}'
 
     stub_request(:post, 'http://localhost:8080/apis/security.openshift.io/v1/securitycontextconstraints')
       .with(body: req_body)
