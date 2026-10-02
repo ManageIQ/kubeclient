@@ -17,8 +17,8 @@ Gem::Specification.new do |spec|
   git_files = `git ls-files -z`.split("\x0")
   spec.files         = git_files.grep_v(%r{^(test|spec|features)/})
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  spec.test_files    = []
   spec.required_ruby_version = '>= 3.3.1'
+  spec.metadata['rubygems_mfa_required'] = 'true'
 
   spec.add_development_dependency 'bundler', '>= 1.6'
   spec.add_development_dependency 'rake', '~> 13.0'
