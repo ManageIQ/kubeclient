@@ -16,6 +16,7 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 ### Removed
 
 - Deprecated `KubeException` removed, use `Kubeclient::HttpError` instead (#727)
+- Dropped support for EOL Ruby versions.  Ruby v3.3.1+ required (#725)
 
 ### TODO: lots of changes on master branch missing here!
 
