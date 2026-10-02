@@ -6,19 +6,50 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 
 ## Unreleased
 
-### Added
-- Added impersonation support. Limited to at most 1 group in `as_groups` and 1 value for each `as_user_extra` field. (#600)
-
-### Changed
-- `Kubeclient::Client.new` now always requires an api version, use for example: `Kubeclient::Client.new(uri, 'v1')`
-- `faraday` is used as HTTP client instead of `rest_client`, supports both `1.x` and `2.x` `faraday` versions
-
 ### Removed
-
-- Deprecated `KubeException` removed, use `Kubeclient::HttpError` instead (#727)
+- **BREAKING** `Kubeclient::Client.new` now requires an API version as a mandatory second argument. Code calling `Client.new(uri)` without a version will break; update to e.g. `Client.new(uri, 'v1')`. (#476)
+- **BREAKING** `faraday` replaces `rest_client` as the HTTP client. Any application-level `rest-client` gem configuration or monkey-patching will no longer have effect. Add `faraday` (and a suitable adapter) to your `Gemfile` if not already present. (#466)
+- Dropped EOL Ruby versions 2.3 and 2.4 support. (#471)
+- **BREAKING** `apply_<entity>` method signature changed from keyword-only arguments to positional arguments. (#491)
+- **BREAKING** Deprecated `KubeException` removed, use `Kubeclient::HttpError` instead (#727)
 - Dropped support for EOL Ruby versions.  Ruby v3.3.1+ required (#725)
 
-### TODO: lots of changes on master branch missing here!
+### Added
+- `Kubeclient::Informer`: new library for shared watching with automatic retries and keeping an up-to-date in-memory list of resources. (#494)
+- `Kubeclient::ResourceAlreadyExistsError`: a new `HttpError` subclass (HTTP 409 Conflict on create) is now raised instead of a generic error. (#498)
+- Added impersonation support via `auth_options` and from kubeconfig. Supports multiple groups in `as_groups` and multiple values per `as_user_extra` key. (#600)
+- `delete_collection` API: deletes all resources matching the given filters and returns the list. (#541)
+- `allow_watch_bookmarks` parameter support for `watch_*` methods. (#516)
+- `timeout_seconds` option for `watch_*` / `watch_entities` calls. (#624)
+- `as:` option now accepts a custom class — the raw JSON string is passed to `YourClass.new(raw)` for full control over deserialization. (#462)
+- Faraday retry middleware support: pass `:http_max_retries` in client options to enable automatic request retries. (#490)
+- `Config`: parse `tokenFile` field in kubeconfig user entries, mapping it to `:bearer_token_file`. (#677)
+- `AmazonEksCredentials`: support passing an IAM role ARN to assume before generating a token (assume-role support). (#630)
+- `AmazonEksCredentials`: support an explicit AWS region when constructing the STS signer. (#507)
+- `AmazonEksCredentials`: use regional STS endpoints to support AWS GovCloud and reduce latency. (#528)
+- `Config`: load all CA certificates from a concatenated PEM file using `OpenSSL::X509::Store#add_file`, fixing chains of root + intermediate CAs and multiple independent certs. (#461)
+- Nested / sub-path API support: `handle_uri` now parses `api_group` via regex rather than a strict URL pattern, enabling clusters not at the root path (e.g. Rancher, OpenShift `/oapi`). (#457)
+- `apply_<entity>` methods now accept positional arguments instead of keyword arguments only. (#491)
+
+### Changed
+- Bearer token and basic auth credentials are now handled uniformly in the Faraday connection setup. (#534)
+- Bearer token file is read per-request inside the watch stream, keeping watch connections alive across token rotations. (#567)
+
+### Fixed
+- Fixed `Informer#stop_worker` race condition. (#597)
+- Fixed headers not being forwarded to the Faraday client. (#600)
+- Fixed handling of multi-value impersonation fields (`Impersonate-Group`, `Impersonate-Extra-*`). (#600)
+- Fixed `verify_ssl` handling: `insecure-skip-tls-verify: true` in kubeconfig is now honoured; when no custom CA is defined the system CA store is used with `VERIFY_PEER` (not `VERIFY_NONE`). (#557)
+- Fixed `Namespace can be missing from default context` — kubeconfig contexts without a `namespace` field no longer cause an error.
+- `Config`: `certificate-authority-data` inline certs are now loaded the same way as file-based certs. (#461)
+
+### Dependencies
+- Relaxed `http` gem dependency to allow `>= 3.0, < 7.0`; adds compatibility with `http` 5.x (#571), 6.x (#687).
+- Relaxed `recursive-open-struct` dependency to `>= 1.1.1, < 3.0`, allowing the 2.x series. (#640)
+- Added `base64` as an explicit runtime dependency for Ruby 3.4+ compatibility. (#724)
+- Added `mutex_m` as a development dependency for Ruby 3.4+ compatibility. (#643)
+- Removed `jsonpath` runtime dependency (no longer required). (#481)
+- Updated `googleauth` development dependency. (#591)
 
 ## 4.13.0 - 2025-10-15
 ### Added
