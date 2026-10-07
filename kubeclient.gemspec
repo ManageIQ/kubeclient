@@ -17,8 +17,8 @@ Gem::Specification.new do |spec|
   git_files = `git ls-files -z`.split("\x0")
   spec.files         = git_files.grep_v(%r{^(test|spec|features)/})
   spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
-  spec.test_files    = []
-  spec.required_ruby_version = '>= 3.0.0'
+  spec.required_ruby_version = '>= 3.3.1'
+  spec.metadata['rubygems_mfa_required'] = 'true'
 
   spec.add_development_dependency 'bundler', '>= 1.6'
   spec.add_development_dependency 'rake', '~> 13.0'
@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'minitest-rg'
   spec.add_development_dependency 'mutex_m', '~> 0.3'
   spec.add_development_dependency 'webmock', '>= 3.26.2', '< 4.0'
-  spec.add_development_dependency 'rubocop', '~> 1.3.0' # locked to minor so new cops don't slip in
+  spec.add_development_dependency 'rubocop', '~> 1.88'
   spec.add_development_dependency 'googleauth', '~> 1.3'
   spec.add_development_dependency('mocha', '~> 2.0')
   spec.add_development_dependency 'openid_connect', '~> 1.1'

@@ -3,7 +3,7 @@
 module Kubeclient
   # Get a bearer token to authenticate against aws eks.
   class AmazonEksCredentials
-    class AmazonEksDependencyError < LoadError # rubocop:disable Lint/InheritException
+    class AmazonEksDependencyError < LoadError
     end
 
     class << self

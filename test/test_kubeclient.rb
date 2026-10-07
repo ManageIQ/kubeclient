@@ -4,7 +4,7 @@ require_relative 'helper'
 
 # Kubernetes client entity tests
 class KubeclientTest < Minitest::Test
-  class TestFaradayMiddleware # rubocop:disable Lint/EmptyClass:
+  class TestFaradayMiddleware # rubocop:disable Lint/EmptyClass
   end
 
   def test_json
@@ -767,8 +767,8 @@ class KubeclientTest < Minitest::Test
   end
 
   def test_init_username_and_bearer_token
-    expected_msg = 'Invalid auth options: specify only one of username/password,' \
-      ' bearer_token or bearer_token_file'
+    expected_msg = 'Invalid auth options: specify only one of username/password, ' \
+                   'bearer_token or bearer_token_file'
     exception = assert_raises(ArgumentError) do
       Kubeclient::Client.new(
         'http://localhost:8080', 'v1',
@@ -779,8 +779,8 @@ class KubeclientTest < Minitest::Test
   end
 
   def test_init_username_and_bearer_token_file
-    expected_msg = 'Invalid auth options: specify only one of username/password,' \
-      ' bearer_token or bearer_token_file'
+    expected_msg = 'Invalid auth options: specify only one of username/password, ' \
+                   'bearer_token or bearer_token_file'
     exception = assert_raises(ArgumentError) do
       Kubeclient::Client.new(
         'http://localhost:8080', 'v1',
@@ -792,8 +792,8 @@ class KubeclientTest < Minitest::Test
 
   def test_bearer_token_and_bearer_token_file
     expected_msg =
-      'Invalid auth options: specify only one of username/password,' \
-      ' bearer_token or bearer_token_file'
+      'Invalid auth options: specify only one of username/password, ' \
+      'bearer_token or bearer_token_file'
     exception = assert_raises(ArgumentError) do
       Kubeclient::Client.new(
         'http://localhost:8080', 'v1',
