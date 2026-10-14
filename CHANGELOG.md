@@ -12,6 +12,7 @@ Kubeclient release versioning follows [SemVer](https://semver.org/).
 ### Changed
 - `Kubeclient::Client.new` now always requires an api version, use for example: `Kubeclient::Client.new(uri, 'v1')`
 - `faraday` is used as HTTP client instead of `rest_client`, supports both `1.x` and `2.x` `faraday` versions
+- `socket_options` has been removed from `Kubeclient::Client.new`
 
 ### Removed
 

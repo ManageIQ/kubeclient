@@ -40,11 +40,6 @@ module Kubeclient
       bearer_token_file: nil
     }.freeze
 
-    DEFAULT_SOCKET_OPTIONS = {
-      socket_class:     nil,
-      ssl_socket_class: nil
-    }.freeze
-
     DEFAULT_TIMEOUTS = {
       # These do NOT affect watch, watching never times out.
       open: Net::HTTP.new('127.0.0.1').open_timeout, # depends on ruby version
@@ -114,7 +109,6 @@ module Kubeclient
       version,
       ssl_options: DEFAULT_SSL_OPTIONS,
       auth_options: DEFAULT_AUTH_OPTIONS,
-      socket_options: DEFAULT_SOCKET_OPTIONS,
       timeouts: DEFAULT_TIMEOUTS,
       http_proxy_uri: DEFAULT_HTTP_PROXY_URI,
       http_max_redirects: DEFAULT_HTTP_MAX_REDIRECTS,
@@ -129,7 +123,6 @@ module Kubeclient
       @headers = {}
       @ssl_options = ssl_options
       @auth_options = auth_options
-      @socket_options = socket_options
       # Allow passing partial timeouts hash, without unspecified
       # @timeouts[:foo] == nil resulting in infinite timeout.
       @timeouts = DEFAULT_TIMEOUTS.merge(timeouts)
@@ -788,26 +781,31 @@ module Kubeclient
       options = {
         basic_auth_user: @auth_options[:username],
         basic_auth_password: @auth_options[:password],
-        headers: @headers,
-        http_proxy_uri: @http_proxy_uri,
         http_max_redirects: http_max_redirects,
         bearer_token_file: @auth_options[:bearer_token_file],
         bearer_token: @auth_options[:bearer_token]
       }
 
+      faraday_options = {
+        proxy: @http_proxy_uri,
+        headers: @headers
+      }
+
       if uri.scheme == 'https'
-        options[:ssl] = {
+        faraday_options[:ssl] = {
           ca_file: @ssl_options[:ca_file],
-          cert: @ssl_options[:client_cert],
+          client_cert: @ssl_options[:client_cert],
           cert_store: @ssl_options[:cert_store],
-          key: @ssl_options[:client_key],
+          client_key: @ssl_options[:client_key],
           # ruby HTTP uses verify_mode instead of verify_ssl
           # http://ruby-doc.org/stdlib-1.9.3/libdoc/openssl/rdoc/OpenSSL/SSL/SSLContext.html
           verify_mode: @ssl_options[:verify_ssl]
         }
       end
 
-      options.merge(@socket_options)
+      options[:faraday_options] = faraday_options
+
+      options
     end
 
     def json_headers

@@ -35,8 +35,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'forking_test_runner'
 
   spec.add_dependency 'base64'
-  spec.add_dependency 'faraday', '>= 1.1', '< 3.0'
+  spec.add_dependency 'faraday', '>= 2.0', '< 3.0'
   spec.add_dependency 'faraday-follow_redirects', '>= 0.3.0'
   spec.add_dependency 'recursive-open-struct', '>= 1.1.1', '< 3.0'
-  spec.add_dependency 'http', '>= 3.0', '< 7.0'
 end
