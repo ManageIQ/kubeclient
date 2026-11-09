@@ -37,7 +37,7 @@ jobs:
         assignees: agrare
         delete-branch: true
         labels: enhancement
-        push-to-fork: miq_bot/kubeclient
+        push-to-fork: miq-bot/kubeclient
         title: Update k0s Certs
         body: Update the saved kubeclient certificates
         token: "${{ secrets.PR_TOKEN }}"
