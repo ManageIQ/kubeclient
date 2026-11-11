@@ -30,7 +30,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rubocop', '~> 1.88'
   spec.add_development_dependency 'googleauth', '~> 1.3'
   spec.add_development_dependency('mocha', '~> 2.0')
-  spec.add_development_dependency 'openid_connect', '~> 1.1'
+  spec.add_development_dependency 'openid_connect', '~> 2.0'
   spec.add_development_dependency 'net-smtp'
   spec.add_development_dependency 'forking_test_runner'
 
