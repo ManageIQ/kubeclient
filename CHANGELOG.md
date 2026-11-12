@@ -4,6 +4,10 @@ Notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/).
 Kubeclient release versioning follows [SemVer](https://semver.org/).
 
+## Unreleased
+### Changed
+- [v4.y] Support http gem 6.0 (#729)
+
 ## 4.13.0 - 2025-10-15
 ### Added
 - [v4.y] Add cgi gem to devel dependencies (#672)
